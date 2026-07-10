@@ -1,15 +1,12 @@
 ﻿@model ManageRolesViewModel
-
 <div class="container mt-5">
-
-    <!-- Amazing Header -->
+    <!-- Cabeçalho -->
     <div class="text-center mb-4">
-        <h1 class="fw-bold" style="letter-spacing:1px; color:#070093;">Manage Roles for @Model.Email</h1>
-        <p class="text-muted">Add or remove roles for this admin</p>
+        <h1 class="fw-bold" style="letter-spacing:1px; color:#070093;">Gerenciar Funções de @Model.Email</h1>
+        <p class="text-muted">Adicione ou remova funções para este admin</p>
         <hr class="w-50 mx-auto" style="border-top:3px solid #070093;" />
     </div>
-
-    <!-- TempData Messages -->
+    <!-- Mensagens do TempData -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -17,7 +14,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -25,13 +21,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-
     <div class="row mt-4 g-4">
-
-        <!-- Current Roles -->
+        <!-- Funções Atuais -->
         <div class="col-md-6">
             <div class="card shadow-sm p-3">
-                <h4 class="fw-semibold mb-3">Current Roles</h4>
+                <h4 class="fw-semibold mb-3">Funções Atuais</h4>
                 <ul class="list-group">
                     @foreach (var role in Model.UserRoles)
                     {
@@ -40,18 +34,17 @@
                             <form asp-action="RemoveRole" method="post" class="m-0">
                                 <input type="hidden" name="userId" value="@Model.UserId" />
                                 <input type="hidden" name="role" value="@role" />
-                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                <button type="submit" class="btn btn-danger btn-sm">Remover</button>
                             </form>
                         </li>
                     }
                 </ul>
             </div>
         </div>
-
-        <!-- Add Roles -->
+        <!-- Adicionar Funções -->
         <div class="col-md-6">
             <div class="card shadow-sm p-3">
-                <h4 class="fw-semibold mb-3">Add Role</h4>
+                <h4 class="fw-semibold mb-3">Adicionar Função</h4>
                 <ul class="list-group">
                     @foreach (var role in Model.AllRoles)
                     {
@@ -62,7 +55,7 @@
                                 <form asp-action="AddRole" method="post" class="m-0">
                                     <input type="hidden" name="userId" value="@Model.UserId" />
                                     <input type="hidden" name="role" value="@role" />
-                                    <button type="submit" class="btn btn-success btn-sm">Add</button>
+                                    <button type="submit" class="btn btn-success btn-sm">Adicionar</button>
                                 </form>
                             </li>
                         }
@@ -70,11 +63,9 @@
                 </ul>
             </div>
         </div>
-
     </div>
-
-    <!-- Back Button -->
+    <!-- Botão Voltar -->
     <div class="text-center mt-4">
-        <a asp-action="Index" class="btn btn-secondary px-4">Back</a>
+        <a asp-action="Index" class="btn btn-secondary px-4">Voltar</a>
     </div>
 </div>

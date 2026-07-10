@@ -4,12 +4,12 @@
     Layout = null;
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Login - Fitness</title>
+    <title>Login Admin - Fitness</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/AuthStyle.css" />
@@ -20,36 +20,36 @@
 
 <body>
     <div class="login-container">
-        <!-- Left Side - Login Form -->
+        <!-- Lado Esquerdo - Formulário de Login -->
         <div class="login-form-section">
             <div class="logo-section">
                 <div class="logo-icon">
                     <i class="bi bi-lightning-charge-fill"></i>
                 </div>
                 <h1 class="brand-name">Route Fitness</h1>
-                <p class="brand-subtitle">Gym Management System</p>
+                <p class="brand-subtitle">Sistema de Gerenciamento de Academia</p>
             </div>
 
-            <h2 class="login-title">Admin Login</h2>
-            <p class="login-subtitle">Welcome back! Please login to your account</p>
+            <h2 class="login-title">Login Administrativo</h2>
+            <p class="login-subtitle">Bem-vindo de volta! Faça login na sua conta</p>
 
             <form asp-action="Login" asp-controller="Account" method="post" id="loginForm">
                 @Html.ValidationMessage("InvalidLogin", new { @class = "text-danger" })
 
                 <div class="form-floating">
-                    <input asp-for="Email" class="form-control" id="floatingEmail" placeholder="admin@example.com"
+                    <input asp-for="Email" class="form-control" id="floatingEmail" placeholder="admin@exemplo.com"
                            autocomplete="username" />
                     <label for="floatingEmail">
-                        <i class="bi bi-envelope me-2"></i>Email Address
+                        <i class="bi bi-envelope me-2"></i>Endereço de Email
                     </label>
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
                 <div class="form-floating">
-                    <input asp-for="Password" class="form-control" id="floatingPassword" placeholder="Password"
+                    <input asp-for="Password" class="form-control" id="floatingPassword" placeholder="Senha"
                            autocomplete="current-password" />
                     <label for="floatingPassword">
-                        <i class="bi bi-lock-fill me-2"></i>Password
+                        <i class="bi bi-lock-fill me-2"></i>Senha
                     </label>
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
@@ -57,44 +57,44 @@
                 <div class="form-check">
                     <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMe">
                     <label class="form-check-label" for="rememberMe">
-                        Remember me for 24 hours
+                        Lembrar de mim por 24 horas
                     </label>
                 </div>
 
                 <button type="submit" class="btn btn-login" id="loginBtn">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Login to Dashboard
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Entrar no Painel
                 </button>
             </form>
         </div>
 
-        <!-- Right Side - Gym Info -->
+        <!-- Lado Direito - Informações da Academia -->
         <div class="gym-info-section">
             <div class="gym-content">
                 <div class="gym-icon">
                     💪
                 </div>
                 <h2 class="gym-title">
-                    Your body can <span style="color: #ffd700;">stand</span><br>
-                    almost anything
+                    Seu corpo pode <span style="color: #ffd700;">suportar</span><br>
+                    quase tudo
                 </h2>
                 <p class="gym-description">
-                    It's your mind that needs convincing. Push past your limits,<br>
-                    stay committed, and watch as your body transforms into<br>
-                    powerhouse of strength and resilience.
+                    É a sua mente que precisa ser convencida. Supere seus limites,<br>
+                    mantenha o compromisso e veja seu corpo se transformar em uma<br>
+                    potência de força e resiliência.
                 </p>
 
                 <div class="stats-container">
                     <div class="stat-item">
                         <span class="stat-number">500+</span>
-                        <span class="stat-label">Members</span>
+                        <span class="stat-label">Membros</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-number">50+</span>
-                        <span class="stat-label">Trainers</span>
+                        <span class="stat-label">Treinadores</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-number">24/7</span>
-                        <span class="stat-label">Support</span>
+                        <span class="stat-label">Suporte</span>
                     </div>
                 </div>
             </div>

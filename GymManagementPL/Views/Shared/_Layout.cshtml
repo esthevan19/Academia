@@ -3,7 +3,7 @@
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8" />
@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <!-- ^ Our main css file -->
     <link rel="stylesheet" href="~/css/style.css" />
-    <title>Power fitness | @ViewData["Title"] </title>
+    <title>Power Fitness | @ViewData["Title"] </title>
 </head>
 
 <body>
@@ -34,7 +34,7 @@
 
                 <!-- Toggler -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Alternar navegação">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -46,47 +46,47 @@
                         <!-- Home -->
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Home" ? "active" : "")"
-                               asp-controller="Home" asp-action="Index">Home</a>
+                               asp-controller="Home" asp-action="Index">Início</a>
                         </li>
 
                         @if (User.IsInRole("SuperAdmin"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Member" ? "active" : "")"
-                                   asp-controller="Member" asp-action="Index">Members</a>
+                                   asp-controller="Member" asp-action="Index">Membros</a>
                             </li>
 
                             <li class="nav-item">
                                 <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Trainer" ? "active" : "")"
-                                   asp-controller="Trainer" asp-action="Index">Trainers</a>
+                                   asp-controller="Trainer" asp-action="Index">Treinadores</a>
                             </li>
                         }
 
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Session" ? "active" : "")"
-                               asp-controller="Session" asp-action="Index">Sessions</a>
+                               asp-controller="Session" asp-action="Index">Sessões</a>
                         </li>
 
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Plan" ? "active" : "")"
-                               asp-controller="Plan" asp-action="Index">Plans</a>
+                               asp-controller="Plan" asp-action="Index">Planos</a>
                         </li>
 
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Membership" ? "active" : "")"
-                               asp-controller="Membership" asp-action="Index">Memberships</a>
+                               asp-controller="Membership" asp-action="Index">Associações</a>
                         </li>
 
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Booking" ? "active" : "")"
-                               asp-controller="Booking" asp-action="Index">Sessions Schedule</a>
+                               asp-controller="Booking" asp-action="Index">Agenda de Sessões</a>
                         </li>
 
                         @if (User.IsInRole("SuperAdmin"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "AdminManagement" ? "active" : "")"
-                                   asp-controller="AdminManagement" asp-action="Index">Admins Management</a>
+                                   asp-controller="AdminManagement" asp-action="Index">Gerenciamento de Admins</a>
                             </li>
                         }
                         @if (User.IsInRole("SuperAdmin"))
@@ -107,7 +107,7 @@
                                 <form asp-action="Logout" asp-controller="Account" method="post" class="d-inline">
                                     <button type="submit"
                                             class="btn btn-link nav-link px-3 py-2 mx-2 fw-bolder fs-5 text-black-alternative">
-                                        Logout
+                                        Sair
                                     </button>
                                 </form>
                             </li>

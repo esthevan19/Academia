@@ -2,11 +2,11 @@
     Layout = null;
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Denied - Fitness Gym</title>
+    <title>Acesso Negado - Fitness Gym</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
             color: #333;
         }
 
-        /* Navigation Bar */
+        /* Barra de Navegação */
         .navbar {
             background-color: #ffffff;
             padding: 20px 40px;
@@ -61,7 +61,7 @@
                 color: #0033cc;
             }
 
-        /* Main Container */
+        /* Container Principal */
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -79,7 +79,7 @@
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         }
 
-        /* Left Content */
+        /* Conteúdo da Esquerda */
         .content {
             display: flex;
             flex-direction: column;
@@ -118,7 +118,7 @@
             margin: 10px 0;
         }
 
-        /* Buttons */
+        /* Botões */
         .button-group {
             display: flex;
             gap: 15px;
@@ -159,7 +159,7 @@
                 background-color: #f0f4ff;
             }
 
-        /* Right Image */
+        /* Imagem da Direita */
         .image-section {
             display: flex;
             justify-content: center;
@@ -193,34 +193,33 @@
             font-size: 80px;
         }
 
-        }
-    </style>
+        }</style>
 </head>
 <body>
-    <!-- Main Content -->
+    <!-- Conteúdo Principal -->
     <div class="container">
         <div class="access-denied-wrapper">
-            <!-- Left Content -->
+            <!-- Conteúdo da Esquerda -->
             <div class="content">
                 <div class="error-icon">🚫</div>
                 <h1>
-                    Access <span class="error-highlight">Denied</span>
+                    Acesso <span class="error-highlight">Negado</span>
                 </h1>
                 <p class="error-message">
-                    We're sorry, but you don't have permission to access this resource. Your current user role or membership status doesn't grant you access to this section.
+                    Sentimos muito, mas você não tem permissão para acessar este recurso. Sua função de usuário ou status de associação atual não concede acesso a esta seção.
                 </p>
                 <div class="error-code">
-                    Error Code: 403 - Forbidden Access
+                    Código de Erro: 403 - Acesso Proibido
                 </div>
                 <p class="error-message">
-                    If you believe this is an error or need elevated permissions, please contact the system administrator or your membership manager for assistance.
+                    Se você acredita que isso é um erro ou precisa de permissões elevadas, entre em contato com o administrador do sistema ou o gerente de associações para obter assistência.
                 </p>
                 <div class="button-group">
-                    <a asp-action="Index" asp-controller="Home" class="btn btn-primary">Return to Home</a>
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-primary">Voltar para o Início</a>
                 </div>
             </div>
 
-            <!-- Right Image -->
+            <!-- Imagem da Direita -->
             <div class="image-section">
                 <div class="lock-icon">🔒</div>
             </div>
