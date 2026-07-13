@@ -70,13 +70,15 @@
                     </div>
 
                     <div class="buttons my-4">
-                        <button class="get-started bg-primary-color text-white btn rounded-5 fw-medium px-3 py-2 me-5 border-2 border-primary-color">
+                        <a asp-controller="Plan" asp-action="Index"
+                               class="get-started bg-primary-color text-white btn rounded-5 fw-medium px-3 py-2 me-5 border-2 border-primary-color text-decoration-none">
                             Comece Agora
-                        </button>
+                        </a>
 
-                        <button class="explore-more border-primary-color btn rounded-5 fw-medium px-3 py-2 border-2 text-primary-color fw-medium">
+                        <a href="#sobre-nos"
+                               class="explore-more border-primary-color btn rounded-5 fw-medium px-3 py-2 border-2 text-primary-color fw-medium text-decoration-none">
                             Explorar Mais
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -101,7 +103,7 @@
         <!-- ^ all other section -->
         <main>
             <!-- ^ about section -->
-            <section class="about my-5 text-black-alternative">
+            <section class="about my-5 text-black-alternative" id="sobre-nos">
                 <div class="container">
                     <div class="row g-5 justify-content-center">
                         <div class="col-12 col-lg-6 w-50 w-md-100">
@@ -193,9 +195,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button class="btn bg-primary-color rounded-pill text-white fw-medium px-4 py-2 mt-3">
+                                <a asp-controller="Plan" asp-action="Index"
+                                       class="btn bg-primary-color rounded-pill text-white fw-medium px-4 py-2 mt-3 text-decoration-none">
                                     Comece Agora
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>

@@ -1,0 +1,252 @@
+﻿@using GymManagementBLL.ViewModels.MemberViewModels
+@using GymManagementDAL.Entities.Enums
+@model CreateMemberViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Criar Conta - Fitness</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/AuthStyle.css" />
+    <link rel="stylesheet" href="~/css/login.css" />
+
+    <style>
+            /* Ajustes específicos da tela de cadastro, que é maior que a de login */
+            .register-container {
+                display: flex;
+                min-height: 100vh;
+            }
+
+            .register-form-section {
+                flex: 1.15;
+                padding: 50px 60px;
+                overflow-y: auto;
+                max-height: 100vh;
+            }
+
+            .section-title {
+                color: #070093;
+                font-weight: 700;
+                margin-top: 25px;
+                margin-bottom: 15px;
+                font-size: 1.1rem;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 8px;
+            }
+
+            .btn-register {
+                background: #070093;
+                border-color: #070093;
+                color: #fff;
+                font-weight: 700;
+                padding: 12px;
+                width: 100%;
+                border-radius: 8px;
+            }
+
+                .btn-register:hover {
+                    background: #05006e;
+                    color: #fff;
+                }
+
+            .login-link {
+                text-align: center;
+                margin-top: 20px;
+            }
+    </style>
+</head>
+
+<body>
+    <div class="register-container">
+        <!-- Lado Esquerdo - Formulário de Cadastro -->
+        <div class="register-form-section">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <h1 class="brand-name">Route Fitness</h1>
+                <p class="brand-subtitle">Sistema de Gerenciamento de Academia</p>
+            </div>
+
+            <h2 class="login-title">Criar Conta</h2>
+            <p class="login-subtitle">Preencha seus dados para se tornar um membro</p>
+
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Erros:</strong>
+                    <ul class="mb-0">
+                        @foreach (var entry in ViewData.ModelState)
+                        {
+                            foreach (var error in entry.Value.Errors)
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        }
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form asp-controller="Register" asp-action="Index" method="post" enctype="multipart/form-data" id="registerForm">
+
+                <!-- Dados Pessoais -->
+                <div class="section-title">Dados Pessoais</div>
+
+                <div class="mb-3">
+                    <label asp-for="PhotoFile" class="form-label fw-semibold">Foto de Perfil</label>
+                    <input asp-for="PhotoFile" type="file" class="form-control shadow-sm" accept="image/*" />
+                    <span asp-validation-for="PhotoFile" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-semibold">Nome Completo</label>
+                    <input asp-for="Name" class="form-control shadow-sm" placeholder="Digite seu nome completo" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                        <input asp-for="Email" class="form-control shadow-sm" placeholder="seuemail@exemplo.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Phone" class="form-label fw-semibold">Telefone</label>
+                        <input asp-for="Phone" class="form-control shadow-sm" placeholder="01xxxxxxxxx" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DateOfBirth" class="form-label fw-semibold">Data de Nascimento</label>
+                        <input asp-for="DateOfBirth" type="date" class="form-control shadow-sm" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Gender" class="form-label fw-semibold">Gênero</label>
+                        <select asp-for="Gender" asp-items="Html.GetEnumSelectList<Gender>()" class="form-select shadow-sm">
+                            <option value="">Selecione...</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Endereço -->
+                <div class="section-title">Endereço</div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="BuildingNumber" class="form-label fw-semibold">Número</label>
+                        <input asp-for="BuildingNumber" class="form-control shadow-sm" />
+                        <span asp-validation-for="BuildingNumber" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="City" class="form-label fw-semibold">Cidade</label>
+                        <input asp-for="City" class="form-control shadow-sm" placeholder="Sua cidade" />
+                        <span asp-validation-for="City" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Street" class="form-label fw-semibold">Rua</label>
+                        <input asp-for="Street" class="form-control shadow-sm" placeholder="Sua rua" />
+                        <span asp-validation-for="Street" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Ficha de Saúde -->
+                <div class="section-title">Ficha de Saúde</div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="HealthRecordViewModel.Height" class="form-label fw-semibold">Altura (m)</label>
+                        <input asp-for="HealthRecordViewModel.Height" class="form-control shadow-sm" placeholder="Ex: 1.75" />
+                        <span asp-validation-for="HealthRecordViewModel.Height" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="HealthRecordViewModel.Weight" class="form-label fw-semibold">Peso (kg)</label>
+                        <input asp-for="HealthRecordViewModel.Weight" class="form-control shadow-sm" placeholder="Ex: 70" />
+                        <span asp-validation-for="HealthRecordViewModel.Weight" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="HealthRecordViewModel.BloodType" class="form-label fw-semibold">Tipo Sanguíneo</label>
+                        <input asp-for="HealthRecordViewModel.BloodType" class="form-control shadow-sm" placeholder="Ex: O+" />
+                        <span asp-validation-for="HealthRecordViewModel.BloodType" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="HealthRecordViewModel.Note" class="form-label fw-semibold">Observações (opcional)</label>
+                    <textarea asp-for="HealthRecordViewModel.Note" class="form-control shadow-sm" rows="2" placeholder="Alguma condição de saúde que devemos saber?"></textarea>
+                    <span asp-validation-for="HealthRecordViewModel.Note" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn-register mt-3" id="registerBtn">
+                    <i class="bi bi-person-plus-fill me-2"></i>Criar Minha Conta
+                </button>
+
+                <div class="login-link">
+                    <span class="text-muted">Já tem uma conta?</span>
+                    <a asp-controller="Account" asp-action="Login" class="fw-semibold" style="color:#070093;">Fazer Login</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lado Direito - Informações da Academia -->
+        <div class="gym-info-section">
+            <div class="gym-content">
+                <div class="gym-icon">
+                    💪
+                </div>
+                <h2 class="gym-title">
+                    Comece sua <span style="color: #ffd700;">jornada</span><br>
+                    hoje mesmo
+                </h2>
+                <p class="gym-description">
+                    Junte-se à nossa comunidade fitness e transforme seu corpo<br>
+                    com o apoio de treinadores certificados e uma estrutura<br>
+                    completa pensada para o seu sucesso.
+                </p>
+
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">Membros</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">Treinadores</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label">Suporte</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+            $(function () {
+                $('#registerForm').on('submit', function () {
+                    if ($(this).valid()) {
+                        const btn = document.getElementById('registerBtn');
+                        btn.disabled = true;
+                        btn.innerHTML = 'Enviando...';
+                    }
+                });
+            });
+    </script>
+</body>
+
+</html>

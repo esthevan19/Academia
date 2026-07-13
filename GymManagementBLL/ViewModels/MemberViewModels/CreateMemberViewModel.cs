@@ -4,51 +4,59 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GymManagementBLL.ViewModels.MemberViewModels
 {
-	public class CreateMemberViewModel
-	{
+    public class CreateMemberViewModel
+    {
 
-		[Required(ErrorMessage ="Profile Photo Is Required")]
-		[Display(Name = "Profile Photo")]
-		public IFormFile PhotoFile { get; set; } = null!;
+        [Required(ErrorMessage = "A Foto de Perfil é obrigatória")]
+        [Display(Name = "Foto de Perfil")]
+        public IFormFile PhotoFile { get; set; } = null!;
 
-        [Required(ErrorMessage = "Name Is Required")]
-		[RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Name can only contain letters and spaces")]
-		public string Name { get; set; } = null!;
+        [Required(ErrorMessage = "O Nome é obrigatório")]
+        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "O nome pode conter apenas letras e espaços")]
+        [Display(Name = "Nome Completo")]
+        public string Name { get; set; } = null!;
 
-		[Required(ErrorMessage = "Email Is Required")]
-		[EmailAddress(ErrorMessage = "Invalid email format")]
-		[DataType(DataType.EmailAddress)]
+        [Required(ErrorMessage = "O Email é obrigatório")]
+        [EmailAddress(ErrorMessage = "Formato de email inválido")]
+        [DataType(DataType.EmailAddress)]
+        [Display(Name = "Email")]
+        public string Email { get; set; } = null!;
 
-		public string Email { get; set; } = null!;
+        [Required(ErrorMessage = "O Telefone é obrigatório")]
+        [Phone(ErrorMessage = "Número de telefone inválido")]
+        [RegularExpression(@"^[1-9]{2}9\d{8}$", ErrorMessage = "O telefone deve estar no formato DDD + 9 dígitos, ex: 11987654321")]
+        [DataType(DataType.PhoneNumber)]
+        [Display(Name = "Telefone")]
+        public string Phone { get; set; } = null!;
 
-		[Required(ErrorMessage = "Phone Number Is Required")]
-		[Phone(ErrorMessage = "Invalid phone number")]
-		[RegularExpression(@"^(010|011|012|015)\d{8}$", ErrorMessage = "Phone number must be a valid Egyptian mobile number")]
-		[DataType(DataType.PhoneNumber)]
-		public string Phone { get; set; } = null!;
+        [Required(ErrorMessage = "A Data de Nascimento é obrigatória")]
+        [DataType(DataType.Date)]
+        [Display(Name = "Data de Nascimento")]
+        public DateOnly DateOfBirth { get; set; }
 
-		[Required(ErrorMessage = "Date of Birth is required")]
-		[DataType(DataType.Date)]
-		public DateOnly DateOfBirth { get; set; }
+        [Required(ErrorMessage = "O Gênero é obrigatório")]
+        [Display(Name = "Gênero")]
+        public Gender Gender { get; set; }
 
-		[Required(ErrorMessage = "Gender is required")]
-		public Gender Gender { get; set; }
+        [Required(ErrorMessage = "O Número do Prédio é obrigatório")]
+        [Range(1, 9000, ErrorMessage = "O Número do Prédio deve ser maior que 0")]
+        [Display(Name = "Número")]
+        public int BuildingNumber { get; set; }
 
-		[Required(ErrorMessage = "Building Number Is Required")]
-		[Range(1, 9000, ErrorMessage = "Building Number must be greater than 0")]
-		public int BuildingNumber { get; set; }
+        [Required(ErrorMessage = "A Cidade é obrigatória")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "A Cidade deve ter entre 2 e 100 caracteres")]
+        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "A cidade pode conter apenas letras e espaços")]
+        [Display(Name = "Cidade")]
+        public string City { get; set; } = null!;
 
-		[Required(ErrorMessage = "City Is Required")]
-		[StringLength(100, MinimumLength = 2, ErrorMessage = "City must be between 2 and 100 characters")]
-		[RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "City can only contain letters and spaces")]
-		public string City { get; set; } = null!;
+        [Required(ErrorMessage = "A Rua é obrigatória")]
+        [StringLength(150, MinimumLength = 2, ErrorMessage = "A Rua deve ter entre 2 e 150 caracteres")]
+        [RegularExpression(@"^[a-zA-Z0-9\s]+$", ErrorMessage = "A rua pode conter apenas letras, números e espaços")]
+        [Display(Name = "Rua")]
+        public string Street { get; set; } = null!;
 
-		[Required(ErrorMessage = "Street Is Required")]
-		[StringLength(150, MinimumLength = 2, ErrorMessage = "Street must be between 2 and 150 characters")]
-		[RegularExpression(@"^[a-zA-Z0-9\s]+$", ErrorMessage = "Street can only contain letters, numbers, and spaces")]
-		public string Street { get; set; } = null!;
-
-		[Required(ErrorMessage = "Health record is required")]
-		public HealthRecordViewModel HealthRecordViewModel { get; set; } = null!;
-	}
+        [Required(ErrorMessage = "A Ficha de Saúde é obrigatória")]
+        [Display(Name = "Ficha de Saúde")]
+        public HealthRecordViewModel HealthRecordViewModel { get; set; } = null!;
+    }
 }
