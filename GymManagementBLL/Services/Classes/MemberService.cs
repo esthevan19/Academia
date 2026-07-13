@@ -120,9 +120,9 @@ namespace GymManagementBLL.Services.Classes
                 return isCreated;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                throw;
             }
 
         }

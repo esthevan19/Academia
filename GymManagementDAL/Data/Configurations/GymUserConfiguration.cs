@@ -13,7 +13,7 @@ namespace GymManagementDAL.Data.Configurations
 {
     public class GymUserConfiguration<T> : IEntityTypeConfiguration<T> where T : GymUser
     {
-    
+
         public void Configure(EntityTypeBuilder<T> builder)
         {
 
@@ -29,9 +29,19 @@ namespace GymManagementDAL.Data.Configurations
                    .HasColumnType("varchar")
                    .HasMaxLength(11);
 
-            builder.ToTable(Tb => {
-                Tb.HasCheckConstraint("CK_GymUserValidEmail", "Email LIKE '_%@_%._%'");
-                Tb.HasCheckConstraint("CK_GymUserValidPhone", "Phone LIKE '01%' AND Phone Not LIKE '%[^0-9]%' AND LEN(Phone) = 11");
+            builder.ToTable(Tb =>
+            {
+                Tb.HasCheckConstraint(
+                    "CK_GymUserValidEmail",
+                    "Email LIKE '_%@_%._%'");
+
+                // Aceita telefone brasileiro:
+                // Apenas números
+                // Exatamente 11 dígitos
+                // DDD entre 10 e 99
+                Tb.HasCheckConstraint(
+                    "CK_GymUserValidPhone",
+                    "Phone LIKE '[1-9][1-9]%' AND Phone NOT LIKE '%[^0-9]%' AND LEN(Phone) = 11");
             });
 
             builder.HasIndex(x => x.Email).IsUnique();
@@ -47,6 +57,7 @@ namespace GymManagementDAL.Data.Configurations
                        .HasColumnName("Street")
                        .HasColumnType("varchar")
                        .HasMaxLength(50);
+
                 Address.Property(a => a.City)
                        .HasColumnName("City")
                        .HasColumnType("varchar")
@@ -54,8 +65,7 @@ namespace GymManagementDAL.Data.Configurations
 
             });
 
-
         }
-    
+
     }
 }

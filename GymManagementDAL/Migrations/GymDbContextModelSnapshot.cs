@@ -230,7 +230,7 @@ namespace GymManagementDAL.Migrations
                         {
                             t.HasCheckConstraint("CK_GymUserValidEmail", "Email LIKE '_%@_%._%'");
 
-                            t.HasCheckConstraint("CK_GymUserValidPhone", "Phone LIKE '01%' AND Phone Not LIKE '%[^0-9]%' AND LEN(Phone) = 11");
+                            t.HasCheckConstraint("CK_GymUserValidPhone", "Phone LIKE '[1-9][1-9]%' AND Phone NOT LIKE '%[^0-9]%' AND LEN(Phone) = 11");
                         });
                 });
 
@@ -404,7 +404,7 @@ namespace GymManagementDAL.Migrations
                             t.HasCheckConstraint("CK_GymUserValidEmail", "Email LIKE '_%@_%._%'")
                                 .HasName("CK_GymUserValidEmail1");
 
-                            t.HasCheckConstraint("CK_GymUserValidPhone", "Phone LIKE '01%' AND Phone Not LIKE '%[^0-9]%' AND LEN(Phone) = 11")
+                            t.HasCheckConstraint("CK_GymUserValidPhone", "Phone LIKE '[1-9][1-9]%' AND Phone NOT LIKE '%[^0-9]%' AND LEN(Phone) = 11")
                                 .HasName("CK_GymUserValidPhone1");
                         });
                 });
