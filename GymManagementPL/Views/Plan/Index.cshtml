@@ -42,8 +42,8 @@
                         </div>
                         <div class="card-body d-flex flex-column">
                             <div class="text-center mb-4">
-                                <div class="display-4 fw-bold text-primary-color">@plan.Price.ToString("N0")</div>
-                                <small class="text-muted">EGP</small>
+                                <div class="display-4 fw-bold text-primary-color">@plan.Price.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</div>
+                                <small class="text-muted">por período do plano</small>
                             </div>
 
                             <div class="mb-3">

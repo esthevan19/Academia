@@ -26,7 +26,7 @@ namespace GymManagementPL.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid Session ID. Please provide a valid identifier.";
+                TempData["ErrorMessage"] = "ID de Sessão inválido. Forneça um identificador válido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -34,7 +34,7 @@ namespace GymManagementPL.Controllers
 
             if (session == null)
             {
-                TempData["ErrorMessage"] = $"No Session found with ID: {id}. Please check and try again.";
+                TempData["ErrorMessage"] = $"Nenhuma Sessão encontrada com o ID: {id}. Verifique e tente novamente.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -62,12 +62,12 @@ namespace GymManagementPL.Controllers
 
             if (result)
             {
-                TempData["SuccessMessage"] = "Session Created Successfully";
+                TempData["SuccessMessage"] = "Sessão criada com sucesso";
                 return RedirectToAction(nameof(Index));
             }
             else
             {
-                ModelState.AddModelError("DataMissed", "Failed to create session. Please verify trainer and category exist.");
+                ModelState.AddModelError("DataMissed", "Falha ao criar a sessão. Verifique se o treinador e a categoria existem, e se o horário informado é válido (o término deve ser depois do início e no futuro).");
                 LoadCategoriesDropDown();
                 LoadTrainersDropDown();
                 return View(createdSession);
@@ -79,7 +79,7 @@ namespace GymManagementPL.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid Session ID. Please provide a valid identifier.";
+                TempData["ErrorMessage"] = "ID de Sessão inválido. Forneça um identificador válido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -87,7 +87,7 @@ namespace GymManagementPL.Controllers
 
             if (session == null)
             {
-                TempData["ErrorMessage"] = $"Can't Update Session ";
+                TempData["ErrorMessage"] = $"Não é possível atualizar esta Sessão";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -102,7 +102,7 @@ namespace GymManagementPL.Controllers
 
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("DataMissed", "Can't Update Session");
+                ModelState.AddModelError("DataMissed", "Não é possível atualizar esta Sessão");
                 LoadTrainersDropDown();
                 return View(updatedSession);
             }
@@ -111,12 +111,12 @@ namespace GymManagementPL.Controllers
 
             if (result)
             {
-                TempData["SuccessMessage"] = "Session Updated Successfully";
+                TempData["SuccessMessage"] = "Sessão atualizada com sucesso";
                 return RedirectToAction(nameof(Index));
             }
             else
             {
-                ModelState.AddModelError("DataMissed", "Failed to Update session");
+                ModelState.AddModelError("DataMissed", "Falha ao atualizar a sessão");
                 LoadTrainersDropDown();
                 return View(updatedSession);
             }
@@ -127,7 +127,7 @@ namespace GymManagementPL.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid Session ID. Please provide a valid identifier.";
+                TempData["ErrorMessage"] = "ID de Sessão inválido. Forneça um identificador válido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -135,7 +135,7 @@ namespace GymManagementPL.Controllers
 
             if (sessionToDelete == null)
             {
-                TempData["ErrorMessage"] = $"No Session found with ID: {id}. Please check and try again.";
+                TempData["ErrorMessage"] = $"Nenhuma Sessão encontrada com o ID: {id}. Verifique e tente novamente.";
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.SessionId = id;
@@ -143,14 +143,14 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
-        public IActionResult DeleteConfirmed([FromForm]int id)
+        public IActionResult DeleteConfirmed([FromForm] int id)
         {
             var result = _sessionService.RemoveSession(id);
 
             if (result)
-                TempData["SuccessMessage"] = "Session Removed Successfully";
+                TempData["SuccessMessage"] = "Sessão removida com sucesso";
             else
-                TempData["ErrorMessage"] = "Session Not Removed";
+                TempData["ErrorMessage"] = "A Sessão não foi removida";
 
             return RedirectToAction(nameof(Index));
         }
