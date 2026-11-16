@@ -30,6 +30,16 @@ public class TrainersApiController : ControllerBase
         });
     }
 
+    [HttpGet("{id:int}/edit")]
+    public IActionResult GetForEdit(int id)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        var trainer = _trainerService.GetTrainerToUpdate(id);
+        return trainer is null
+            ? NotFound(new { success = false, message = "Instrutor não encontrado." })
+            : Ok(new { success = true, trainer });
+    }
+
     [HttpPost]
     [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
     public IActionResult Create([FromBody] CreateTrainerViewModel model)
