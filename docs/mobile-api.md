@@ -31,7 +31,7 @@ Required hosting configuration (environment variables; never commit values):
 
 | Method | Route | Access |
 |---|---|---|
-| GET | `/api/admins` | SuperAdmin |
+| GET | `/api/admins` | SuperAdmin; lista todas as contas Identity |
 | POST | `/api/admins` | SuperAdmin; cria conta com perfil Admin |
 | PUT | `/api/admins` | SuperAdmin |
 | DELETE | `/api/admins/{id}` | SuperAdmin |
@@ -70,7 +70,7 @@ Required hosting configuration (environment variables; never commit values):
 
 ## Important limitations
 
-- There is no verified Identity-user-to-Member relationship in the current data model. Do not implement a student `/me` endpoint by guessing a member record.
+- The existing database has no direct Identity-user-to-Member foreign key. A SuperAdmin can explicitly link an Aluno account to one existing member through the `gymflow:member_id` Identity claim stored in the existing AspNetUserClaims table. A member can be linked to only one account. The student must sign in again after the link is changed so the new claim is included in the JWT.
 - The MVC project currently has no real workout/exercise persistence service. Do not return sample workouts as if they were saved data.
-- Student self-booking and individual membership access must wait until the account-to-member relationship is implemented and verified.
+- Student profile, membership and booking endpoints use only the member ID from the authenticated JWT claim; they never accept a member ID supplied by the student.
 - These routes must be tested on a staging or approved deployment before the mobile app is considered production-ready.
