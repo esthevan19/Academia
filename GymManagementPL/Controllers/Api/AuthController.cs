@@ -55,6 +55,7 @@ public class AuthController : ControllerBase
         var issuer = _configuration["Jwt:Issuer"] ?? "GymFlow";
         var audience = _configuration["Jwt:Audience"] ?? "GymFlow.Mobile";
         var roles = await _userManager.GetRolesAsync(user);
+        var userClaims = await _userManager.GetClaimsAsync(user);
         var fullName = string.Join(" ", new[] { user.FirstName, user.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
 
         var claims = new List<Claim>
@@ -65,6 +66,7 @@ public class AuthController : ControllerBase
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        claims.AddRange(userClaims.Where(claim => claim.Type == "gymflow:member_id"));
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyText));
         var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
