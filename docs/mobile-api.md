@@ -48,6 +48,7 @@ Required hosting configuration (environment variables; never commit values):
 | GET | `/api/trainers/{id}` | SuperAdmin, Admin, Gerente, Instrutor |
 | POST/PUT/DELETE | `/api/trainers` and `/api/trainers/{id}` | SuperAdmin, Admin, Gerente |
 | GET | `/api/plans` and `/api/plans/{id}` | SuperAdmin, Admin, Gerente |
+| POST | `/api/plans` | SuperAdmin, Admin, Gerente |
 | PUT | `/api/plans/{id}` | SuperAdmin, Admin, Gerente |
 | POST | `/api/plans/{id}/toggle-status` | SuperAdmin, Admin, Gerente |
 | GET | `/api/sessions` and `/api/sessions/{id}` | All six GymFlow roles |
