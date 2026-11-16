@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using GymManagementDAL.Entities;
+using Microsoft.AspNetCore.Identity;
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.AdminManamentViewModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -15,10 +17,16 @@ namespace GymManagementPL.Controllers.Api;
 public class AdminsApiController : ControllerBase
 {
     private readonly IAdminService _adminService;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IMemberService _memberService;
 
-    public AdminsApiController(IAdminService adminService)
+    private const string MemberClaimType = "gymflow:member_id";
+
+    public AdminsApiController(IAdminService adminService, UserManager<ApplicationUser> userManager, IMemberService memberService)
     {
         _adminService = adminService;
+        _userManager = userManager;
+        _memberService = memberService;
     }
 
     public sealed record RoleRequest(string Role);
@@ -48,6 +56,65 @@ public class AdminsApiController : ControllerBase
             ? Ok(new { success = true, message = "Administrador atualizado com sucesso." })
             : Conflict(new { success = false, errors = result.Errors.Select(error => error.Description) });
     }
+
+    [HttpGet("{id}/member-link")]
+    public async Task<IActionResult> GetMemberLink(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user is null) return NotFound(new { success = false, message = "Usuário não encontrado." });
+        var claims = await _userManager.GetClaimsAsync(user);
+        var linkedId = claims.FirstOrDefault(claim => claim.Type == MemberClaimType)?.Value;
+        return Ok(new { success = true, memberId = int.TryParse(linkedId, out var memberId) ? memberId : (int?)null });
+    }
+
+    [HttpPost("{id}/member-link")]
+    public async Task<IActionResult> LinkMember(string id, [FromBody] MemberLinkRequest request)
+    {
+        if (request.MemberId <= 0)
+            return BadRequest(new { success = false, message = "Informe um ID de aluno válido." });
+
+        var user = await _userManager.FindByIdAsync(id);
+        if (user is null) return NotFound(new { success = false, message = "Usuário não encontrado." });
+        if (!await _userManager.IsInRoleAsync(user, "Aluno"))
+            return BadRequest(new { success = false, message = "Somente contas com perfil Aluno podem ser vinculadas." });
+        if (_memberService.GetMemberToUpdate(request.MemberId) is null)
+            return NotFound(new { success = false, message = "Cadastro de aluno não encontrado." });
+
+        var requestedClaim = new Claim(MemberClaimType, request.MemberId.ToString());
+        var alreadyLinked = await _userManager.GetUsersForClaimAsync(requestedClaim);
+        if (alreadyLinked.Any(existing => existing.Id != user.Id))
+            return Conflict(new { success = false, message = "Este cadastro já está vinculado a outra conta." });
+
+        var currentClaims = await _userManager.GetClaimsAsync(user);
+        var oldLinks = currentClaims.Where(claim => claim.Type == MemberClaimType).ToList();
+        if (oldLinks.Count > 0)
+        {
+            var removed = await _userManager.RemoveClaimsAsync(user, oldLinks);
+            if (!removed.Succeeded)
+                return Conflict(new { success = false, errors = removed.Errors.Select(error => error.Description) });
+        }
+
+        var result = await _userManager.AddClaimAsync(user, requestedClaim);
+        return result.Succeeded
+            ? Ok(new { success = true, message = "Conta de aluno vinculada com segurança.", memberId = request.MemberId })
+            : Conflict(new { success = false, errors = result.Errors.Select(error => error.Description) });
+    }
+
+    [HttpDelete("{id}/member-link")]
+    public async Task<IActionResult> UnlinkMember(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user is null) return NotFound(new { success = false, message = "Usuário não encontrado." });
+        var claims = await _userManager.GetClaimsAsync(user);
+        var links = claims.Where(claim => claim.Type == MemberClaimType).ToList();
+        if (links.Count == 0) return NotFound(new { success = false, message = "Esta conta não possui vínculo com aluno." });
+        var result = await _userManager.RemoveClaimsAsync(user, links);
+        return result.Succeeded
+            ? Ok(new { success = true, message = "Vínculo removido." })
+            : Conflict(new { success = false, errors = result.Errors.Select(error => error.Description) });
+    }
+
+    public sealed record MemberLinkRequest(int MemberId);
 
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)
