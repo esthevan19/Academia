@@ -63,3 +63,4 @@ public class MembershipsApiController : ControllerBase
             ? Ok(new { success = true, message = "Matrícula ativa cancelada." })
             : NotFound(new { success = false, message = "Não existe matrícula ativa para esse aluno." });
 }
+}
