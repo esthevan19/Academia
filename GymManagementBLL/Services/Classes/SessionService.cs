@@ -18,7 +18,7 @@ namespace GymManagementBLL.Services.Classes
         #region Fields
 
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper; 
+        private readonly IMapper _mapper;
 
         #endregion
 
@@ -28,7 +28,7 @@ namespace GymManagementBLL.Services.Classes
         {
             this._unitOfWork = unitOfWork;
             this._mapper = mapper;
-        } 
+        }
 
         #endregion
 
@@ -197,21 +197,24 @@ namespace GymManagementBLL.Services.Classes
 
         private bool IsValidDateRange(DateTime startDate, DateTime EndDate)
         {
-            return EndDate > startDate && EndDate > DateTime.UtcNow;
+            // Corrigido: o formulário envia o horário local do usuário (ex: horário do Brasil),
+            // então comparamos com DateTime.Now (horário local do servidor) em vez de
+            // DateTime.UtcNow, que ficava várias horas à frente e rejeitava sessões futuras válidas.
+            return EndDate > startDate && EndDate > DateTime.Now;
         }
 
         private bool IsSessionValidToUpdate(Session session)
         {
             return session != null &&
-                   session.EndDate >= DateTime.UtcNow &&
-                   session.StartDate > DateTime.UtcNow &&
+                   session.EndDate >= DateTime.Now &&
+                   session.StartDate > DateTime.Now &&
                    _unitOfWork.SessionRepository.GetCountOfBooksSlots(session.Id) == 0;
         }
 
         private bool IsSessionValidToRemove(Session session)
         {
             return session != null &&
-            session.EndDate <= DateTime.UtcNow &&
+            session.EndDate <= DateTime.Now &&
             _unitOfWork.SessionRepository.GetCountOfBooksSlots(session.Id) == 0;
         }
 
