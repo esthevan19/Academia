@@ -131,7 +131,7 @@ namespace GymManagementBLL
             // UpdatePlanViewModel -> plan
 
             CreateMap<UpdatePlanViewModel, Plan>()
-                .ForMember(dest => dest.Name, options => options.Ignore())
+                .ForMember(dest => dest.Name, options => options.MapFrom(src => src.PlanName))
                 .ForMember(dest => dest.UpdatedAt, options => options.MapFrom(src => DateTime.Now));
 
         }
