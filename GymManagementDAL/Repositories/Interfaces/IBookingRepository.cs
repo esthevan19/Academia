@@ -12,5 +12,7 @@ namespace GymManagementDAL.Repositories.Interfaces
 
         IEnumerable<Booking> GetSessionById(int id);
 
+        IEnumerable<Booking> GetMemberBookings(int memberId);
+
     }
 }
