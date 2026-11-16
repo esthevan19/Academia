@@ -5,6 +5,8 @@ namespace GymManagementPL.Controllers.Api
 {
     [ApiController]
     [Route("api/[controller]")]
+    /// <summary>API de consulta de alunos, utilizando serviços da camada de negócios.</summary>
+    /// <remarks>Este controller não declara restrição de acesso por perfil.</remarks>
     public class MembersApiController : ControllerBase
     {
         private readonly IMemberService _memberService;
@@ -21,6 +23,7 @@ namespace GymManagementPL.Controllers.Api
             _planService = planService;
         }
 
+        /// <summary>GET /api/MembersApi: retorna a lista de alunos do serviço.</summary>
         [HttpGet]
         public IActionResult GetAllMembers()
         {
@@ -28,6 +31,7 @@ namespace GymManagementPL.Controllers.Api
             return Ok(new { success = true, members });
         }
 
+        /// <summary>GET /api/MembersApi/{id}: consulta um aluno pelo identificador numérico; retorna 404 se não existir.</summary>
         [HttpGet("{id}")]
         public IActionResult GetMemberById(int id)
         {
@@ -37,6 +41,8 @@ namespace GymManagementPL.Controllers.Api
             return Ok(new { success = true, member });
         }
 
+        /// <summary>GET /api/MembersApi/me: devolve um perfil simplificado para a tela do aplicativo.</summary>
+        /// <remarks>Implementação provisória: usa o primeiro aluno da lista ou dados fictícios; não identifica o aluno autenticado.</remarks>
         [HttpGet("me")]
         public IActionResult GetMyProfile()
         {
