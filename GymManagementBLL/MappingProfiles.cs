@@ -64,7 +64,7 @@ namespace GymManagementBLL
 
             // MemberToUpdateViewModel -> Member mapping
             CreateMap<MemberToUpdateViewModel, Member>()
-               .ForMember(dest => dest.Name, options => options.Ignore())
+               .ForMember(dest => dest.Name, options => options.MapFrom(src => src.Name))
                .ForMember(dest => dest.Photo, options => options.Ignore())
                .AfterMap((src, dest) => // After mapping, update the nested Address object Not replacing it Or Change The reference
                {
@@ -107,7 +107,7 @@ namespace GymManagementBLL
             // TrainerToUpdateViewModel -> Trainer mapping
 
             CreateMap<TrainerToUpdateViewModel, Trainer>()
-               .ForMember(dest => dest.Name, options => options.Ignore())
+               .ForMember(dest => dest.Name, options => options.MapFrom(src => src.Name))
                .AfterMap((src, dest) => // After mapping, update the nested Address object Not replacing it Or Change The reference
                {
                    dest.Address.City = src.City;
