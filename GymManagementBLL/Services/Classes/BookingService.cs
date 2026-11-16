@@ -77,14 +77,19 @@ namespace GymManagementBLL.Services.Classes
             try
             {
                 var session = _unitOfWork.SessionRepository.GetById(createdBooking.SessionId);
-                if (session is null) return false;
+                if (session is null || session.StartDate <= DateTime.Now) return false;
 
                 var hasActiveMembership = _unitOfWork.MembershipRepository
-                                                     .GetAll(x => x.MemberId == createdBooking.MemberId).Any();
+                                                     .GetAll(x => x.MemberId == createdBooking.MemberId && x.Status == "Active").Any();
                 if (!hasActiveMembership) return false;
 
-                var HasAvailableSolts = session.Capacity - _unitOfWork.SessionRepository.GetCountOfBooksSlots(createdBooking.SessionId);
-                if (HasAvailableSolts == 0) return false;
+                var hasExistingBooking = _unitOfWork.BookingRepository
+                                                    .GetAll(x => x.MemberId == createdBooking.MemberId && x.SessionId == createdBooking.SessionId)
+                                                    .Any();
+                if (hasExistingBooking) return false;
+
+                var availableSlots = session.Capacity - _unitOfWork.SessionRepository.GetCountOfBooksSlots(createdBooking.SessionId);
+                if (availableSlots <= 0) return false;
 
                 var mappedCreatedBooking = _mapper.Map<Booking>(createdBooking);
 
