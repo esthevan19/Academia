@@ -34,7 +34,7 @@ public class AdminsApiController : ControllerBase
     [HttpGet]
     public IActionResult GetAll()
     {
-        return Ok(new { success = true, admins = _adminService.GetAllAdmins() });
+        return Ok(new { success = true, admins = _adminService.GetAllUsers() });
     }
 
     [HttpPost]
