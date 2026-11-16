@@ -10,6 +10,7 @@ namespace GymManagementPL.Controllers.Api
 {
     [ApiController]
     [Route("api/[controller]")]
+    /// <summary>API de autenticação do aplicativo GymFlow. Usa as contas do ASP.NET Identity.</summary>
     public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -26,6 +27,8 @@ namespace GymManagementPL.Controllers.Api
             _configuration = configuration;
         }
 
+        /// <summary>POST /api/Auth/login: valida email (ou nome de usuário) e senha e devolve um JWT com os perfis da conta.</summary>
+        /// <remarks>Retorna 400 quando faltam credenciais, 401 quando são inválidas e 200 quando o login é aceito.</remarks>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginApiRequest request)
         {
@@ -69,6 +72,7 @@ namespace GymManagementPL.Controllers.Api
             });
         }
 
+        /// <summary>Cria o JWT com identificador, email, nome e papéis do usuário; validade configurada aqui para 30 dias.</summary>
         private string GenerateJwtToken(ApplicationUser user, IList<string> roles)
         {
             var claims = new List<Claim>
@@ -100,6 +104,7 @@ namespace GymManagementPL.Controllers.Api
         }
     }
 
+    /// <summary>Dados enviados no corpo JSON do pedido de login.</summary>
     public class LoginApiRequest
     {
         public string Email { get; set; } = string.Empty;
