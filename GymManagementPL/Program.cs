@@ -9,6 +9,9 @@ using GymManagementDAL.Repositories.Classes;
 using GymManagementDAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace GymManagementPL
 {
@@ -45,6 +48,27 @@ namespace GymManagementPL
                 Config.User.RequireUniqueEmail = true;
             }).AddEntityFrameworkStores<GymDbContext>()
             .AddDefaultTokenProviders(); ;
+
+            // Cookies continuam para o MVC; Bearer autentica as requisições do aplicativo.
+            var jwtSecret = builder.Configuration["Jwt:SecretKey"] ?? builder.Configuration["Jwt:Key"];
+            if (!string.IsNullOrWhiteSpace(jwtSecret) && Encoding.UTF8.GetByteCount(jwtSecret) >= 32)
+            {
+                builder.Services.AddAuthentication()
+                    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidIssuer = "GymFlow",
+                            ValidateAudience = true,
+                            ValidAudience = "GymFlowApp",
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+                            ValidateLifetime = true,
+                            ClockSkew = TimeSpan.FromMinutes(2)
+                        };
+                    });
+            }
 
             //builder.Services.ConfigureApplicationCookie(opt =>
             //{
@@ -88,6 +112,7 @@ namespace GymManagementPL
 
             app.UseAuthorization();
 
+            app.MapControllers();
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
