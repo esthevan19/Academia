@@ -31,6 +31,14 @@ Required hosting configuration (environment variables; never commit values):
 
 | Method | Route | Access |
 |---|---|---|
+| GET | `/api/admins` | SuperAdmin |
+| POST | `/api/admins` | SuperAdmin; cria conta com perfil Admin |
+| PUT | `/api/admins` | SuperAdmin |
+| DELETE | `/api/admins/{id}` | SuperAdmin |
+| POST | `/api/admins/{id}/reset-password` | SuperAdmin |
+| GET | `/api/admins/{id}/roles` | SuperAdmin |
+| POST | `/api/admins/{id}/roles` | SuperAdmin |
+| DELETE | `/api/admins/{id}/roles/{role}` | SuperAdmin |
 | GET | `/api/members` | SuperAdmin, Admin, Gerente, Recepcionista |
 | GET | `/api/members/{id}` | SuperAdmin, Admin, Gerente, Recepcionista |
 | POST | `/api/members` | SuperAdmin, Admin, Gerente, Recepcionista; multipart form, existing model requires photo and health record |
