@@ -45,12 +45,14 @@ public class AdminsApiController : ControllerBase
         [Required] string LastName,
         string? PhoneNumber,
         [Required, MinLength(6)] string Password,
-        [Required, Compare(nameof(Password))] string ConfirmPassword);
+        [Required] string ConfirmPassword);
 
     [HttpPost("student-account")]
     public async Task<IActionResult> CreateStudentAccount([FromBody] CreateStudentAccountRequest request)
     {
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
+        if (!string.Equals(request.Password, request.ConfirmPassword, StringComparison.Ordinal))
+            return BadRequest(new { success = false, message = "A confirmação da senha não corresponde." });
 
         var user = new ApplicationUser
         {
