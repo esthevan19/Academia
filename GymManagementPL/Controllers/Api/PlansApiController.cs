@@ -30,6 +30,15 @@ public class PlansApiController : ControllerBase
         });
     }
 
+    [HttpPost]
+    public IActionResult Create([FromBody] CreatePlanViewModel model)
+    {
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+        return _planService.CreatePlan(model)
+            ? Ok(new { success = true, message = "Plano criado com sucesso." })
+            : Conflict(new { success = false, message = "Não foi possível criar o plano." });
+    }
+
     [HttpPut("{id:int}")]
     public IActionResult Update(int id, [FromBody] UpdatePlanViewModel model)
     {
