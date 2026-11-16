@@ -41,6 +41,17 @@ public class SessionsApiController : ControllerBase
         });
     }
 
+    [HttpGet("{id:int}/edit")]
+    [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
+    public IActionResult GetForEdit(int id)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        var session = _sessionService.GetSessionToUpdate(id);
+        return session is null
+            ? NotFound(new { success = false, message = "Sessão não encontrada." })
+            : Ok(new { success = true, session });
+    }
+
     [HttpPost]
     [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
     public IActionResult Create([FromBody] CreateSessionViewModel model)
