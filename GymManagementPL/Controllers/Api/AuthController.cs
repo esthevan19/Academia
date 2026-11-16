@@ -84,7 +84,7 @@ namespace GymManagementPL.Controllers.Api
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var secretKey = _configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("Configure Jwt:SecretKey.");
+            var secretKey = (_configuration["Jwt:SecretKey"] ?? _configuration["Jwt:Key"]) ?? throw new InvalidOperationException("Configure Jwt:SecretKey.");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
