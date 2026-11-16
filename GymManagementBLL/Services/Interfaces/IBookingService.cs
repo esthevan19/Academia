@@ -12,6 +12,7 @@ namespace GymManagementBLL.Services.Interfaces
     public interface IBookingService
     {
         IEnumerable<SessionViewModel> GetAllSessions();
+        IEnumerable<MemberBookingViewModel> GetMemberBookings(int memberId);
         IEnumerable<MemberForSessionViewModel> GetMembersSession(int sessionId);
         IEnumerable<MemberSelectListViewModel> GetMembersForDropDown(int sessionId);
         bool CreateNewBooking(CreateBookingViewModel CreatedBooking);
