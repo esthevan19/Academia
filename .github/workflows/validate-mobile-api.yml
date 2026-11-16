@@ -1,0 +1,17 @@
+name: Validar MVC e API Mobile
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - name: Restaurar dependências
+        run: dotnet restore GymManagementPL/GymManagementPL.csproj
+      - name: Compilar MVC e API
+        run: dotnet build GymManagementPL/GymManagementPL.csproj --configuration Release --no-restore
