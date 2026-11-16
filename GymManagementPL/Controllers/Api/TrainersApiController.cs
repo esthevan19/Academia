@@ -1,4 +1,5 @@
 using GymManagementBLL.Services.Interfaces;
+using GymManagementBLL.ViewModels.TrainerViewModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,37 @@ public class TrainersApiController : ControllerBase
             success = true,
             trainers = _trainerService.GetAllTrainers()
         });
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
+    public IActionResult Create([FromBody] CreateTrainerViewModel model)
+    {
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+        return _trainerService.CreateTrainer(model)
+            ? Ok(new { success = true, message = "Instrutor cadastrado com sucesso." })
+            : Conflict(new { success = false, message = "E-mail ou telefone já cadastrado." });
+    }
+
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
+    public IActionResult Update(int id, [FromBody] TrainerToUpdateViewModel model)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+        return _trainerService.UpdateTrainer(id, model)
+            ? Ok(new { success = true, message = "Instrutor atualizado com sucesso." })
+            : Conflict(new { success = false, message = "Não foi possível atualizar o instrutor." });
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
+    public IActionResult Delete(int id)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        return _trainerService.RemoveTrainer(id)
+            ? Ok(new { success = true, message = "Instrutor removido com sucesso." })
+            : Conflict(new { success = false, message = "Não foi possível remover o instrutor." });
     }
 
     [HttpGet("{id:int}")]
