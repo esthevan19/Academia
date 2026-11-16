@@ -1,4 +1,5 @@
 using GymManagementBLL.Services.Interfaces;
+using GymManagementBLL.ViewModels.PlanViewModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,25 @@ public class PlansApiController : ControllerBase
             success = true,
             plans = _planService.GetAllPlans()
         });
+    }
+
+    [HttpPut("{id:int}")]
+    public IActionResult Update(int id, [FromBody] UpdatePlanViewModel model)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+        return _planService.UpdatePlan(id, model)
+            ? Ok(new { success = true, message = "Plano atualizado com sucesso." })
+            : Conflict(new { success = false, message = "Não foi possível atualizar o plano." });
+    }
+
+    [HttpPost("{id:int}/toggle-status")]
+    public IActionResult ToggleStatus(int id)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        return _planService.PlanStatusToggle(id)
+            ? Ok(new { success = true, message = "Status do plano atualizado." })
+            : Conflict(new { success = false, message = "Não foi possível alterar o status do plano." });
     }
 
     [HttpGet("{id:int}")]
