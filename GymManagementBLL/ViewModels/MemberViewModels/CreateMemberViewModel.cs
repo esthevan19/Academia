@@ -1,4 +1,4 @@
-using GymManagementDAL.Entities.Enums;
+﻿using GymManagementDAL.Entities.Enums;
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
@@ -7,11 +7,12 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
     public class CreateMemberViewModel
     {
 
+        [Required(ErrorMessage = "A Foto de Perfil é obrigatória")]
         [Display(Name = "Foto de Perfil")]
-        public IFormFile? PhotoFile { get; set; }
+        public IFormFile PhotoFile { get; set; } = null!;
 
         [Required(ErrorMessage = "O Nome é obrigatório")]
-        [RegularExpression(@"^[\p{L}\s'-]+$", ErrorMessage = "O nome pode conter apenas letras e espaços")]
+        [RegularExpression(@"^[\p{L}\s]+$", ErrorMessage = "O nome pode conter apenas letras e espaços")]
         [Display(Name = "Nome Completo")]
         public string Name { get; set; } = null!;
 
@@ -23,7 +24,7 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
 
         [Required(ErrorMessage = "O Telefone é obrigatório")]
         [Phone(ErrorMessage = "Número de telefone inválido")]
-        [RegularExpression(@"^(\+?55\s?)?(\(?\d{2}\)?\s?)?9?\d{4}[-\s]?\d{4}$|^\d{8,15}$", ErrorMessage = "O telefone deve estar em formato válido (ex: 11987654321)")]
+        [RegularExpression(@"^[1-9]{2}9\d{8}$", ErrorMessage = "O telefone deve estar no formato DDD + 9 dígitos, ex: 11987654321")]
         [DataType(DataType.PhoneNumber)]
         [Display(Name = "Telefone")]
         public string Phone { get; set; } = null!;
@@ -44,13 +45,13 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
 
         [Required(ErrorMessage = "A Cidade é obrigatória")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "A Cidade deve ter entre 2 e 100 caracteres")]
-        [RegularExpression(@"^[\p{L}0-9\s'.-]+$", ErrorMessage = "A cidade pode conter apenas letras e espaços")]
+        [RegularExpression(@"^[\p{L}\s]+$", ErrorMessage = "A cidade pode conter apenas letras e espaços")]
         [Display(Name = "Cidade")]
         public string City { get; set; } = null!;
 
         [Required(ErrorMessage = "A Rua é obrigatória")]
         [StringLength(150, MinimumLength = 2, ErrorMessage = "A Rua deve ter entre 2 e 150 caracteres")]
-        [RegularExpression(@"^[\p{L}0-9\s'.,-]+$", ErrorMessage = "A rua pode conter apenas letras, números e espaços")]
+        [RegularExpression(@"^[\p{L}0-9\s]+$", ErrorMessage = "A rua pode conter apenas letras, números e espaços")]
         [Display(Name = "Rua")]
         public string Street { get; set; } = null!;
 
