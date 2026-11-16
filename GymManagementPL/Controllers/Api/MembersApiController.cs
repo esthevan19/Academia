@@ -1,74 +1,61 @@
-﻿using GymManagementBLL.Services.Interfaces;
+using GymManagementBLL.Services.Interfaces;
+using GymManagementBLL.ViewModels.MemberViewModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GymManagementPL.Controllers.Api
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/MembersApi")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MembersApiController : ControllerBase
     {
         private readonly IMemberService _memberService;
-        private readonly IMembershipService _membershipService;
-        private readonly IPlanService _planService;
 
-        public MembersApiController(
-            IMemberService memberService,
-            IMembershipService membershipService,
-            IPlanService planService)
+        public MembersApiController(IMemberService memberService)
         {
             _memberService = memberService;
-            _membershipService = membershipService;
-            _planService = planService;
         }
 
         [HttpGet]
-        public IActionResult GetAllMembers()
-        {
-            var members = _memberService.GetAllMembers();
-            return Ok(new { success = true, members });
-        }
-
-        [HttpGet("{id}")]
-        public IActionResult GetMemberById(int id)
-        {
-            var member = _memberService.GetMemberDetails(id);
-            if (member == null) return NotFound(new { success = false, message = "Aluno não encontrado" });
-
-            return Ok(new { success = true, member });
-        }
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
+        public IActionResult GetAllMembers() => Ok(new { success = true, members = _memberService.GetAllMembers() });
 
         [HttpGet("me")]
+        [Authorize(Roles = "Aluno")]
         public IActionResult GetMyProfile()
         {
-            // Retorna o perfil do aluno para o aplicativo
-            var members = _memberService.GetAllMembers();
-            var firstMember = members.FirstOrDefault();
-
-            return Ok(new
-            {
-                success = true,
-                student = firstMember != null ? new
-                {
-                    name = firstMember.Name,
-                    email = firstMember.Email,
-                    phone = firstMember.Phone,
-                    planName = firstMember.PlanName ?? "Plano Ouro Anual",
-                    status = "Ativo",
-                    matricula = "GF-" + firstMember.Id.ToString("D5"),
-                    qrCode = "GYMFLOW-" + firstMember.Id + "-ACCESS-VALID",
-                    expiresAt = firstMember.MembershipEndDate ?? DateTime.Today.AddMonths(6).ToString("dd/MM/yyyy")
-                } : new
-                {
-                    name = "Aluno GymFlow",
-                    email = "aluno@gymflow.com",
-                    phone = "(51) 99426-2915",
-                    planName = "Plano Ouro Anual",
-                    status = "Ativo",
-                    matricula = "GF-00001",
-                    qrCode = "GYMFLOW-001-ACCESS-VALID",
-                    expiresAt = DateTime.Today.AddMonths(6).ToString("dd/MM/yyyy")
-                }
-            });
+            // Não mostrar o primeiro aluno nem um perfil fictício: usar e-mail do JWT validado.
+            var email = User.FindFirstValue(ClaimTypes.Email)
+                ?? User.FindFirstValue("email");
+            if (string.IsNullOrWhiteSpace(email)) return Unauthorized();
+            var member = _memberService.GetAllMembers().FirstOrDefault(m =>
+                string.Equals(m.Email, email, StringComparison.OrdinalIgnoreCase));
+            if (member == null)
+                return NotFound(new { success = false, message = "Esta conta ainda não está vinculada a um cadastro de aluno com o mesmo e-mail." });
+            return Ok(new { success = true, member, student = member });
         }
+
+        [HttpGet("{id:int}")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
+        public IActionResult GetMemberById(int id) =>
+            _memberService.GetMemberDetails(id) is { } member ? Ok(new { success = true, member }) : NotFound();
+
+        [HttpGet("{id:int}/edit")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
+        public IActionResult Edit(int id) =>
+            _memberService.GetMemberToUpdate(id) is { } member ? Ok(new { success = true, member }) : NotFound();
+
+        [HttpPut("{id:int}")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
+        public IActionResult Update(int id, [FromBody] MemberToUpdateViewModel model) =>
+            _memberService.UpdateMember(id, model) ? Ok(new { success = true }) : BadRequest(new { success = false, message = "Não foi possível atualizar o aluno." });
+
+        [HttpDelete("{id:int}")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
+        public IActionResult Delete(int id) =>
+            _memberService.RemoveMember(id) ? Ok(new { success = true }) : NotFound();
     }
 }
