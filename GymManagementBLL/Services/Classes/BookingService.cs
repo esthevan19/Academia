@@ -25,6 +25,22 @@ namespace GymManagementBLL.Services.Classes
             _mapper = mapper;
         }
 
+        public IEnumerable<MemberBookingViewModel> GetMemberBookings(int memberId)
+        {
+            if (memberId <= 0) return [];
+
+            var bookings = _unitOfWork.BookingRepository.GetMemberBookings(memberId);
+            return bookings.Select(booking => new MemberBookingViewModel
+            {
+                SessionId = booking.SessionId,
+                Description = booking.Session.Description,
+                StartDate = booking.Session.StartDate,
+                EndDate = booking.Session.EndDate,
+                TrainerName = booking.Session.SessionTrainer != null ? booking.Session.SessionTrainer.Name : "",
+                IsAttended = booking.IsAttended
+            }).ToList();
+        }
+
         #region GetAllSessions
         public IEnumerable<SessionViewModel> GetAllSessions()
         {
