@@ -39,7 +39,7 @@ namespace GymManagementBLL.Services.Classes
                                                    .Any();
 
                 var hasActiveMembership = _unitOfWork.MembershipRepository
-                                                     .GetAllMembershipsWithMemberAndPLan(x => x.MemberId == createdMembership.MemberId)
+                                                     .GetAllMembershipsWithMemberAndPLan(x => x.MemberId == createdMembership.MemberId && x.Status == "Active")
                                                      .Any();
 
                 var isPlanExistandActive = _unitOfWork.GetRepository<Plan>()
