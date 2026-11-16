@@ -19,7 +19,7 @@ namespace GymManagementBLL.ViewModels.TrainerViewModels
 
 		[Required(ErrorMessage = "Phone Number Is Required")]
 		[Phone(ErrorMessage = "Invalid phone number")]
-		[RegularExpression(@"^(010|011|012|015)\d{8}$", ErrorMessage = "Informe um telefone brasileiro com DDD e 9 dígitos")]
+		[RegularExpression(@"^[1-9]{2}9\d{8}$", ErrorMessage = "Informe um telefone brasileiro com DDD e 9 dígitos")]
 
 		public string Phone { get; set; } = null!;
 
