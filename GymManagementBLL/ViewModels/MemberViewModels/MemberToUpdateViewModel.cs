@@ -1,35 +1,36 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace GymManagementBLL.ViewModels.MemberViewModels
 {
 	public class MemberToUpdateViewModel
 	{
+		[Required(ErrorMessage = "O Nome é obrigatório")]
+		[RegularExpression(@"^[\p{L}\s'-]+$", ErrorMessage = "O nome pode conter apenas letras e espaços")]
 		public string Name { get; set; } = null!;
 
 		public string? Photo { get; set; }
 
-		[Required(ErrorMessage = "Email Is Required")]
-		[EmailAddress(ErrorMessage = "Invalid email format")]
+		[Required(ErrorMessage = "O Email é obrigatório")]
+		[EmailAddress(ErrorMessage = "Formato de email inválido")]
 		public string Email { get; set; } = null!;
 
-		[Required(ErrorMessage = "Phone Number Is Required")]
-		[Phone(ErrorMessage = "Invalid phone number")]
-		[RegularExpression(@"^(010|011|012|015)\d{8}$", ErrorMessage = "Phone number must be a valid Egyptian mobile number")]
+		[Required(ErrorMessage = "O Telefone é obrigatório")]
+		[Phone(ErrorMessage = "Número de telefone inválido")]
+		[RegularExpression(@"^(\+?55\s?)?(\(?\d{2}\)?\s?)?9?\d{4}[-\s]?\d{4}$|^\d{8,15}$", ErrorMessage = "Informe um telefone válido (ex: 11987654321)")]
 		public string Phone { get; set; } = null!;
 
-		[Required(ErrorMessage = "Building Number Is Required")]
-		[Range(1, int.MaxValue, ErrorMessage = "Building Number must be greater than 0")]
+		[Required(ErrorMessage = "O Número é obrigatório")]
+		[Range(1, int.MaxValue, ErrorMessage = "O número deve ser maior que 0")]
 		public int BuildingNumber { get; set; }
 
-		[Required(ErrorMessage = "City Is Required")]
-		[StringLength(100, MinimumLength = 2, ErrorMessage = "City must be between 2 and 100 characters")]
-		[RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "City can only contain letters and spaces")]
+		[Required(ErrorMessage = "A Cidade é obrigatória")]
+		[StringLength(100, MinimumLength = 2, ErrorMessage = "A cidade deve ter entre 2 e 100 caracteres")]
+		[RegularExpression(@"^[\p{L}0-9\s'.-]+$", ErrorMessage = "A cidade pode conter apenas letras e espaços")]
 		public string City { get; set; } = null!;
 
-		[Required(ErrorMessage = "Street Is Required")]
-		[StringLength(150, MinimumLength = 2, ErrorMessage = "Street must be between 2 and 150 characters")]
-		[RegularExpression(@"^[a-zA-Z0-9\s]+$", ErrorMessage = "Street can only contain letters, numbers, and spaces")]
+		[Required(ErrorMessage = "A Rua é obrigatória")]
+		[StringLength(150, MinimumLength = 2, ErrorMessage = "A rua deve ter entre 2 e 150 caracteres")]
+		[RegularExpression(@"^[\p{L}0-9\s'.,-]+$", ErrorMessage = "A rua pode conter letras, números e espaços")]
 		public string Street { get; set; } = null!;
-
 	}
 }

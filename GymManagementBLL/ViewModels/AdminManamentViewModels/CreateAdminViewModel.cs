@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -34,5 +34,9 @@ namespace GymManagementBLL.ViewModels.AdminManamentViewModels
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Passwords do not match")]
         public string ConfirmPassword { get; set; } = null!;
+
+        [Required(ErrorMessage = "O Perfil/Função é obrigatório")]
+        [Display(Name = "Perfil / Função")]
+        public string Role { get; set; } = "Admin";
     }
 }

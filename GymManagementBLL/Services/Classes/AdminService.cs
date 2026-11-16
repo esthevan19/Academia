@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.AdminManamentViewModels;
 using GymManagementDAL.Entities;
@@ -31,12 +31,24 @@ namespace GymManagementBLL.Services.Classes
         // =========================
         public IEnumerable<AdminListViewModel> GetAllAdmins()
         {
-            var admins = _userManager.GetUsersInRoleAsync("Admin").Result;
-            return _mapper.Map<IEnumerable<AdminListViewModel>>(admins);
+            var users = _userManager.Users.ToList();
+            var list = new List<AdminListViewModel>();
+            foreach (var user in users)
+            {
+                var roles = _userManager.GetRolesAsync(user).Result;
+                list.Add(new AdminListViewModel
+                {
+                    Id = user.Id,
+                    Email = user.Email ?? string.Empty,
+                    UserName = user.UserName ?? string.Empty,
+                    Role = roles.FirstOrDefault() ?? "Sem Perfil"
+                });
+            }
+            return list;
         }
 
         // =========================
-        // Create Admin
+        // Create Admin / User with Role
         // =========================
         public IdentityResult CreateAdmin(CreateAdminViewModel model)
         {
@@ -45,7 +57,14 @@ namespace GymManagementBLL.Services.Classes
             var result = _userManager.CreateAsync(user, model.Password).Result;
 
             if (result.Succeeded)
-                _userManager.AddToRoleAsync(user, "Admin").Wait();
+            {
+                var role = string.IsNullOrWhiteSpace(model.Role) ? "Admin" : model.Role;
+                if (!_roleManager.RoleExistsAsync(role).Result)
+                {
+                    _roleManager.CreateAsync(new IdentityRole(role)).Wait();
+                }
+                _userManager.AddToRoleAsync(user, role).Wait();
+            }
 
             return result;
         }

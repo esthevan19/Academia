@@ -1,4 +1,4 @@
-﻿using GymManagementDAL.Entities;
+using GymManagementDAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace GymManagementDAL.Data.DataSeed
             try
             {
                 // Garante que as roles existem, sem apagar nada
-                var roles = new List<string> { "SuperAdmin", "Admin" };
+                var roles = new List<string> { "SuperAdmin", "Admin", "Gerente", "Recepcionista", "Instrutor", "Aluno" };
 
                 foreach (var roleName in roles)
                 {
@@ -47,6 +47,50 @@ namespace GymManagementDAL.Data.DataSeed
                     phone: "51994262911",
                     password: "Senha1234!",
                     role: "Admin"
+                );
+
+                CreateUserIfNotExists(
+                    userManager,
+                    email: "gerente@gymflow.com",
+                    userName: "gerente",
+                    firstName: "Gerente",
+                    lastName: "Geral",
+                    phone: "51994262912",
+                    password: "Senha1234!",
+                    role: "Gerente"
+                );
+
+                CreateUserIfNotExists(
+                    userManager,
+                    email: "recepcao@gymflow.com",
+                    userName: "recepcao",
+                    firstName: "Recepcionista",
+                    lastName: "Atendimento",
+                    phone: "51994262913",
+                    password: "Senha1234!",
+                    role: "Recepcionista"
+                );
+
+                CreateUserIfNotExists(
+                    userManager,
+                    email: "instrutor@gymflow.com",
+                    userName: "instrutor",
+                    firstName: "Instrutor",
+                    lastName: "Fitness",
+                    phone: "51994262914",
+                    password: "Senha1234!",
+                    role: "Instrutor"
+                );
+
+                CreateUserIfNotExists(
+                    userManager,
+                    email: "aluno@gymflow.com",
+                    userName: "aluno",
+                    firstName: "Aluno",
+                    lastName: "GymFlow",
+                    phone: "51994262915",
+                    password: "Senha1234!",
+                    role: "Aluno"
                 );
 
                 return true;

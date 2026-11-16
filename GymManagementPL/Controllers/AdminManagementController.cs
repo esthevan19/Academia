@@ -1,4 +1,4 @@
-﻿using GymManagementBLL.Services.Classes;
+using GymManagementBLL.Services.Classes;
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.AdminManamentViewModels;
 using GymManagementDAL.Entities;
@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GymManagementPL.Controllers
 {
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "SuperAdmin,Admin")]
     public class AdminManagementController : Controller
     {
         private readonly IAdminService _adminService;

@@ -1,4 +1,4 @@
-﻿using GymManagementDAL.Data.Contexts;
+using GymManagementDAL.Data.Contexts;
 using GymManagementDAL.Entities;
 using System;
 using System.Collections.Generic;
@@ -48,9 +48,17 @@ namespace GymManagementDAL.Data.DataSeed
 
         private static List<T> LoadDataFromJsonFile<T>(string fileName)
         {
+            var filePath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "Files", fileName);
+            if (!File.Exists(filePath))
+            {
+                filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Files", fileName);
+            }
 
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\Files", fileName);
-            if (!File.Exists(filePath)) throw new FileNotFoundException();
+            if (!File.Exists(filePath))
+            {
+                Console.WriteLine($"Seed file not found: {fileName}");
+                return new List<T>();
+            }
 
             string data = File.ReadAllText(filePath);
 
@@ -60,7 +68,6 @@ namespace GymManagementDAL.Data.DataSeed
             };
 
             return JsonSerializer.Deserialize<List<T>>(data, options) ?? new List<T>();
-
         }
 
     }

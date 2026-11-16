@@ -1,4 +1,4 @@
-﻿@model IEnumerable<AdminListViewModel>
+@model IEnumerable<AdminListViewModel>
 @{
     ViewData["Title"] = "Gerenciar Admins";
 }
@@ -42,6 +42,7 @@
                         <tr>
                             <th>Email</th>
                             <th>Nome de Usuário</th>
+                            <th>Perfil / Função</th>
                             <th class="text-center">Ações</th>
                         </tr>
                     </thead>
@@ -51,6 +52,36 @@
                             <tr>
                                 <td>@admin.Email</td>
                                 <td>@admin.UserName</td>
+                                <td>
+                                    @if (admin.Role == "SuperAdmin")
+                                    {
+                                        <span class="badge bg-danger px-3 py-2 fs-6">SuperAdmin</span>
+                                    }
+                                    else if (admin.Role == "Admin")
+                                    {
+                                        <span class="badge bg-primary px-3 py-2 fs-6" style="background-color:#070093 !important;">Admin</span>
+                                    }
+                                    else if (admin.Role == "Gerente")
+                                    {
+                                        <span class="badge bg-success px-3 py-2 fs-6">Gerente</span>
+                                    }
+                                    else if (admin.Role == "Recepcionista")
+                                    {
+                                        <span class="badge bg-info text-dark px-3 py-2 fs-6">Recepcionista</span>
+                                    }
+                                    else if (admin.Role == "Instrutor")
+                                    {
+                                        <span class="badge bg-warning text-dark px-3 py-2 fs-6">Instrutor</span>
+                                    }
+                                    else if (admin.Role == "Aluno")
+                                    {
+                                        <span class="badge bg-secondary px-3 py-2 fs-6">Aluno</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark px-3 py-2 fs-6">@admin.Role</span>
+                                    }
+                                </td>
                                 <td class="text-center">
                                     <a asp-action="Edit" asp-route-id="@admin.Id" class="btn btn-warning btn-sm">Editar</a>
                                     <a asp-action="ResetPassword" asp-route-id="@admin.Id" class="btn btn-info btn-sm text-white">Redefinir Senha</a>

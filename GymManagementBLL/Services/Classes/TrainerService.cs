@@ -103,8 +103,8 @@ namespace GymManagementBLL.Services.Classes
         public bool UpdateTrainer(int trainerId, TrainerToUpdateViewModel trainerToUpdate)
         {
 
-            var emailExist = _unitOfWork.GetRepository<Member>().GetAll(x => x.Email == trainerToUpdate.Email && x.Id != trainerId);
-            var phoneExist = _unitOfWork.GetRepository<Member>().GetAll(x => x.Phone == trainerToUpdate.Phone && x.Id != trainerId);
+            var emailExist = _unitOfWork.GetRepository<Trainer>().GetAll(x => x.Email == trainerToUpdate.Email && x.Id != trainerId);
+            var phoneExist = _unitOfWork.GetRepository<Trainer>().GetAll(x => x.Phone == trainerToUpdate.Phone && x.Id != trainerId);
 
             if (emailExist.Any() || phoneExist.Any())
                 return false;
@@ -162,14 +162,15 @@ namespace GymManagementBLL.Services.Classes
 
         private bool IsMailExist(string email)
         {
-            return _unitOfWork.GetRepository<Member>().GetAll(m => m.Email == email).Any();
+            return _unitOfWork.GetRepository<Trainer>().GetAll(t => t.Email == email).Any();
         }
         private bool IsPhoneExist(string phone)
         {
-            return _unitOfWork.GetRepository<Member>().GetAll(m => m.Phone == phone).Any();
+            return _unitOfWork.GetRepository<Trainer>().GetAll(t => t.Phone == phone).Any();
         }
 
         #endregion
 
     }
 }
+

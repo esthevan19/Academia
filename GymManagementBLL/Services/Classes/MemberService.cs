@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using GymManagementBLL.Services.AttachmentService;
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.MemberViewModels;
@@ -104,17 +104,24 @@ namespace GymManagementBLL.Services.Classes
                 if (IsMailExist(createdMember.Email) || IsPhoneExist(createdMember.Phone))
                     return false;
 
-                var photoName = _attachmentService.Upload("members", createdMember.PhotoFile);
-                if (string.IsNullOrEmpty(photoName)) return false;
+                string photoName = "default-avatar.png";
+                if (createdMember.PhotoFile is not null && createdMember.PhotoFile.Length > 0)
+                {
+                    var uploadedPhoto = _attachmentService.Upload("members", createdMember.PhotoFile);
+                    if (!string.IsNullOrEmpty(uploadedPhoto))
+                    {
+                        photoName = uploadedPhoto;
+                    }
+                }
 
                 var member = _mapper.Map<Member>(createdMember);
                 member.Photo = photoName;
 
                 _unitOfWork.GetRepository<Member>().Add(member);
 
-                bool isCreated =  _unitOfWork.SaveChanges() > 0;
+                bool isCreated = _unitOfWork.SaveChanges() > 0;
 
-                if (!isCreated)
+                if (!isCreated && photoName != "default-avatar.png")
                     _attachmentService.Delete(photoName, "members");
 
                 return isCreated;

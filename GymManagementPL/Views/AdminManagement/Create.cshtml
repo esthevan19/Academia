@@ -1,4 +1,4 @@
-﻿@model CreateAdminViewModel
+@model CreateAdminViewModel
 <div class="container mt-5">
     <!-- Cabeçalho -->
     <div class="text-center mb-4">
@@ -54,6 +54,22 @@
             <input asp-for="Email" class="form-control shadow-sm" />
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
+        <!-- Perfil / Função -->
+        <div class="mb-3">
+            <label asp-for="Role" class="form-label fw-semibold">Perfil / Função</label>
+            <select asp-for="Role" class="form-select shadow-sm" required>
+                <option value="Admin">Administrador (Gestão Geral)</option>
+                <option value="Gerente">Gerente (Operacional e Relatórios)</option>
+                <option value="Recepcionista">Recepcionista (Atendimento e Matrículas)</option>
+                <option value="Instrutor">Instrutor (Montagem de Treinos)</option>
+                <option value="Aluno">Aluno (Acesso ao App e Treinos)</option>
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <option value="SuperAdmin">SuperAdmin (Dono / Acesso Máximo)</option>
+                }
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
+        </div>
         <!-- Senha + Confirmar Senha -->
         <div class="row">
             <div class="col-md-6 mb-3">
@@ -70,7 +86,7 @@
         <!-- Botão de Envio -->
         <div class="text-center mt-4">
             <button type="submit" class="btn btn-primary px-5 py-2 fw-bold shadow-sm" style="background:#070093; border-color:#070093;">
-                Criar Admin
+                Cadastrar Usuário
             </button>
         </div>
     </form>
