@@ -31,6 +31,12 @@ namespace GymManagementBLL.Services.Classes
         // =========================
         public IEnumerable<AdminListViewModel> GetAllAdmins()
         {
+            var admins = _userManager.GetUsersInRoleAsync("Admin").Result;
+            return _mapper.Map<IEnumerable<AdminListViewModel>>(admins);
+        }
+
+        public IEnumerable<AdminListViewModel> GetAllUsers()
+        {
             var users = _userManager.Users.ToList();
             return _mapper.Map<IEnumerable<AdminListViewModel>>(users);
         }
