@@ -39,6 +39,7 @@ Required hosting configuration (environment variables; never commit values):
 | GET | `/api/admins/{id}/roles` | SuperAdmin |
 | POST | `/api/admins/{id}/roles` | SuperAdmin |
 | DELETE | `/api/admins/{id}/roles/{role}` | SuperAdmin |
+| GET/POST/DELETE | `/api/admins/{id}/member-link` | SuperAdmin; vincula uma conta Aluno a um cadastro existente usando claim Identity, sem migração de banco |
 | GET | `/api/members` | SuperAdmin, Admin, Gerente, Recepcionista |
 | GET | `/api/members/{id}` | SuperAdmin, Admin, Gerente, Recepcionista |
 | POST | `/api/members` | SuperAdmin, Admin, Gerente, Recepcionista; multipart form, existing model requires photo and health record |
@@ -58,6 +59,10 @@ Required hosting configuration (environment variables; never commit values):
 | GET | `/api/memberships` and `/api/memberships/lookups` | SuperAdmin, Admin, Gerente, Recepcionista |
 | POST | `/api/memberships` | SuperAdmin, Admin, Gerente, Recepcionista |
 | DELETE | `/api/memberships/{memberId}` | SuperAdmin, Admin, Gerente |
+| GET | `/api/me` | Aluno; somente o cadastro vinculado à conta autenticada |
+| GET | `/api/me/bookings` | Aluno; somente seus próprios agendamentos |
+| POST | `/api/me/bookings` | Aluno; agenda a própria conta vinculada |
+| DELETE | `/api/me/bookings/{sessionId}` | Aluno; cancela somente o próprio agendamento antes do início |
 | GET | `/api/bookings/sessions/{sessionId}/members` | SuperAdmin, Admin, Gerente, Recepcionista, Instrutor |
 | POST | `/api/bookings` | SuperAdmin, Admin, Gerente, Recepcionista |
 | POST | `/api/bookings/attendance` | SuperAdmin, Admin, Gerente, Recepcionista, Instrutor |
