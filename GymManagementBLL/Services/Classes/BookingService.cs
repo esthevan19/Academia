@@ -111,10 +111,14 @@ namespace GymManagementBLL.Services.Classes
         {
             try
             {
+                var session = _unitOfWork.SessionRepository.GetById(sessionId);
+                var now = DateTime.Now;
+                if (session is null || session.StartDate > now || session.EndDate < now) return false;
+
                 var memberSession = _unitOfWork.GetRepository<Booking>()
                                            .GetAll(X => X.MemberId == memberId && X.SessionId == sessionId)
                                            .FirstOrDefault();
-                if (memberSession is null) return false;
+                if (memberSession is null || memberSession.IsAttended) return false;
 
                 memberSession.IsAttended = true;
                 memberSession.UpdatedAt = DateTime.Now;
