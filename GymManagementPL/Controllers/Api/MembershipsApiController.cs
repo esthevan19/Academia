@@ -52,19 +52,14 @@ public class MembershipsApiController : ControllerBase
             : Conflict(new { success = false, message = "Não foi possível criar a matrícula. Verifique os dados e se já existe vínculo ativo." });
     }
 
-    [HttpDelete("{memberId:int}/{planId:int}")]
+    [HttpDelete("{memberId:int}")]
     [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
-    public IActionResult Delete(int memberId, int planId)
+    public IActionResult Delete(int memberId)
     {
-        if (memberId <= 0 || planId <= 0)
-            return BadRequest(new { success = false, message = "Identificadores inválidos." });
+        if (memberId <= 0)
+            return BadRequest(new { success = false, message = "Identificador inválido." });
 
-        // The legacy service deletes by membership id, so this endpoint deliberately
-        // does not guess an identifier from the member/plan pair.
-        return BadRequest(new
-        {
-            success = false,
-            message = "A exclusão mobile exige o identificador próprio da matrícula, ainda não exposto pelo serviço atual."
-        });
-    }
+        return _membershipService.DeleteMembership(memberId)
+            ? Ok(new { success = true, message = "Matrícula ativa cancelada." })
+            : NotFound(new { success = false, message = "Não existe matrícula ativa para esse aluno." });
 }
