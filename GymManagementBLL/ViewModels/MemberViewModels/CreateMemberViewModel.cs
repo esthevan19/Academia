@@ -12,7 +12,7 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
         public IFormFile PhotoFile { get; set; } = null!;
 
         [Required(ErrorMessage = "O Nome é obrigatório")]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "O nome pode conter apenas letras e espaços")]
+        [RegularExpression(@"^[\p{L}\s]+$", ErrorMessage = "O nome pode conter apenas letras e espaços")]
         [Display(Name = "Nome Completo")]
         public string Name { get; set; } = null!;
 
@@ -45,13 +45,13 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
 
         [Required(ErrorMessage = "A Cidade é obrigatória")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "A Cidade deve ter entre 2 e 100 caracteres")]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "A cidade pode conter apenas letras e espaços")]
+        [RegularExpression(@"^[\p{L}\s]+$", ErrorMessage = "A cidade pode conter apenas letras e espaços")]
         [Display(Name = "Cidade")]
         public string City { get; set; } = null!;
 
         [Required(ErrorMessage = "A Rua é obrigatória")]
         [StringLength(150, MinimumLength = 2, ErrorMessage = "A Rua deve ter entre 2 e 150 caracteres")]
-        [RegularExpression(@"^[a-zA-Z0-9\s]+$", ErrorMessage = "A rua pode conter apenas letras, números e espaços")]
+        [RegularExpression(@"^[\p{L}0-9\s]+$", ErrorMessage = "A rua pode conter apenas letras, números e espaços")]
         [Display(Name = "Rua")]
         public string Street { get; set; } = null!;
 
