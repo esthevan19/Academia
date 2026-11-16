@@ -12,6 +12,7 @@ namespace GymManagementBLL.Services.Interfaces
     public interface IAdminService
     {
         IEnumerable<AdminListViewModel> GetAllAdmins();
+        IEnumerable<AdminListViewModel> GetAllUsers();
         IdentityResult CreateAdmin(CreateAdminViewModel model);
         EditAdminViewModel GetAdminForUpdate(string id);
         IdentityResult EditAdmin(EditAdminViewModel model);
