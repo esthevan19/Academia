@@ -19,6 +19,16 @@ namespace GymManagementDAL.Repositories.Classes
             _dbContext = dbContext;
         }
 
+        public IEnumerable<Booking> GetMemberBookings(int memberId)
+        {
+            return _dbContext.Bookings
+                .Include(booking => booking.Session)
+                    .ThenInclude(session => session.SessionTrainer)
+                .Where(booking => booking.MemberId == memberId)
+                .OrderByDescending(booking => booking.Session.StartDate)
+                .ToList();
+        }
+
         public IEnumerable<Booking> GetSessionById(int id)
         {
             return _dbContext.Bookings.Include(x => x.Member)

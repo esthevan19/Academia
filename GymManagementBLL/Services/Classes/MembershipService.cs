@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.MembershipViewModels;
 using GymManagementDAL.Entities;
@@ -39,7 +39,7 @@ namespace GymManagementBLL.Services.Classes
                                                    .Any();
 
                 var hasActiveMembership = _unitOfWork.MembershipRepository
-                                                     .GetAllMembershipsWithMemberAndPLan(x => x.MemberId == createdMembership.MemberId && x.Status == "Active" && x.EndDate >= DateTime.Today)
+                                                     .GetAllMembershipsWithMemberAndPLan(x => x.MemberId == createdMembership.MemberId && x.Status == "Active")
                                                      .Any();
 
                 var isPlanExistandActive = _unitOfWork.GetRepository<Plan>()

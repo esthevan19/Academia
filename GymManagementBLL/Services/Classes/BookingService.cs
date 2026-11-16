@@ -25,6 +25,22 @@ namespace GymManagementBLL.Services.Classes
             _mapper = mapper;
         }
 
+        public IEnumerable<MemberBookingViewModel> GetMemberBookings(int memberId)
+        {
+            if (memberId <= 0) return [];
+
+            var bookings = _unitOfWork.BookingRepository.GetMemberBookings(memberId);
+            return bookings.Select(booking => new MemberBookingViewModel
+            {
+                SessionId = booking.SessionId,
+                Description = booking.Session.Description,
+                StartDate = booking.Session.StartDate,
+                EndDate = booking.Session.EndDate,
+                TrainerName = booking.Session.SessionTrainer != null ? booking.Session.SessionTrainer.Name : "",
+                IsAttended = booking.IsAttended
+            }).ToList();
+        }
+
         #region GetAllSessions
         public IEnumerable<SessionViewModel> GetAllSessions()
         {
@@ -77,14 +93,19 @@ namespace GymManagementBLL.Services.Classes
             try
             {
                 var session = _unitOfWork.SessionRepository.GetById(createdBooking.SessionId);
-                if (session is null) return false;
+                if (session is null || session.StartDate <= DateTime.Now) return false;
 
                 var hasActiveMembership = _unitOfWork.MembershipRepository
-                                                     .GetAll(x => x.MemberId == createdBooking.MemberId).Any();
+                                                     .GetAll(x => x.MemberId == createdBooking.MemberId && x.Status == "Active").Any();
                 if (!hasActiveMembership) return false;
 
-                var HasAvailableSolts = session.Capacity - _unitOfWork.SessionRepository.GetCountOfBooksSlots(createdBooking.SessionId);
-                if (HasAvailableSolts == 0) return false;
+                var hasExistingBooking = _unitOfWork.BookingRepository
+                                                    .GetAll(x => x.MemberId == createdBooking.MemberId && x.SessionId == createdBooking.SessionId)
+                                                    .Any();
+                if (hasExistingBooking) return false;
+
+                var availableSlots = session.Capacity - _unitOfWork.SessionRepository.GetCountOfBooksSlots(createdBooking.SessionId);
+                if (availableSlots <= 0) return false;
 
                 var mappedCreatedBooking = _mapper.Map<Booking>(createdBooking);
 
@@ -106,10 +127,14 @@ namespace GymManagementBLL.Services.Classes
         {
             try
             {
+                var session = _unitOfWork.SessionRepository.GetById(sessionId);
+                var now = DateTime.Now;
+                if (session is null || session.StartDate > now || session.EndDate < now) return false;
+
                 var memberSession = _unitOfWork.GetRepository<Booking>()
                                            .GetAll(X => X.MemberId == memberId && X.SessionId == sessionId)
                                            .FirstOrDefault();
-                if (memberSession is null) return false;
+                if (memberSession is null || memberSession.IsAttended) return false;
 
                 memberSession.IsAttended = true;
                 memberSession.UpdatedAt = DateTime.Now;

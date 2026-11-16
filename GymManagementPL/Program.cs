@@ -8,6 +8,9 @@ using GymManagementDAL.Entities;
 using GymManagementDAL.Repositories.Classes;
 using GymManagementDAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymManagementPL
@@ -45,6 +48,31 @@ namespace GymManagementPL
                 Config.User.RequireUniqueEmail = true;
             }).AddEntityFrameworkStores<GymDbContext>()
             .AddDefaultTokenProviders(); ;
+
+            // JWT para o aplicativo mobile. Configure Jwt__Key como variável de ambiente.
+            var jwtKey = builder.Configuration["Jwt:Key"];
+            var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "GymFlow";
+            var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "GymFlow.Mobile";
+
+            builder.Services.AddAuthentication()
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = string.IsNullOrWhiteSpace(jwtKey)
+                            ? null
+                            : new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtIssuer,
+                        ValidateAudience = true,
+                        ValidAudience = jwtAudience,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.FromMinutes(1),
+                        RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+                        NameClaimType = System.Security.Claims.ClaimTypes.Name
+                    };
+                });
 
             //builder.Services.ConfigureApplicationCookie(opt =>
             //{
@@ -89,6 +117,7 @@ namespace GymManagementPL
             app.UseAuthorization();
 
             app.MapStaticAssets();
+            app.MapControllers();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}")

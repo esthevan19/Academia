@@ -1,74 +1,78 @@
-﻿using GymManagementBLL.Services.Interfaces;
+using GymManagementBLL.Services.Interfaces;
+using GymManagementBLL.ViewModels.MemberViewModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GymManagementPL.Controllers.Api
+namespace GymManagementPL.Controllers.Api;
+
+[ApiController]
+[Route("api/members")]
+[Authorize(
+    AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,
+    Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
+public class MembersApiController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class MembersApiController : ControllerBase
+    private readonly IMemberService _memberService;
+
+    public MembersApiController(IMemberService memberService)
     {
-        private readonly IMemberService _memberService;
-        private readonly IMembershipService _membershipService;
-        private readonly IPlanService _planService;
+        _memberService = memberService;
+    }
 
-        public MembersApiController(
-            IMemberService memberService,
-            IMembershipService membershipService,
-            IPlanService planService)
-        {
-            _memberService = memberService;
-            _membershipService = membershipService;
-            _planService = planService;
-        }
+    [HttpGet]
+    public IActionResult GetAll()
+    {
+        var members = _memberService.GetAllMembers();
+        return Ok(new { success = true, members });
+    }
 
-        [HttpGet]
-        public IActionResult GetAllMembers()
-        {
-            var members = _memberService.GetAllMembers();
-            return Ok(new { success = true, members });
-        }
+    [HttpGet("{id:int}")]
+    public IActionResult GetById(int id)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        var member = _memberService.GetMemberDetails(id);
+        return member is null
+            ? NotFound(new { success = false, message = "Aluno não encontrado." })
+            : Ok(new { success = true, member });
+    }
 
-        [HttpGet("{id}")]
-        public IActionResult GetMemberById(int id)
-        {
-            var member = _memberService.GetMemberDetails(id);
-            if (member == null) return NotFound(new { success = false, message = "Aluno não encontrado" });
+    [HttpGet("{id:int}/edit")]
+    public IActionResult GetForEdit(int id)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        var member = _memberService.GetMemberToUpdate(id);
+        return member is null
+            ? NotFound(new { success = false, message = "Aluno não encontrado." })
+            : Ok(new { success = true, member });
+    }
 
-            return Ok(new { success = true, member });
-        }
+    [HttpPost]
+    public IActionResult Create([FromForm] CreateMemberViewModel model)
+    {
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+        return _memberService.CreateMember(model)
+            ? Ok(new { success = true, message = "Aluno cadastrado com sucesso." })
+            : Conflict(new { success = false, message = "E-mail ou telefone já cadastrado." });
+    }
 
-        [HttpGet("me")]
-        public IActionResult GetMyProfile()
-        {
-            // Retorna o perfil do aluno para o aplicativo
-            var members = _memberService.GetAllMembers();
-            var firstMember = members.FirstOrDefault();
+    [HttpPut("{id:int}")]
+    public IActionResult Update(int id, [FromBody] MemberToUpdateViewModel model)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+        return _memberService.UpdateMember(id, model)
+            ? Ok(new { success = true, message = "Aluno atualizado com sucesso." })
+            : Conflict(new { success = false, message = "Não foi possível atualizar o aluno." });
+    }
 
-            return Ok(new
-            {
-                success = true,
-                student = firstMember != null ? new
-                {
-                    name = firstMember.Name,
-                    email = firstMember.Email,
-                    phone = firstMember.Phone,
-                    planName = firstMember.PlanName ?? "Plano Ouro Anual",
-                    status = "Ativo",
-                    matricula = "GF-" + firstMember.Id.ToString("D5"),
-                    qrCode = "GYMFLOW-" + firstMember.Id + "-ACCESS-VALID",
-                    expiresAt = firstMember.MembershipEndDate ?? DateTime.Today.AddMonths(6).ToString("dd/MM/yyyy")
-                } : new
-                {
-                    name = "Aluno GymFlow",
-                    email = "aluno@gymflow.com",
-                    phone = "(51) 99426-2915",
-                    planName = "Plano Ouro Anual",
-                    status = "Ativo",
-                    matricula = "GF-00001",
-                    qrCode = "GYMFLOW-001-ACCESS-VALID",
-                    expiresAt = DateTime.Today.AddMonths(6).ToString("dd/MM/yyyy")
-                }
-            });
-        }
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
+    public IActionResult Delete(int id)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        return _memberService.RemoveMember(id)
+            ? Ok(new { success = true, message = "Aluno removido com sucesso." })
+            : Conflict(new { success = false, message = "Não foi possível remover o aluno." });
     }
 }
