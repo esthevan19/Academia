@@ -4,8 +4,11 @@ namespace GymManagementPL.Controllers.Api
 {
     [ApiController]
     [Route("api/[controller]")]
+    /// <summary>API de consulta dos treinos exibidos no aplicativo.</summary>
+    /// <remarks>Os treinos A, B, C e D são exemplos fixos neste controller; não são consultados do banco de dados.</remarks>
     public class WorkoutsController : ControllerBase
     {
+        /// <summary>GET /api/Workouts: devolve treinos com exercícios, séries, repetições, descansos e grupos musculares.</summary>
         [HttpGet]
         public IActionResult GetWorkouts()
         {
