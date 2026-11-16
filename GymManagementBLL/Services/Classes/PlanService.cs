@@ -33,6 +33,36 @@ namespace GymManagementBLL.Services.Classes
 
         #region GetAllPlans
 
+        public bool CreatePlan(CreatePlanViewModel newPlan)
+        {
+            if (newPlan is null ||
+                string.IsNullOrWhiteSpace(newPlan.PlanName) ||
+                string.IsNullOrWhiteSpace(newPlan.Description) ||
+                newPlan.DurationDays < 1 || newPlan.DurationDays > 365 ||
+                newPlan.Price <= 0 || newPlan.Price > 10000)
+                return false;
+
+            try
+            {
+                var plan = new Plan
+                {
+                    Name = newPlan.PlanName.Trim(),
+                    Description = newPlan.Description.Trim(),
+                    DurationDays = newPlan.DurationDays,
+                    Price = newPlan.Price,
+                    IsActive = true,
+                    Memberships = new HashSet<Membership>()
+                };
+
+                _unitOfWork.GetRepository<Plan>().Add(plan);
+                return _unitOfWork.SaveChanges() > 0;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         public IEnumerable<PlanViewModel> GetAllPlans()
         {
             var plans = _unitOfWork.GetRepository<Plan>().GetAll();
