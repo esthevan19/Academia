@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.ComponentModel.DataAnnotations;
 using GymManagementDAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using GymManagementBLL.Services.Interfaces;
@@ -35,6 +36,48 @@ public class AdminsApiController : ControllerBase
     public IActionResult GetAll()
     {
         return Ok(new { success = true, admins = _adminService.GetAllUsers() });
+    }
+
+    public sealed record CreateStudentAccountRequest(
+        [Required, EmailAddress] string Email,
+        [Required, StringLength(50, MinimumLength = 3)] string UserName,
+        [Required] string FirstName,
+        [Required] string LastName,
+        string? PhoneNumber,
+        [Required, MinLength(6)] string Password,
+        [Required, Compare(nameof(Password))] string ConfirmPassword);
+
+    [HttpPost("student-account")]
+    public async Task<IActionResult> CreateStudentAccount([FromBody] CreateStudentAccountRequest request)
+    {
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        var user = new ApplicationUser
+        {
+            Email = request.Email.Trim(),
+            UserName = request.UserName.Trim(),
+            FirstName = request.FirstName.Trim(),
+            LastName = request.LastName.Trim(),
+            PhoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber) ? null : request.PhoneNumber.Trim()
+        };
+
+        var created = await _userManager.CreateAsync(user, request.Password);
+        if (!created.Succeeded)
+            return Conflict(new { success = false, errors = created.Errors.Select(error => error.Description) });
+
+        var roleResult = await _userManager.AddToRoleAsync(user, "Aluno");
+        if (!roleResult.Succeeded)
+        {
+            await _userManager.DeleteAsync(user);
+            return Conflict(new { success = false, errors = roleResult.Errors.Select(error => error.Description) });
+        }
+
+        return Ok(new
+        {
+            success = true,
+            message = "Conta de aluno criada. Agora vincule-a ao cadastro do aluno.",
+            user = new { id = user.Id, email = user.Email, userName = user.UserName }
+        });
     }
 
     [HttpPost]
