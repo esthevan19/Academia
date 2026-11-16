@@ -33,6 +33,7 @@ Required hosting configuration (environment variables; never commit values):
 |---|---|---|
 | GET | `/api/admins` | SuperAdmin; lista todas as contas Identity |
 | POST | `/api/admins` | SuperAdmin; cria conta com perfil Admin |
+| POST | `/api/admins/student-account` | SuperAdmin; cria conta com perfil Aluno |
 | PUT | `/api/admins` | SuperAdmin |
 | DELETE | `/api/admins/{id}` | SuperAdmin |
 | POST | `/api/admins/{id}/reset-password` | SuperAdmin |
