@@ -29,6 +29,18 @@ public class SessionsApiController : ControllerBase
         });
     }
 
+    [HttpGet("lookups")]
+    [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
+    public IActionResult GetLookups()
+    {
+        return Ok(new
+        {
+            success = true,
+            trainers = _sessionService.GetTrainersForDropDown(),
+            categories = _sessionService.GetCategoriesForDropDown()
+        });
+    }
+
     [HttpPost]
     [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
     public IActionResult Create([FromBody] CreateSessionViewModel model)
