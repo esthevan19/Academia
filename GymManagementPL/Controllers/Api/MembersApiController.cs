@@ -37,6 +37,16 @@ public class MembersApiController : ControllerBase
             : Ok(new { success = true, member });
     }
 
+    [HttpGet("{id:int}/edit")]
+    public IActionResult GetForEdit(int id)
+    {
+        if (id <= 0) return BadRequest(new { success = false, message = "Identificador inválido." });
+        var member = _memberService.GetMemberToUpdate(id);
+        return member is null
+            ? NotFound(new { success = false, message = "Aluno não encontrado." })
+            : Ok(new { success = true, member });
+    }
+
     [HttpPost]
     public IActionResult Create([FromForm] CreateMemberViewModel model)
     {
