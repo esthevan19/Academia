@@ -51,7 +51,9 @@ namespace GymManagementBLL.Services.Classes
 
                 var membership = _mapper.Map<Membership>(createdMembership);
                 var plan = _unitOfWork.GetRepository<Plan>().GetById(createdMembership.PlanId);
-                membership.EndDate = DateTime.Now.AddDays(plan!.DurationDays);
+                var startDate = createdMembership.StartDate ?? DateTime.Now;
+                membership.CreatedAt = startDate;
+                membership.EndDate = startDate.AddDays(plan!.DurationDays);
 
                 _unitOfWork.GetRepository<Membership>().Add(membership);
 
