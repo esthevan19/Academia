@@ -12,7 +12,7 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
         public IFormFile PhotoFile { get; set; } = null!;
 
         [Required(ErrorMessage = "O Nome é obrigatório")]
-        [RegularExpression(@"^[\p{L}\s]+$", ErrorMessage = "O nome pode conter apenas letras e espaços")]
+        [RegularExpression(@"^[\p{L}\s'.-]+$", ErrorMessage = "O nome pode conter apenas letras e espaços")]
         [Display(Name = "Nome Completo")]
         public string Name { get; set; } = null!;
 
@@ -24,7 +24,7 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
 
         [Required(ErrorMessage = "O Telefone é obrigatório")]
         [Phone(ErrorMessage = "Número de telefone inválido")]
-        [RegularExpression(@"^[1-9]{2}9\d{8}$", ErrorMessage = "O telefone deve estar no formato DDD + 9 dígitos, ex: 11987654321")]
+        [RegularExpression(@"^\(?[1-9][0-9]\)?\s?9[0-9]{4}-?[0-9]{4}$", ErrorMessage = "Informe um celular brasileiro com DDD, por exemplo (51) 98765-4321.")]
         [DataType(DataType.PhoneNumber)]
         [Display(Name = "Telefone")]
         public string Phone { get; set; } = null!;
@@ -39,7 +39,7 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
         public Gender Gender { get; set; }
 
         [Required(ErrorMessage = "O Número do Prédio é obrigatório")]
-        [Range(1, 9000, ErrorMessage = "O Número do Prédio deve ser maior que 0")]
+        [Range(1, 999999, ErrorMessage = "Informe um número de endereço válido (1 a 999999).")]
         [Display(Name = "Número")]
         public int BuildingNumber { get; set; }
 
