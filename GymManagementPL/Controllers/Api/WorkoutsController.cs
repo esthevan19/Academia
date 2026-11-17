@@ -1,83 +1,153 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using GymManagementDAL.Data.Contexts;
+using GymManagementDAL.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace GymManagementPL.Controllers.Api
+namespace GymManagementPL.Controllers.Api;
+
+[ApiController]
+[Route("api/workouts")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+public class WorkoutsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class WorkoutsController : ControllerBase
-    {
-        [HttpGet]
-        public IActionResult GetWorkouts()
-        {
-            var workouts = new[]
-            {
-                new
-                {
-                    id = "treino-a",
-                    letter = "A",
-                    name = "Peito & Tríceps",
-                    category = "Hipertrofia",
-                    estimatedTimeMinutes = 50,
-                    exercises = new[]
-                    {
-                        new { name = "Supino Reto com Barra", sets = 4, reps = "10 a 12", restSeconds = 60, muscle = "Peitoral" },
-                        new { name = "Supino Inclinado com Halteres", sets = 3, reps = "12", restSeconds = 60, muscle = "Peitoral Superior" },
-                        new { name = "Crossover na Polia Média", sets = 3, reps = "15", restSeconds = 45, muscle = "Peitoral" },
-                        new { name = "Tríceps Corda no Cross", sets = 4, reps = "12", restSeconds = 45, muscle = "Tríceps" },
-                        new { name = "Tríceps Francês Unilateral", sets = 3, reps = "12", restSeconds = 45, muscle = "Tríceps" }
-                    }
-                },
-                new
-                {
-                    id = "treino-b",
-                    letter = "B",
-                    name = "Costas & Bíceps",
-                    category = "Hipertrofia",
-                    estimatedTimeMinutes = 50,
-                    exercises = new[]
-                    {
-                        new { name = "Puxada Frontal Aberta", sets = 4, reps = "10 a 12", restSeconds = 60, muscle = "Dorsal" },
-                        new { name = "Remada Curvada com Barra", sets = 4, reps = "10", restSeconds = 60, muscle = "Costas Geral" },
-                        new { name = "Remada Baixa no Triângulo", sets = 3, reps = "12", restSeconds = 45, muscle = "Dorsal" },
-                        new { name = "Rosca Direta com Barra W", sets = 4, reps = "10 a 12", restSeconds = 45, muscle = "Bíceps" },
-                        new { name = "Rosca Martelo com Halteres", sets = 3, reps = "12", restSeconds = 45, muscle = "Braquial / Antebraço" }
-                    }
-                },
-                new
-                {
-                    id = "treino-c",
-                    letter = "C",
-                    name = "Pernas & Ombros",
-                    category = "Força & Resistência",
-                    estimatedTimeMinutes = 55,
-                    exercises = new[]
-                    {
-                        new { name = "Agachamento Livre", sets = 4, reps = "10", restSeconds = 90, muscle = "Quadríceps / Glúteos" },
-                        new { name = "Leg Press 45°", sets = 4, reps = "12", restSeconds = 60, muscle = "Pernas Completo" },
-                        new { name = "Cadeira Extensora", sets = 3, reps = "15", restSeconds = 45, muscle = "Quadríceps" },
-                        new { name = "Mesa Flexora", sets = 3, reps = "12", restSeconds = 45, muscle = "Posterior de Coxa" },
-                        new { name = "Desenvolvimento com Halteres", sets = 4, reps = "10", restSeconds = 60, muscle = "Ombros" },
-                        new { name = "Elevação Lateral", sets = 4, reps = "12 a 15", restSeconds = 45, muscle = "Deltoide Lateral" }
-                    }
-                },
-                new
-                {
-                    id = "treino-d",
-                    letter = "D",
-                    name = "Abdômen & Funcional",
-                    category = "Condicionamento",
-                    estimatedTimeMinutes = 40,
-                    exercises = new[]
-                    {
-                        new { name = "Abdominal Supra no Solo", sets = 4, reps = "20", restSeconds = 30, muscle = "Abdômen" },
-                        new { name = "Prancha Isométrica", sets = 3, reps = "45 segundos", restSeconds = 30, muscle = "Core" },
-                        new { name = "Elevação de Pernas na Barra", sets = 3, reps = "15", restSeconds = 45, muscle = "Abdômen Infra" },
-                        new { name = "Esteira / Corrida Moderada", sets = 1, reps = "20 minutos", restSeconds = 0, muscle = "Cardiovascular" }
-                    }
-                }
-            };
+    private readonly GymDbContext _db;
+    public WorkoutsController(GymDbContext db) => _db = db;
 
-            return Ok(new { success = true, workouts });
-        }
+    public sealed record ExerciseInput(string Name, int Sets, string Reps, decimal? LoadKg, int RestSeconds, string? Notes);
+    public sealed record WorkoutInput(int MemberId, string Name, string? Category, string? Letter, string? Notes, List<ExerciseInput> Exercises);
+
+    private int? LinkedMemberId()
+    {
+        return int.TryParse(User.FindFirstValue("gymflow:member_id"), out var id) && id > 0 ? id : null;
     }
+
+    private bool CanManage() => User.IsInRole("SuperAdmin") || User.IsInRole("Admin") ||
+                                User.IsInRole("Gerente") || User.IsInRole("Instrutor");
+
+    private IQueryable<Workout> AccessibleWorkouts()
+    {
+        var query = _db.Workouts.AsNoTracking().Include(x => x.Exercises).AsQueryable();
+        if (CanManage()) return query;
+        var id = LinkedMemberId();
+        return User.IsInRole("Aluno") && id.HasValue
+            ? query.Where(x => x.MemberId == id.Value)
+            : query.Where(x => false);
+    }
+
+    private static object ToResponse(Workout workout) => new
+    {
+        workout.Id, workout.MemberId, workout.Name, workout.Category, workout.Letter, workout.Notes,
+        exercises = workout.Exercises.OrderBy(e => e.SortOrder).Select(e => new
+        {
+            e.Id, e.Name, e.Sets, e.Reps, e.LoadKg, e.RestSeconds, e.SortOrder, e.Notes
+        }).ToList()
+    };
+
+    [HttpGet]
+    public async Task<IActionResult> List([FromQuery] int? memberId)
+    {
+        if (!CanManage() && !User.IsInRole("Aluno")) return Forbid();
+        if (User.IsInRole("Aluno") && LinkedMemberId() is null)
+            return Conflict(new { success = false, message = "Conta sem vínculo com cadastro de aluno." });
+        var query = AccessibleWorkouts();
+        if (memberId.HasValue) query = query.Where(x => x.MemberId == memberId.Value);
+        var data = await query.OrderByDescending(x => x.CreatedAt).ToListAsync();
+        return Ok(new { success = true, workouts = data.Select(ToResponse).ToList() });
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        if (!CanManage() && !User.IsInRole("Aluno")) return Forbid();
+        if (User.IsInRole("Aluno") && LinkedMemberId() is null)
+            return Conflict(new { success = false, message = "Conta sem vínculo com cadastro de aluno." });
+        var workout = await AccessibleWorkouts().FirstOrDefaultAsync(x => x.Id == id);
+        return workout is null ? NotFound(new { success = false, message = "Treino não encontrado." })
+            : Ok(new { success = true, workout = ToResponse(workout) });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] WorkoutInput input)
+    {
+        if (!CanManage()) return Forbid();
+        var validation = Validate(input);
+        if (validation is not null) return BadRequest(new { success = false, message = validation });
+        if (!await _db.Members.AnyAsync(x => x.Id == input.MemberId))
+            return NotFound(new { success = false, message = "Aluno não encontrado." });
+        var workout = Build(input);
+        _db.Workouts.Add(workout);
+        await _db.SaveChangesAsync();
+        return CreatedAtAction(nameof(Get), new { id = workout.Id }, new { success = true, workout = ToResponse(workout) });
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] WorkoutInput input)
+    {
+        if (!CanManage()) return Forbid();
+        var validation = Validate(input);
+        if (validation is not null) return BadRequest(new { success = false, message = validation });
+        var workout = await _db.Workouts.Include(x => x.Exercises).FirstOrDefaultAsync(x => x.Id == id);
+        if (workout is null) return NotFound(new { success = false, message = "Treino não encontrado." });
+        if (!await _db.Members.AnyAsync(x => x.Id == input.MemberId))
+            return NotFound(new { success = false, message = "Aluno não encontrado." });
+        workout.MemberId = input.MemberId;
+        workout.Name = input.Name.Trim();
+        workout.Category = string.IsNullOrWhiteSpace(input.Category) ? "Musculação" : input.Category.Trim();
+        workout.Letter = string.IsNullOrWhiteSpace(input.Letter) ? "A" : input.Letter.Trim();
+        workout.Notes = input.Notes?.Trim();
+        workout.UpdatedAt = DateTime.UtcNow;
+        _db.WorkoutExercises.RemoveRange(workout.Exercises);
+        workout.Exercises = BuildExercises(input.Exercises);
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true, workout = ToResponse(workout) });
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        if (!CanManage()) return Forbid();
+        var workout = await _db.Workouts.FindAsync(id);
+        if (workout is null) return NotFound(new { success = false, message = "Treino não encontrado." });
+        _db.Workouts.Remove(workout);
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true, message = "Treino removido." });
+    }
+
+    private static string? Validate(WorkoutInput? input)
+    {
+        if (input is null) return "Informe os dados do treino.";
+        if (input.MemberId <= 0) return "Informe um aluno válido.";
+        if (string.IsNullOrWhiteSpace(input.Name) || input.Name.Length > 150) return "Nome do treino inválido.";
+        if (input.Category?.Length > 80 || input.Letter?.Length > 10 || input.Notes?.Length > 1000)
+            return "Um dos campos do treino excede o tamanho permitido.";
+        if (input.Exercises is null || input.Exercises.Count is < 1 or > 40)
+            return "Informe entre 1 e 40 exercícios.";
+        foreach (var e in input.Exercises)
+            if (e is null || string.IsNullOrWhiteSpace(e.Name) || e.Name.Length > 150 ||
+                string.IsNullOrWhiteSpace(e.Reps) || e.Reps.Length > 50 ||
+                e.Sets is < 1 or > 30 || e.RestSeconds is < 0 or > 3600 ||
+                e.LoadKg is < 0 or > 999999 || e.Notes?.Length > 1000)
+                return "Confira nome, séries, repetições, carga e descanso dos exercícios.";
+        return null;
+    }
+
+    private static List<WorkoutExercise> BuildExercises(List<ExerciseInput> exercises) =>
+        exercises.Select((e, i) => new WorkoutExercise
+        {
+            Name = e.Name.Trim(), Sets = e.Sets, Reps = e.Reps.Trim(), LoadKg = e.LoadKg,
+            RestSeconds = e.RestSeconds, Notes = e.Notes?.Trim(), SortOrder = i
+        }).ToList();
+
+    private static Workout Build(WorkoutInput input) => new()
+    {
+        MemberId = input.MemberId,
+        Name = input.Name.Trim(),
+        Category = string.IsNullOrWhiteSpace(input.Category) ? "Musculação" : input.Category.Trim(),
+        Letter = string.IsNullOrWhiteSpace(input.Letter) ? "A" : input.Letter.Trim(),
+        Notes = input.Notes?.Trim(),
+        Exercises = BuildExercises(input.Exercises)
+    };
 }

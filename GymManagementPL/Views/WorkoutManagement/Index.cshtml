@@ -1,0 +1,58 @@
+@model IEnumerable<GymManagementDAL.Entities.Workout>
+@{
+    ViewData["Title"] = "Treinos de Musculação";
+}
+<section class="py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div><span class="text-primary fw-bold small">GYMFLOW · MUSCULAÇÃO</span><h1 class="h2 fw-bold mt-2">Treinos dos alunos</h1><p class="text-muted">Monte fichas personalizadas que serão consultadas pelo aluno no aplicativo.</p></div>
+        <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="collapse" data-bs-target="#workoutForm"><i class="bi bi-plus-lg me-2"></i>Novo treino</button>
+    </div>
+    @if (TempData["WorkoutError"] is string error) { <div class="alert alert-danger" role="alert">@error</div> }
+    @if (TempData["WorkoutSuccess"] is string success) { <div class="alert alert-success" role="status">@success</div> }
+    <div class="collapse mb-4" id="workoutForm">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h2 class="h5 fw-bold mb-3">Cadastrar ficha de treino</h2>
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label" for="memberId">Aluno</label><select class="form-select" name="memberId" id="memberId" required><option value="">Selecione um aluno</option>@foreach (var member in (IEnumerable<GymManagementDAL.Entities.Member>)ViewBag.Members) { <option value="@member.Id">@member.Name</option> }</select></div>
+                    <div class="col-md-6"><label class="form-label" for="workoutName">Nome do treino</label><input class="form-control" name="name" id="workoutName" placeholder="Ex.: Peito e tríceps" maxlength="150" required /></div>
+                    <div class="col-md-4"><label class="form-label" for="letter">Ficha</label><input class="form-control" name="letter" id="letter" value="A" maxlength="10" /></div>
+                    <div class="col-md-8"><label class="form-label" for="category">Objetivo / categoria</label><input class="form-control" name="category" id="category" value="Musculação" maxlength="80" /></div>
+                    <div class="col-12"><label class="form-label" for="notes">Observações</label><textarea class="form-control" name="notes" id="notes" maxlength="1000" rows="2"></textarea></div>
+                </div>
+                <h3 class="h6 fw-bold mt-4">Exercícios</h3>
+                <div id="exerciseRows"><div class="row g-2 align-items-end mb-2 exercise-row">
+                    <div class="col-md-4"><label class="form-label">Exercício</label><input class="form-control" name="exerciseName" placeholder="Supino reto" maxlength="150" required /></div>
+                    <div class="col-3 col-md-2"><label class="form-label">Séries</label><input class="form-control" type="number" name="sets" value="3" min="1" max="30" required /></div>
+                    <div class="col-3 col-md-2"><label class="form-label">Repetições</label><input class="form-control" name="reps" value="12" maxlength="50" required /></div>
+                    <div class="col-3 col-md-2"><label class="form-label">Carga (kg)</label><input class="form-control" type="number" name="loadKg" min="0" max="999999" step="0.01" /></div>
+                    <div class="col-3 col-md-2"><label class="form-label">Descanso (s)</label><input class="form-control" type="number" name="restSeconds" value="60" min="0" max="3600" required /></div>
+                </div></div>
+                <div class="d-flex flex-wrap gap-2 mt-3"><button type="button" class="btn btn-outline-primary rounded-pill" id="addExercise">Adicionar exercício</button><button type="submit" class="btn btn-primary rounded-pill px-4">Salvar treino</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="row g-3">
+        @foreach (var workout in Model)
+        {
+            <div class="col-md-6 col-xl-4"><div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start"><span class="badge bg-primary rounded-pill">Ficha @workout.Letter</span><form asp-action="Delete" method="post" onsubmit="return confirm('Excluir este treino?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@workout.Id" /><button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Excluir treino"><i class="bi bi-trash"></i></button></form></div>
+                <h2 class="h5 fw-bold mt-3">@workout.Name</h2><p class="text-muted mb-2">Aluno: @workout.Member.Name</p><p class="small text-muted">@workout.Category · @workout.Exercises.Count exercício(s)</p>
+                <ul class="list-group list-group-flush">@foreach (var exercise in workout.Exercises.OrderBy(x => x.SortOrder)) { <li class="list-group-item px-0"><strong>@exercise.Name</strong><span class="d-block small text-muted">@exercise.Sets séries · @exercise.Reps repetições · @(exercise.LoadKg?.ToString("0.##") ?? "—") kg · @exercise.RestSeconds s</span></li> }</ul>
+            </div></div>
+        }
+        @if (!Model.Any()) { <div class="col-12"><div class="card border-0 rounded-4 p-5 text-center text-muted">Nenhum treino cadastrado. Use “Novo treino” para começar.</div></div> }
+    </div>
+</section>
+@section Scripts {
+<script>
+document.getElementById('addExercise').addEventListener('click', function () {
+ const root = document.getElementById('exerciseRows');
+ if (root.children.length >= 40) return;
+ const row = root.firstElementChild.cloneNode(true);
+ row.querySelectorAll('input').forEach(input => { if(input.name === 'exerciseName' || input.name === 'loadKg') input.value = ''; });
+ root.appendChild(row);
+});
+</script>
+}
