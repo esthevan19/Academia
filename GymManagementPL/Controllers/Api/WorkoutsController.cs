@@ -49,6 +49,7 @@ public class WorkoutsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] int? memberId)
     {
+        if (!CanManage() && !User.IsInRole("Aluno")) return Forbid();
         if (User.IsInRole("Aluno") && LinkedMemberId() is null)
             return Conflict(new { success = false, message = "Conta sem vínculo com cadastro de aluno." });
         var query = AccessibleWorkouts();
@@ -60,6 +61,9 @@ public class WorkoutsController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
+        if (!CanManage() && !User.IsInRole("Aluno")) return Forbid();
+        if (User.IsInRole("Aluno") && LinkedMemberId() is null)
+            return Conflict(new { success = false, message = "Conta sem vínculo com cadastro de aluno." });
         var workout = await AccessibleWorkouts().FirstOrDefaultAsync(x => x.Id == id);
         return workout is null ? NotFound(new { success = false, message = "Treino não encontrado." })
             : Ok(new { success = true, workout = ToResponse(workout) });
