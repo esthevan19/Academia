@@ -15,7 +15,7 @@
             <form asp-action="Create" method="post">
                 @Html.AntiForgeryToken()
                 <div class="row g-3">
-                    <div class="col-md-6"><label class="form-label" for="memberId">Aluno</label><select class="form-select" name="memberId" id="memberId" required><option value="">Selecione um aluno</option>@foreach (var member in (IEnumerable<dynamic>)ViewBag.Members) { <option value="@member.Id">@member.Name</option> }</select></div>
+                    <div class="col-md-6"><label class="form-label" for="memberId">Aluno</label><select class="form-select" name="memberId" id="memberId" required><option value="">Selecione um aluno</option>@foreach (var member in (IEnumerable<GymManagementDAL.Entities.Member>)ViewBag.Members) { <option value="@member.Id">@member.Name</option> }</select></div>
                     <div class="col-md-6"><label class="form-label" for="workoutName">Nome do treino</label><input class="form-control" name="name" id="workoutName" placeholder="Ex.: Peito e tríceps" maxlength="150" required /></div>
                     <div class="col-md-4"><label class="form-label" for="letter">Ficha</label><input class="form-control" name="letter" id="letter" value="A" maxlength="10" /></div>
                     <div class="col-md-8"><label class="form-label" for="category">Objetivo / categoria</label><input class="form-control" name="category" id="category" value="Musculação" maxlength="80" /></div>
