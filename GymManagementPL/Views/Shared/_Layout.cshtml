@@ -64,6 +64,11 @@
                             </li>
                         }
 
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Instrutor"))
+                        {
+                            <li class="nav-item"><a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "WorkoutManagement" ? "active" : "")" asp-controller="WorkoutManagement" asp-action="Index">Treinos</a></li>
+                        }
+
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Session" ? "active" : "")"
                                asp-controller="Session" asp-action="Index">Sessões</a>
