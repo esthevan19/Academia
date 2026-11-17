@@ -116,8 +116,9 @@ public class WorkoutsController : ControllerBase
         return Ok(new { success = true, message = "Treino removido." });
     }
 
-    private static string? Validate(WorkoutInput input)
+    private static string? Validate(WorkoutInput? input)
     {
+        if (input is null) return "Informe os dados do treino.";
         if (input.MemberId <= 0) return "Informe um aluno válido.";
         if (string.IsNullOrWhiteSpace(input.Name) || input.Name.Length > 150) return "Nome do treino inválido.";
         if (input.Category?.Length > 80 || input.Letter?.Length > 10 || input.Notes?.Length > 1000)
@@ -125,7 +126,7 @@ public class WorkoutsController : ControllerBase
         if (input.Exercises is null || input.Exercises.Count is < 1 or > 40)
             return "Informe entre 1 e 40 exercícios.";
         foreach (var e in input.Exercises)
-            if (string.IsNullOrWhiteSpace(e.Name) || e.Name.Length > 150 ||
+            if (e is null || string.IsNullOrWhiteSpace(e.Name) || e.Name.Length > 150 ||
                 string.IsNullOrWhiteSpace(e.Reps) || e.Reps.Length > 50 ||
                 e.Sets is < 1 or > 30 || e.RestSeconds is < 0 or > 3600 ||
                 e.LoadKg is < 0 or > 999999 || e.Notes?.Length > 1000)
