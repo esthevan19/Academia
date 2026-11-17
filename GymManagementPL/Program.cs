@@ -29,7 +29,7 @@ namespace GymManagementPL
             var brazilCulture = CultureInfo.GetCultureInfo("pt-BR");
             CultureInfo.DefaultThreadCurrentCulture = brazilCulture;
             CultureInfo.DefaultThreadCurrentUICulture = brazilCulture;
-            builder.Services.Configure<Microsoft.AspNetCore.Localization.RequestLocalizationOptions>(options =>
+            builder.Services.Configure<Microsoft.AspNetCore.Builder.RequestLocalizationOptions>(options =>
             {
                 options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(brazilCulture);
                 options.SupportedCultures = new[] { brazilCulture };
