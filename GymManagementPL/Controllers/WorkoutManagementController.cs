@@ -25,7 +25,7 @@ public class WorkoutManagementController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(int memberId, string name, string? category,
         string? letter, string? notes, List<string> exerciseName, List<int> sets,
-        List<string> reps, List<decimal?> loadKg, List<int> restSeconds)
+        List<string> reps, List<string> loadKg, List<int> restSeconds)
     {
         if (memberId <= 0 || string.IsNullOrWhiteSpace(name) || name.Length > 150 ||
             category?.Length > 80 || letter?.Length > 10 || notes?.Length > 1000 ||
@@ -50,7 +50,7 @@ public class WorkoutManagementController : Controller
             if (string.IsNullOrWhiteSpace(exerciseName[i]) || exerciseName[i].Length > 150 ||
                 string.IsNullOrWhiteSpace(reps[i]) || reps[i].Length > 50 ||
                 sets[i] is < 1 or > 30 || restSeconds[i] is < 0 or > 3600 ||
-                loadKg[i] is < 0 or > 999999)
+                (decimal.TryParse(loadKg[i], System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CurrentCulture, out var parsedLoad) && (parsedLoad < 0 || parsedLoad > 999999)))
             {
                 TempData["WorkoutError"] = "Confira as séries, repetições, cargas e descansos.";
                 return RedirectToAction(nameof(Index));
@@ -58,7 +58,7 @@ public class WorkoutManagementController : Controller
             workout.Exercises.Add(new WorkoutExercise
             {
                 Name = exerciseName[i].Trim(), Sets = sets[i], Reps = reps[i].Trim(),
-                LoadKg = loadKg[i], RestSeconds = restSeconds[i], SortOrder = i
+                LoadKg = decimal.TryParse(loadKg[i], System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CurrentCulture, out var kg) ? kg : null, RestSeconds = restSeconds[i], SortOrder = i
             });
         }
         _db.Workouts.Add(workout);
