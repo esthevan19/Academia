@@ -9,7 +9,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login Admin - Fitness</title>
+    <title>Entrar | GymFlow</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/AuthStyle.css" />
@@ -26,11 +26,11 @@
                 <div class="logo-icon">
                     <i class="bi bi-lightning-charge-fill"></i>
                 </div>
-                <h1 class="brand-name">Route Fitness</h1>
-                <p class="brand-subtitle">Sistema de Gerenciamento de Academia</p>
+                <h1 class="brand-name">GymFlow</h1>
+                <p class="brand-subtitle">Sistema de Gestão de Academias</p>
             </div>
 
-            <h2 class="login-title">Login Administrativo</h2>
+            <h2 class="login-title">Acesse o GymFlow</h2>
             <p class="login-subtitle">Bem-vindo de volta! Faça login na sua conta</p>
 
             <form asp-action="Login" asp-controller="Account" method="post" id="loginForm">
@@ -40,7 +40,7 @@
                     <input asp-for="Email" class="form-control" id="floatingEmail" placeholder="admin@exemplo.com"
                            autocomplete="username" />
                     <label for="floatingEmail">
-                        <i class="bi bi-envelope me-2"></i>Endereço de Email
+                        <i class="bi bi-envelope me-2"></i>E-mail
                     </label>
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
@@ -79,31 +79,18 @@
                         💪
                     </div>
                     <h2 class="gym-title">
-                        Seu corpo pode <span style="color: #ffd700;">suportar</span><br>
-                        quase tudo
+                        Sua academia <span style="color: #ffd700;">organizada</span><br>
+                        em um só lugar
                     </h2>
                     <p class="gym-description">
-                        É a sua mente que precisa ser convencida. Supere seus limites,<br>
-                        mantenha o compromisso e veja seu corpo se transformar em uma<br>
-                        potência de força e resiliência.
+                        Gerencie alunos, instrutores, planos e agendamentos<br>
+                        com segurança e praticidade, no site e no aplicativo.
                     </p>
 
-                    <div class="stats-container">
-                        <div class="stat-item">
-                            <span class="stat-number">500+</span>
-                            <span class="stat-label">Membros</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">50+</span>
-                            <span class="stat-label">Treinadores</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">24/7</span>
-                            <span class="stat-label">Suporte</span>
-                        </div>
-                    </div>
+                    <div class="stats-container"><p class="text-white">Gestão de academia com informações centralizadas.</p></div>
                 </div>
             </div>
+        </div>
         </div>
 
 
