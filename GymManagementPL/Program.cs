@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymManagementPL
@@ -24,6 +25,16 @@ namespace GymManagementPL
             #region Add services to the container.
             
             builder.Services.AddControllersWithViews();
+            // Exibição e validação numérica padronizadas para o Brasil.
+            var brazilCulture = CultureInfo.GetCultureInfo("pt-BR");
+            CultureInfo.DefaultThreadCurrentCulture = brazilCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = brazilCulture;
+            builder.Services.Configure<Microsoft.AspNetCore.Localization.RequestLocalizationOptions>(options =>
+            {
+                options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(brazilCulture);
+                options.SupportedCultures = new[] { brazilCulture };
+                options.SupportedUICultures = new[] { brazilCulture };
+            });
             builder.Services.AddDbContext<GymDbContext>(optoins =>
             {
                 optoins.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -115,6 +126,7 @@ namespace GymManagementPL
                 app.UseHsts();
             }
 
+            app.UseRequestLocalization();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
