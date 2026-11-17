@@ -16,7 +16,7 @@ public class WorkoutManagementController : Controller
     public async Task<IActionResult> Index()
     {
         ViewBag.Members = await _db.Members.AsNoTracking().OrderBy(x => x.Name)
-            .Select(x => new { x.Id, x.Name }).ToListAsync();
+            .ToListAsync();
         return View(await _db.Workouts.AsNoTracking().Include(x => x.Member)
             .Include(x => x.Exercises).OrderByDescending(x => x.CreatedAt).ToListAsync());
     }
