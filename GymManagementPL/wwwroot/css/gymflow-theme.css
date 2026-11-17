@@ -1,0 +1,28 @@
+/* GymFlow web theme — consistent with mobile palette. Visual-only layer. */
+:root{--gf-primary:#070093;--gf-ink:#202033;--gf-muted:#55556b;--gf-border:#e3e3ef;--gf-bg:#f7f7fc}
+body{background:var(--gf-bg)!important;color:var(--gf-ink);font-family:Rubik,system-ui,sans-serif}
+.navbar{background:#fff!important;border-bottom:1px solid var(--gf-border);box-shadow:0 8px 25px rgba(7,0,147,.05)!important}
+.navbar .container{max-width:1440px}
+.navbar-brand{color:var(--gf-primary)!important;font-weight:900;letter-spacing:-.5px}
+.navbar .nav-link{font-size:.88rem!important;color:var(--gf-muted)!important;border-radius:12px;margin:2px;white-space:nowrap}
+.navbar .nav-link:hover,.navbar .nav-link.active{color:var(--gf-primary)!important;background:#eae9ff}
+.navbar .navbar-nav{flex-wrap:wrap;gap:2px}
+main[role=main]{padding-top:28px}
+.card,.modal-content{border:1px solid var(--gf-border)!important;border-radius:20px!important;box-shadow:0 12px 30px rgba(20,18,90,.045)!important;overflow:hidden}
+.card-header{background:#f7f7fc!important;border-bottom:1px solid var(--gf-border)!important}
+h1,h2,h3,h4,h5{color:var(--gf-ink);font-weight:800}
+.text-primary,.text-primary-color{color:var(--gf-primary)!important}
+.btn{border-radius:12px!important;font-weight:700;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary,.btn-fill{background:var(--gf-primary)!important;border-color:var(--gf-primary)!important;color:#fff!important}
+.btn-outline-primary,.btn-outline{border:1px solid var(--gf-primary)!important;color:var(--gf-primary)!important;background:white!important}
+.btn-outline-primary:hover,.btn-outline:hover{background:#eae9ff!important}
+.form-control,.form-select,.input-group-text{border:1px solid var(--gf-border)!important;border-radius:12px!important;background:#fff!important;color:var(--gf-ink)!important;min-height:43px}
+.form-control::placeholder,textarea::placeholder{color:var(--gf-muted)!important;opacity:1}
+.form-control:focus,.form-select:focus{border-color:var(--gf-primary)!important;box-shadow:0 0 0 3px rgba(7,0,147,.12)!important}
+.form-label,label{color:var(--gf-ink);font-weight:600}
+.table{background:#fff;color:var(--gf-ink);vertical-align:middle}
+.table thead th{background:#f0efff!important;color:var(--gf-primary)!important;border-bottom:1px solid var(--gf-border)}
+.table td,.table th{padding:13px}
+.badge{border-radius:10px}
+@media(max-width:991px){.navbar .navbar-nav{align-items:stretch!important}.navbar .nav-link{padding:10px 12px!important}main[role=main]{padding-top:16px}.table-responsive{border-radius:12px}}
