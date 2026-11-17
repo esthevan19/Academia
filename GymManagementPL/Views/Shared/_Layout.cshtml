@@ -18,7 +18,8 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <!-- ^ Our main css file -->
     <link rel="stylesheet" href="~/css/style.css" />
-    <title>Power Fitness | @ViewData["Title"] </title>
+    <link rel="stylesheet" href="~/css/gymflow-theme.css" asp-append-version="true" />
+    <title>GymFlow | @ViewData["Title"] </title>
 </head>
 
 <body>
@@ -28,9 +29,7 @@
             <div class="container">
 
                 <!-- Logo -->
-                <a class="navbar-brand" href="#">
-                    <img src="~/images/logo.jpg" alt="Logo" style="height: 50px;">
-                </a>
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index"><i class="bi bi-activity me-2"></i>GymFlow</a>
 
                 <!-- Toggler -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -53,7 +52,7 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Member" ? "active" : "")"
-                                   asp-controller="Member" asp-action="Index">Membros</a>
+                                   asp-controller="Member" asp-action="Index">Alunos</a>
                             </li>
                         }
 
@@ -77,12 +76,12 @@
 
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Membership" ? "active" : "")"
-                               asp-controller="Membership" asp-action="Index">Associações</a>
+                               asp-controller="Membership" asp-action="Index">Matrículas</a>
                         </li>
 
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Booking" ? "active" : "")"
-                               asp-controller="Booking" asp-action="Index">Agenda de Sessões</a>
+                               asp-controller="Booking" asp-action="Index">Agenda</a>
                         </li>
 
                         @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
