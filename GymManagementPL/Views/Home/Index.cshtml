@@ -1,420 +1,57 @@
-﻿@using GymManagementBLL.ViewModels.AnalyticsViewModels
+@using GymManagementBLL.ViewModels.AnalyticsViewModels
 @model AnalyticsViewModel
-
 @{
-    ViewData["Title"] = "Página Inicial";
+    ViewData["Title"] = "Painel da Academia";
 }
-
-<div class="container">
-    <main role="main" class="pb-3">
-        <div class="row">
-            <div class="col-md-6 col-lg-7 col-12">
-                <div class="info mt-4">
-                    <header class="text-black-alternative">
-                        <h2 class="fw-bolder display-2 mb-4">
-                            Seu corpo pode
-                            <span class="text-primary-color">suportar quase</span> tudo
-                        </h2>
-
-                        <p class="mb-6">
-                            É a sua mente que precisa ser convencida. Supere seus
-                            limites, <br />
-                            mantenha o compromisso e veja seu corpo se transformar em uma
-                            <br />
-                            potência de força e resiliência. Comece sua jornada hoje e
-                            descubra o que você é capaz de fazer!
-                        </p>
-                    </header>
-
-                    <div class="stats-bar">
-                        <div class="row g-0">
-                            <div class="col-4">
-                                <div class="stat">
-                                    <span class="fw-bolder fs-5 d-block mb-1">@Model.TotalMembers</span>
-                                    <h3 class="fs-5 fw-normal">Total de Membros</h3>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="stat">
-                                    <span class="fw-bolder fs-5 d-block mb-1">@Model.ActiveMembers</span>
-                                    <h3 class="fs-5 fw-normal">Membros Ativos</h3>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="stat">
-                                    <span class="fw-bolder fs-5 d-block mb-1">@Model.TotalTrainers</span>
-                                    <h3 class="fs-5 fw-normal">Treinadores</h3>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row g-0">
-                            <div class="col-4">
-                                <div class="stat">
-                                    <span class="fw-bolder fs-5 d-block mb-1">@Model.UpcomingSessions</span>
-                                    <h3 class="fs-5 fw-normal">Próximas Sessões</h3>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="stat">
-                                    <span class="fw-bolder fs-5 d-block mb-1">@Model.OngoingSessions</span>
-                                    <h3 class="fs-5 fw-normal">Sessões em Andamento</h3>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="stat">
-                                    <span class="fw-bolder fs-5 d-block mb-1">@Model.CompletedSessions</span>
-                                    <h3 class="fs-5 fw-normal">Sessões Concluídas</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="buttons my-4">
-                        <a asp-controller="Plan" asp-action="Index"
-                               class="get-started bg-primary-color text-white btn rounded-5 fw-medium px-3 py-2 me-5 border-2 border-primary-color text-decoration-none">
-                            Comece Agora
-                        </a>
-
-                        <a href="#sobre-nos"
-                               class="explore-more border-primary-color btn rounded-5 fw-medium px-3 py-2 border-2 text-primary-color fw-medium text-decoration-none">
-                            Explorar Mais
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-1 offset-md-2 col-12 order-first order-md-last">
-                <div class="character d-md-block d-flex justify-content-center">
-                    <img src="~/images/Theo Vance.jpg" alt="Theo Vance" />
-                </div>
-            </div>
+<section class="gf-dashboard py-3">
+    <div class="gf-hero mb-4">
+        <div>
+            <div class="gf-eyebrow"><i class="bi bi-activity me-2"></i>GYMFLOW · PAINEL DE CONTROLE</div>
+            <h1 class="fw-bold mt-2 mb-2">Bem-vindo à sua academia</h1>
+            <p class="mb-0">Acompanhe os resultados e gerencie sua operação em um só lugar.</p>
         </div>
-
-        <div class="bar bg-primary-color d-flex py-4 text-white fw-bolder align-items-center">
-            <p class="py-0 my-0 overflow-hidden text-nowrap">
-                treinadores externos e online
-                <img src="~/images/star.svg" alt="ícone de estrela" /> treinamento personalizado
-                <img src="~/images/star.svg" alt="ícone de estrela" /> aulas em tempo real
-                <img src="~/images/star.svg" alt="ícone de estrela" /> treinadores pessoais
-                <img src="~/images/star.svg" alt="ícone de estrela" /> treinamento personalizado
-            </p>
-        </div>
-
-        <!-- ^ all other section -->
-        <main>
-            <!-- ^ about section -->
-            <section class="about my-5 text-black-alternative" id="sobre-nos">
-                <div class="container">
-                    <div class="row g-5 justify-content-center">
-                        <div class="col-12 col-lg-6 w-50 w-md-100">
-                            <div class="characters position-relative">
-                                <div class="image">
-                                    <img class="" src="~/images/about p1.jpg" alt="pessoa" />
-                                </div>
-
-                                <div class="image position-absolute d-none d-lg-block">
-                                    <img src="~/images/about p2.jpg" alt="pessoa" />
-                                </div>
-
-                                <div class="image position-absolute d-none d-lg-block">
-                                    <img src="~/images/about p3.jpg" alt="pessoa" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-lg-6">
-                            <div class="title d-flex justify-content-start align-items-start gap-2">
-                                <img class="" src="~/images/dumbbell.jpg" alt="ícone de halter" />
-                                <h2 class="text-primary-color fs-5">Sobre Nós</h2>
-                            </div>
-
-                            <header>
-                                <p class="fw-bolder display-6 mb-4">
-                                    CAPACITANDO VOCÊ A ALCANÇAR
-                                    <span class="text-primary-color">SEUS OBJETIVOS DE</span> FITNESS
-                                </p>
-                                <p class="text">
-                                    Acreditamos que fitness é mais do que apenas um treino — é
-                                    um estilo de vida. Com instalações de ponta, treinadores
-                                    certificados e uma comunidade que apoia, estamos aqui para
-                                    inspirar e guiar você em cada etapa do caminho.
-                                </p>
-                            </header>
-
-                            <div class="features">
-                                <div class="row row-cols-1 row-cols-sm-2 gx-3 gy-5">
-                                    <div class="feature">
-                                        <div class="inner">
-                                            <div class="title d-flex gap-2">
-                                                <img src="~/images/feature icon.jpg" alt="ícone" />
-                                                <h3 class="fw-bold">Treinador Pessoal</h3>
-                                            </div>
-                                            <div class="info">
-                                                <p>Alcance seus objetivos de fitness com a</p>
-                                                <p>orientação dos nossos treinadores certificados.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="feature">
-                                        <div class="inner">
-                                            <div class="title d-flex gap-2">
-                                                <img src="~/images/feature icon.jpg" alt="ícone" />
-                                                <h3 class="fw-bold">Treinador Pessoal</h3>
-                                            </div>
-                                            <div class="info">
-                                                <p>Alcance seus objetivos de fitness com a</p>
-                                                <p>orientação dos nossos treinadores certificados.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="feature">
-                                        <div class="inner">
-                                            <div class="title d-flex gap-2">
-                                                <img src="~/images/feature icon.jpg" alt="ícone" />
-                                                <h3 class="fw-bold">Treinador Pessoal</h3>
-                                            </div>
-                                            <div class="info">
-                                                <p>Alcance seus objetivos de fitness com a</p>
-                                                <p>orientação dos nossos treinadores certificados.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="feature">
-                                        <div class="inner">
-                                            <div class="title d-flex gap-2">
-                                                <img src="~/images/feature icon.jpg" alt="ícone" />
-                                                <h3 class="fw-bold">Treinador Pessoal</h3>
-                                            </div>
-                                            <div class="info">
-                                                <p>Alcance seus objetivos de fitness com a</p>
-                                                <p>orientação dos nossos treinadores certificados.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <a asp-controller="Plan" asp-action="Index"
-                                       class="btn bg-primary-color rounded-pill text-white fw-medium px-4 py-2 mt-3 text-decoration-none">
-                                    Comece Agora
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ^ workout section -->
-            <section class="workout">
-                <div class="container">
-                    <div class="title">
-                        <h2>TREINOS</h2>
-                        <p class="text-white fw-bolder fs-2 mb-4">
-                            Transforme Seu Corpo com Nossos Treinos Dinâmicos
-                        </p>
-                    </div>
-
-                    <div class="row row-cols-md-3 row-cols-12 gy-4 gx-2 gx-md-4">
-                        <div>
-                            <div class="card">
-                                <img src="~/images/workout 1.jpg" class="card-img-top" alt="..." />
-
-                                <footer class="card-footer bg-white">
-                                    <h5 class="card-title text-black-alternative text-uppercase fw-bolder">
-                                        treino em grupo
-                                    </h5>
-                                    <a href="#" class="">Explorar</a>
-                                </footer>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="card">
-                                <img src="~/images/workout 2.jpg" class="card-img-top" alt="..." />
-
-                                <footer class="card-footer bg-white">
-                                    <h5 class="card-title text-black-alternative text-uppercase fw-bolder">
-                                        treino em grupo
-                                    </h5>
-                                    <a href="#" class="">Explorar</a>
-                                </footer>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="card">
-                                <img src="~/images/workout 3.jpg" class="card-img-top" alt="..." />
-
-                                <footer class="card-footer bg-white">
-                                    <h5 class="card-title text-black-alternative text-uppercase fw-bolder">
-                                        treino em grupo
-                                    </h5>
-                                    <a href="#" class="">Explorar</a>
-                                </footer>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="indicators">
-                        <div class="indicator"></div>
-                        <div class="indicator active"></div>
-                        <div class="indicator"></div>
-                        <div class="indicator"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ^ why-us section -->
-            <section class="why-us my-5">
-                <div class="container">
-                    <div class="row row-cols-1 row-cols-lg-2">
-                        <div class="info">
-                            <div>
-                                <div class="title d-flex justify-content-start align-items-start gap-2">
-                                    <img class="" src="~/images/dumbbell.jpg" alt="ícone de halter" />
-                                    <h2 class="text-primary-color fs-5">Por Que Nós</h2>
-                                </div>
-
-                                <header>
-                                    <p class="fw-bolder display-5 mb-4">
-                                        Eleve seu condicionamento físico<br />
-                                        com <span class="text-primary-color">a melhor</span> forma
-                                        possível
-                                    </p>
-                                    <p class="text">
-                                        Acreditamos que fitness é mais do que apenas um treino — é
-                                        um estilo de vida. Com instalações de ponta, treinadores
-                                        certificados e uma comunidade que apoia, estamos aqui para
-                                        inspirar e guiar você em cada etapa do caminho.
-                                    </p>
-                                </header>
-
-                                <ul class="featutes list-unstyled mt-6">
-                                    <li class="feature d-flex gap-4 align-items-center mb-4">
-                                        <div class="count">01</div>
-
-                                        <div class="text">
-                                            <h3 class="text-capitalize fw-bold">
-                                                planos de fitness personalizados
-                                            </h3>
-                                            <p class="fs-18">
-                                                Personalizamos cada treino para atender aos seus
-                                                objetivos e nível de condicionamento físico,
-                                                garantindo o máximo de progresso.
-                                            </p>
-                                        </div>
-                                    </li>
-
-                                    <li class="feature d-flex gap-4 align-items-center mb-4">
-                                        <div class="count">01</div>
-
-                                        <div class="text">
-                                            <h3 class="text-capitalize fw-bold">
-                                                planos de fitness personalizados
-                                            </h3>
-                                            <p class="fs-18">
-                                                Personalizamos cada treino para atender aos seus
-                                                objetivos e nível de condicionamento físico,
-                                                garantindo o máximo de progresso.
-                                            </p>
-                                        </div>
-                                    </li>
-
-                                    <li class="feature d-flex gap-4 align-items-center">
-                                        <div class="count">01</div>
-
-                                        <div class="text">
-                                            <h3 class="text-capitalize fw-bold">
-                                                planos de fitness personalizados
-                                            </h3>
-                                            <p class="fs-18">
-                                                Personalizamos cada treino para atender aos seus
-                                                objetivos e nível de condicionamento físico,
-                                                garantindo o máximo de progresso.
-                                            </p>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="characters d-none d-lg-block">
-                            <div class="images">
-                                <img class="" src="~/images/why us images.svg" alt="personagens" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-        <footer class="mt-5">
-            <div class="bar bg-primary-color d-flex py-4 text-white fw-bolder align-items-center">
-                <p class="py-0 my-0 overflow-hidden text-nowrap">
-                    treinadores externos e online
-                    <img src="~/images/star.svg" alt="ícone de estrela" /> treinamento personalizado
-                    <img src="~/images/star.svg" alt="ícone de estrela" /> aulas em tempo real
-                    <img src="~/images/star.svg" alt="ícone de estrela" /> treinadores pessoais
-                    <img src="~/images/star.svg" alt="ícone de estrela" /> treinamento personalizado
-                </p>
-            </div>
-
-            <div class="footer-content my-5">
-                <div class="container">
-                    <div class="row row-cols-2 row-cols-md-4 g-5">
-                        <div class="logo">
-                            <div class="inner">
-                                <div class="image">
-                                    <img src="~/images/logo.jpg" alt="nosso logo" />
-                                </div>
-                                <p class="fs-18 mt-2">
-                                    Vá mais além, supere seus limites. Sua <br />
-                                    jornada fitness começa hoje!
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="contact">
-                            <h4 class="fw-bolder text-uppercase mb-4">fale conosco</h4>
-
-                            <ul>
-                                <li class="d-flex align-items-center gap-2">
-                                    <div class="icon">
-                                        <img src="~/images/phone icon.jpg" alt="ícone de telefone" />
-                                    </div>
-                                    <p>+91 123 456 789</p>
-                                </li>
-
-                                <li class="d-flex align-items-center gap-2">
-                                    <div class="icon">
-                                        <img src="~/images/message icon.jpg" alt="ícone de mensagem" />
-                                    </div>
-                                    <p>info@gmail.com</p>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="time">
-                            <h4 class="fw-bolder text-uppercase mb-4">horário da academia</h4>
-
-                            <p>
-                                Seg - Sex: 08:00 - 22:00 <br />Sáb - Dom: 08:00 -
-                                21:00
-                            </p>
-                        </div>
-
-                        <div class="location">
-                            <h4 class="fw-bolder text-uppercase mb-4">nossa localização</h4>
-
-                            <p>
-                                2715 Ash Dr. San Jose, South <br />
-                                Dakota 83475
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </footer>
-
-    </main>
-</div>
+        <i class="bi bi-bar-chart-line gf-hero-icon" aria-hidden="true"></i>
+    </div>
+    <h2 class="h5 fw-bold mb-3">Visão geral</h2>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-people"></i></div><span>Total de alunos</span><strong>@Model.TotalMembers</strong></div></div>
+        <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-person-check"></i></div><span>Alunos ativos</span><strong>@Model.ActiveMembers</strong></div></div>
+        <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-person-badge"></i></div><span>Instrutores</span><strong>@Model.TotalTrainers</strong></div></div>
+        <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-calendar-plus"></i></div><span>Próximas sessões</span><strong>@Model.UpcomingSessions</strong></div></div>
+        <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-clock-history"></i></div><span>Sessões em andamento</span><strong>@Model.OngoingSessions</strong></div></div>
+        <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-check-circle"></i></div><span>Sessões concluídas</span><strong>@Model.CompletedSessions</strong></div></div>
+    </div>
+    <h2 class="h5 fw-bold mb-3">Acesso rápido</h2>
+    <div class="row g-3">
+        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Recepcionista"))
+        {
+            <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Member" asp-action="Index"><i class="bi bi-people"></i><span><strong>Alunos</strong><small>Cadastros e informações</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
+        }
+        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Instrutor"))
+        {
+            <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Trainer" asp-action="Index"><i class="bi bi-person-badge"></i><span><strong>Instrutores</strong><small>Equipe e profissionais</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
+        }
+        <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Plan" asp-action="Index"><i class="bi bi-card-checklist"></i><span><strong>Planos</strong><small>Planos da academia</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
+        <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Session" asp-action="Index"><i class="bi bi-calendar-event"></i><span><strong>Sessões</strong><small>Atividades e horários</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
+        <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Membership" asp-action="Index"><i class="bi bi-person-vcard"></i><span><strong>Matrículas</strong><small>Vínculos e inscrições</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
+        <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Booking" asp-action="Index"><i class="bi bi-calendar-week"></i><span><strong>Agenda</strong><small>Reservas e presença</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
+        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
+        {
+            <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="AdminManagement" asp-action="Index"><i class="bi bi-shield-lock"></i><span><strong>Usuários</strong><small>Contas e permissões</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
+        }
+    </div>
+</section>
+<style>
+.gf-hero{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:32px;border-radius:24px;background:linear-gradient(115deg,#070093,#2923bc);color:#fff;overflow:hidden}
+.gf-hero h1{color:#fff;font-size:clamp(1.5rem,3vw,2.4rem)}
+.gf-hero p{color:#e4e2ff}.gf-eyebrow{font-size:.73rem;letter-spacing:1.5px;font-weight:800;color:#c8c6ff}
+.gf-hero-icon{font-size:5rem;color:#9995ff;opacity:.55}
+.gf-stat{height:100%;min-height:145px;background:#fff;border:1px solid #e9e9f3;border-radius:19px;padding:20px;display:flex;flex-direction:column;gap:8px}
+.gf-stat-icon{display:grid;place-items:center;width:37px;height:37px;border-radius:11px;background:#eae9ff;color:#070093}
+.gf-stat span{font-size:.83rem;color:#55556b}.gf-stat strong{font-size:1.8rem;color:#202033;line-height:1.1}
+.gf-shortcut{display:flex;align-items:center;gap:13px;padding:19px;border:1px solid #e9e9f3;background:#fff;border-radius:17px;color:#202033;text-decoration:none;height:100%;transition:transform .15s,border-color .15s}
+.gf-shortcut:hover{transform:translateY(-2px);border-color:#070093;color:#070093}
+.gf-shortcut>i:first-child{font-size:1.4rem;color:#070093;background:#eae9ff;padding:10px;border-radius:12px}
+.gf-shortcut span{display:flex;flex-direction:column;gap:3px}.gf-shortcut small{color:#55556b;font-size:.77rem}
+@@media(max-width:575px){.gf-hero{padding:23px}.gf-hero-icon{display:none}.gf-stat{min-height:130px;padding:15px}}
+</style>
