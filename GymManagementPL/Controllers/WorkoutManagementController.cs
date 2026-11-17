@@ -50,7 +50,7 @@ public class WorkoutManagementController : Controller
             if (string.IsNullOrWhiteSpace(exerciseName[i]) || exerciseName[i].Length > 150 ||
                 string.IsNullOrWhiteSpace(reps[i]) || reps[i].Length > 50 ||
                 sets[i] is < 1 or > 30 || restSeconds[i] is < 0 or > 3600 ||
-                (decimal.TryParse(loadKg[i], System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CurrentCulture, out var parsedLoad) && (parsedLoad < 0 || parsedLoad > 999999)))
+                (!string.IsNullOrWhiteSpace(loadKg[i]) && (!decimal.TryParse(loadKg[i], System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CurrentCulture, out var parsedLoad) || parsedLoad < 0 || parsedLoad > 999999)))
             {
                 TempData["WorkoutError"] = "Confira as séries, repetições, cargas e descansos.";
                 return RedirectToAction(nameof(Index));
