@@ -90,9 +90,16 @@ namespace GymManagementPL
             var dbContext = scope.ServiceProvider.GetRequiredService<GymDbContext>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var pendingMigrations = dbContext.Database.GetPendingMigrations();
-            if (pendingMigrations?.Any() ?? false)
-                dbContext.Database.Migrate();
+            // Production schema changes require an explicit deployment opt-in.
+            // Back up the SQL Server database before setting Database__ApplyMigrations=true.
+            var applyMigrations = app.Environment.IsDevelopment() ||
+                app.Configuration.GetValue<bool>("Database:ApplyMigrations");
+            if (applyMigrations)
+            {
+                var pendingMigrations = dbContext.Database.GetPendingMigrations();
+                if (pendingMigrations.Any())
+                    dbContext.Database.Migrate();
+            }
             GymDataSeeding.SeedData(dbContext);
             IdentityDbContextSeeding.SeedData(roleManager, userManager);
 
