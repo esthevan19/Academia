@@ -8,8 +8,8 @@ namespace GymManagementBLL.ViewModels.SessionViewModels
         [Display(Name = "Descrição")]
         public string Description { get; set; } = null!;
 
-        [Required(ErrorMessage = "A Capacidade é obrigatória")]
-        [Range(0, 25, ErrorMessage = "A Capacidade deve ser entre 0 e 25")]
+        [Required(ErrorMessage = "Informe a capacidade da aula")]
+        [Range(1, 25, ErrorMessage = "A capacidade deve ser de 1 a 25 participantes.")]
         [Display(Name = "Capacidade")]
         public int Capacity { get; set; }
 
@@ -21,11 +21,11 @@ namespace GymManagementBLL.ViewModels.SessionViewModels
         [Display(Name = "Data e Horário de Término")]
         public DateTime EndDate { get; set; }
 
-        [Required(ErrorMessage = "O Treinador é obrigatório")]
+        [Required(ErrorMessage = "Selecione o professor responsável")]
         [Display(Name = "Treinador")]
         public int TrainerId { get; set; }
 
-        [Required(ErrorMessage = "A Categoria é obrigatória")]
+        [Required(ErrorMessage = "Selecione o tipo de aula")]
         [Display(Name = "Categoria")]
         public int CategoryId { get; set; }
     }
