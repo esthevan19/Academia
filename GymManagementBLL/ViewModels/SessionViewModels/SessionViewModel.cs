@@ -1,5 +1,5 @@
 using GymManagementBLL.Services.Classes;
-﻿namespace GymManagementBLL.ViewModels.SessionViewModels
+namespace GymManagementBLL.ViewModels.SessionViewModels
 {
 	public class SessionViewModel
 	{
@@ -20,12 +20,10 @@ using GymManagementBLL.Services.Classes;
 		{
 			get
 			{
-				if (StartDate > BrazilClock.Now)
-					return "Upcoming";
-				else if (StartDate <= DateTime.UtcNow && EndDate >= DateTime.UtcNow)
-					return "Ongoing";
-				else
-					return "Completed";
+                var now = BrazilClock.Now;
+                if (StartDate > now) return "Upcoming";
+                if (EndDate >= now) return "Ongoing";
+                return "Completed";
 			}
 		}
 	}

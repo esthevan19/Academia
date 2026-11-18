@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.BookingViewModels;
+using GymManagementDAL.Data.Contexts;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +16,13 @@ public class MyAccountApiController : ControllerBase
 {
     private readonly IMemberService _memberService;
     private readonly IBookingService _bookingService;
+    private readonly GymDbContext _db;
 
-    public MyAccountApiController(IMemberService memberService, IBookingService bookingService)
+    public MyAccountApiController(IMemberService memberService, IBookingService bookingService, GymDbContext db)
     {
         _memberService = memberService;
         _bookingService = bookingService;
+        _db = db;
     }
 
     public sealed record StudentBookingRequest(int SessionId);
@@ -26,7 +30,16 @@ public class MyAccountApiController : ControllerBase
     private int? GetLinkedMemberId()
     {
         var value = User.FindFirstValue("gymflow:member_id");
-        return int.TryParse(value, out var memberId) && memberId > 0 ? memberId : null;
+        if (!int.TryParse(value, out var memberId) || memberId <= 0) return null;
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        if (string.IsNullOrWhiteSpace(userId)) return null;
+
+        // O JWT pode continuar válido após o SuperAdmin revogar o vínculo.
+        // Confirme no banco que a conta ainda é proprietária do cadastro.
+        return _db.UserClaims.AsNoTracking().Any(claim =>
+            claim.UserId == userId && claim.ClaimType == "gymflow:member_id" &&
+            claim.ClaimValue == memberId.ToString())
+            ? memberId : null;
     }
 
     [HttpGet]

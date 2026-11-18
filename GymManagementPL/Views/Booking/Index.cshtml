@@ -1,135 +1,105 @@
-﻿@model IEnumerable<SessionViewModel>
-
+@model IEnumerable<SessionViewModel>
 @{
-    ViewData["Title"] = "Agendamentos";
+    ViewData["Title"] = "Agenda de aulas";
+    var futuras = (Model ?? Enumerable.Empty<SessionViewModel>())
+        .Where(x => x.Status == "Upcoming").OrderBy(x => x.StartDate).ToList();
+    var acontecendo = (Model ?? Enumerable.Empty<SessionViewModel>())
+        .Where(x => x.Status == "Ongoing").OrderBy(x => x.StartDate).ToList();
 }
+<style>
+    .agenda-top { background:linear-gradient(110deg,#070093,#2b23ca); border-radius:22px; padding:clamp(24px,4vw,36px); color:#fff; }
+    .agenda-top p { color:#e2e1ff; }
+    .agenda-card { background:#fff; border:1px solid #e4e4f2; border-radius:18px; box-shadow:0 10px 30px rgba(7,0,147,.05); }
+    .agenda-label { display:inline-block; background:#ecebff; color:#070093; font-size:.8rem; font-weight:800; padding:6px 11px; border-radius:99px; }
+    .agenda-detail { color:#54546e; font-size:.91rem; }
+    .agenda-detail i { color:#070093; }
+    .agenda-btn { background:#070093; color:#fff; border-radius:12px; padding:12px; font-weight:700; }
+    .agenda-btn:hover { background:#241bba; color:white; }
+    .agenda-section { color:#1d1d36; font-weight:800; }
+    .agenda-empty { border:1px dashed #d7d5eb; border-radius:18px; background:#fff; padding:28px; color:#65657b; }
+</style>
+<div class="container py-4 py-lg-5" style="max-width:1200px">
+    <header class="agenda-top mb-4 mb-lg-5">
+        <span class="small fw-bold text-uppercase" style="letter-spacing:.11em">GymFlow · Gestão de aulas</span>
+        <h1 class="fw-bold mt-2 mb-2">Agenda e presenças</h1>
+        <p class="mb-0">Acompanhe vagas, reservas e presença dos alunos nas aulas coletivas da academia.</p>
+    </header>
 
-<div class="container">
-
-    @if (Model is not null && Model.Any())
+    @if (TempData["SuccessMessage"] is string success)
     {
-        <header class="d-flex justify-content-between mt-5 mb-4 align-items-center">
-            <div>
-                <h2 class="text-primary-color mb-0">Aulas coletivas</h2>
-                <p class="text-muted">Aulas com horários disponíveis para reservas</p>
-            </div>
-        </header>
-        <div class="row g-4 ">
-            @foreach (var session in Model.Where(X => X.Status == "Upcoming"))
-            {
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm border-0 session-card">
-                        <div class="card-header text-white py-3 bg-primary ">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-calendar-event me-2"></i>@session.CategoryName
-                                </h5>
-                                <span class="badge bg-light text-dark">@(session.Status == "Upcoming" ? "Agendada" : session.Status == "Ongoing" ? "Em andamento" : session.Status)</span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <p class="text-muted mb-3">@session.Description</p>
+        <div class="alert alert-success rounded-3" role="status">@success</div>
+    }
+    @if (TempData["ErrorMessage"] is string error)
+    {
+        <div class="alert alert-danger rounded-3" role="alert">@error</div>
+    }
 
-                            <div class="session-info mb-3">
-                                <div class="info-item mb-2">
-                                    <i class="bi bi-person-circle text-primary-color me-2"></i>
-                                    <strong>Professor:</strong> @session.TrainerName
-                                </div>
-                                <div class="info-item mb-2">
-                                    <i class="bi bi-calendar3 text-primary-color me-2"></i>
-                                    <strong>Data:</strong> @session.DateDisplay
-                                </div>
-                                <div class="info-item mb-2">
-                                    <i class="bi bi-clock text-primary-color me-2"></i>
-                                    <strong>Horário:</strong> @session.TimeRangeDisplay
-                                </div>
-                                <div class="info-item mb-2">
-                                    <i class="bi bi-hourglass-split text-primary-color me-2"></i>
-                                    <strong>Duração:</strong> @session.Duration
-                                </div>
-                                <div class="info-item">
-                                    <i class="bi bi-people text-primary-color me-2"></i>
-                                    <strong>Capacidade:</strong> @session.AvailableSlots/@session.Capacity vagas
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-white border-0">
-                            <div class="d-grid gap-2">
-                                <a asp-action="GetMembersForUpcomingSession" asp-route-id="@session.Id" class="btn btn-outline btn-sm">
-                                    <i class="bi bi-eye me-1"></i> Ver Membros
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <h2 class="agenda-section h4 mb-0"><i class="bi bi-calendar-event me-2" style="color:#070093"></i>Próximas aulas</h2>
+        <span class="agenda-label">@futuras.Count aula(s) agendada(s)</span>
+    </div>
+    @if (futuras.Count == 0)
+    {
+        <div class="agenda-empty mb-5">
+            <strong>Nenhuma aula futura cadastrada.</strong>
+            <p class="mb-0 mt-1">Cadastre uma aula coletiva para começar a receber reservas.</p>
         </div>
-
-        <header class="d-flex justify-content-between mt-5 mb-4 align-items-center">
-            <div>
-                <h2 class="text-primary-color mb-0">Aulas coletivas</h2>
-                <p class="text-muted">Aulas em andamento para registrar presença</p>
-            </div>
-        </header>
-        <div class="row g-4 ">
-            @foreach (var session in Model.Where(X => X.Status == "Ongoing"))
-            {
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm border-0 session-card">
-                        <div class="card-header text-white py-3 bg-success ">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-calendar-event me-2"></i>@session.CategoryName
-                                </h5>
-                                <span class="badge bg-light text-dark">@session.Status</span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <p class="text-muted mb-3">@session.Description</p>
-
-                            <div class="session-info mb-3">
-                                <div class="info-item mb-2">
-                                    <i class="bi bi-person-circle text-primary-color me-2"></i>
-                                    <strong>Professor:</strong> @session.TrainerName
-                                </div>
-                                <div class="info-item mb-2">
-                                    <i class="bi bi-calendar3 text-primary-color me-2"></i>
-                                    <strong>Data:</strong> @session.DateDisplay
-                                </div>
-                                <div class="info-item mb-2">
-                                    <i class="bi bi-clock text-primary-color me-2"></i>
-                                    <strong>Horário:</strong> @session.TimeRangeDisplay
-                                </div>
-                                <div class="info-item mb-2">
-                                    <i class="bi bi-hourglass-split text-primary-color me-2"></i>
-                                    <strong>Duração:</strong> @session.Duration
-                                </div>
-                                <div class="info-item">
-                                    <i class="bi bi-people text-primary-color me-2"></i>
-                                    <strong>Capacidade:</strong> @session.AvailableSlots/@session.Capacity vagas
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-white border-0">
-                            <div class="d-grid gap-2">
-                                <a asp-action="GetMembersForOngoingSession" asp-route-id="@session.Id" class="btn btn-outline btn-sm">
-                                    <i class="bi bi-eye me-1"></i> Ver Membros
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-
-        </div>
-
     }
     else
     {
-        <div class="text-center py-5">
-            <i class="bi bi-calendar-x display-1 text-muted"></i>
-            <h4 class="mt-3 text-muted">Nenhuma aula disponível</h4>
-            <p class="text-muted">Cadastre uma aula para organizar os agendamentos</p>
+        <div class="row g-3 mb-5">
+            @foreach (var aula in futuras)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <article class="agenda-card h-100 p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between gap-2 align-items-center">
+                            <span class="agenda-label">@aula.CategoryName</span>
+                            <span class="small @(aula.AvailableSlots > 0 ? "text-success" : "text-danger") fw-bold">
+                                @(aula.AvailableSlots > 0 ? aula.AvailableSlots + " vaga(s)" : "Lotada")
+                            </span>
+                        </div>
+                        <h3 class="h5 fw-bold mt-3">@aula.Description</h3>
+                        <div class="agenda-detail mt-2"><i class="bi bi-person-circle me-2"></i>@aula.TrainerName</div>
+                        <div class="agenda-detail mt-2"><i class="bi bi-calendar3 me-2"></i>@aula.StartDate.ToString("dd/MM/yyyy")</div>
+                        <div class="agenda-detail mt-2 mb-4"><i class="bi bi-clock me-2"></i>@aula.StartDate.ToString("HH:mm")–@aula.EndDate.ToString("HH:mm")</div>
+                        <a asp-controller="Booking" asp-action="GetMembersForUpcomingSession" asp-route-id="@aula.Id"
+                           class="btn agenda-btn w-100 mt-auto">Gerenciar reservas</a>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <h2 class="agenda-section h4 mb-0"><i class="bi bi-check2-square me-2" style="color:#070093"></i>Aulas em andamento</h2>
+        <span class="agenda-label">@acontecendo.Count aula(s)</span>
+    </div>
+    @if (acontecendo.Count == 0)
+    {
+        <div class="agenda-empty mb-4">
+            <strong>Não há aulas acontecendo agora.</strong>
+            <p class="mb-0 mt-1">As aulas aparecem aqui durante o horário previsto, no horário de Brasília.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var aula in acontecendo)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <article class="agenda-card h-100 p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center gap-2">
+                            <span class="agenda-label">@aula.CategoryName</span>
+                            <span class="badge bg-success">Em andamento</span>
+                        </div>
+                        <h3 class="h5 fw-bold mt-3">@aula.Description</h3>
+                        <div class="agenda-detail mt-2"><i class="bi bi-person-circle me-2"></i>@aula.TrainerName</div>
+                        <div class="agenda-detail mt-2 mb-4"><i class="bi bi-clock me-2"></i>@aula.StartDate.ToString("HH:mm")–@aula.EndDate.ToString("HH:mm")</div>
+                        <a asp-controller="Booking" asp-action="GetMembersForOngoingSession" asp-route-id="@aula.Id"
+                           class="btn agenda-btn w-100 mt-auto">Registrar presenças</a>
+                    </article>
+                </div>
+            }
         </div>
     }
 </div>

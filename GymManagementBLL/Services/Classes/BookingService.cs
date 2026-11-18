@@ -69,8 +69,12 @@ namespace GymManagementBLL.Services.Classes
                                                  .Select(x => x.MemberId)
                                                  .ToList();
 
+            var activeMemberIds = _unitOfWork.MembershipRepository
+                .GetAll(x => x.EndDate >= BrazilClock.Now)
+                .Select(x => x.MemberId).ToHashSet();
+
             var members = _unitOfWork.GetRepository<Member>()
-                                     .GetAll(x => !membersIdHasBooking.Contains(x.Id));
+                .GetAll(x => !membersIdHasBooking.Contains(x.Id) && activeMemberIds.Contains(x.Id));
             // Get All Members That Not Have Booking Untill => !List.Contains(x.Id)
 
             return _mapper.Map<IEnumerable<MemberSelectListViewModel>>(members);
@@ -96,7 +100,7 @@ namespace GymManagementBLL.Services.Classes
                 if (session is null || session.StartDate <= BrazilClock.Now) return false;
 
                 var hasActiveMembership = _unitOfWork.MembershipRepository
-                                                     .GetAll(x => x.MemberId == createdBooking.MemberId && x.Status == "Active").Any();
+                                                     .GetAll(x => x.MemberId == createdBooking.MemberId && x.EndDate >= BrazilClock.Now).Any();
                 if (!hasActiveMembership) return false;
 
                 var hasExistingBooking = _unitOfWork.BookingRepository
@@ -137,7 +141,7 @@ namespace GymManagementBLL.Services.Classes
                 if (memberSession is null || memberSession.IsAttended) return false;
 
                 memberSession.IsAttended = true;
-                memberSession.UpdatedAt = DateTime.Now;
+                memberSession.UpdatedAt = DateTime.UtcNow;
 
                 _unitOfWork.GetRepository<Booking>().Update(memberSession);
 
@@ -156,7 +160,7 @@ namespace GymManagementBLL.Services.Classes
             try
             {
                 var session = _unitOfWork.SessionRepository.GetById(sessionId);
-                if (session is null || session.StartDate <= DateTime.Now) return false;
+                if (session is null || session.StartDate <= BrazilClock.Now) return false;
 
                 var Booking = _unitOfWork.BookingRepository.GetAll(X => X.SessionId == sessionId && X.MemberId == memberId)
                                                            .FirstOrDefault();

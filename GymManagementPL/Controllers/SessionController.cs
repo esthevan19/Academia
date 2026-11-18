@@ -101,6 +101,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
         public IActionResult Edit(int id, UpdateSessionViewModel updatedSession)
         {
@@ -149,6 +150,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
         public IActionResult DeleteConfirmed([FromForm] int id)
         {

@@ -1,0 +1,167 @@
+@model GymManagementPL.Models.StudentBookingPageViewModel
+@using GymManagementBLL.Services.Classes
+@{
+    ViewData["Title"] = "Minhas aulas";
+    var minhasReservas = Model.MyBookings.ToDictionary(x => x.SessionId, x => x);
+    var agora = BrazilClock.Now;
+}
+<style>
+    .gym-hero { border-radius: 24px; padding: clamp(24px, 5vw, 42px); background: linear-gradient(120deg,#070093 0%,#211ab9 100%); color:#fff; }
+    .gym-hero .lead { color:#e0ddff; max-width:660px; }
+    .gym-section-title { font-size:1.35rem; color:#20203b; font-weight:800; }
+    .gym-class { border:1px solid #e7e7f3; border-radius:19px; background:#fff; box-shadow:0 10px 35px rgba(7,0,147,.05); transition:transform .15s ease; }
+    .gym-class:hover { transform:translateY(-2px); }
+    .gym-pill { display:inline-block; border-radius:30px; padding:5px 11px; background:#eeedff; color:#070093; font-weight:800; font-size:.8rem; }
+    .gym-muted { color:#63637b; }
+    .gym-primary { background:#070093; border-color:#070093; color:#fff; font-weight:700; border-radius:11px; }
+    .gym-primary:hover { background:#1b13b8; color:#fff; }
+    .gym-outline { border:1px solid #d7d6ec; color:#070093; font-weight:700; border-radius:11px; }
+    .gym-outline:hover { background:#eeedff; color:#070093; }
+    .gym-empty { border:1px dashed #d3d2e7; border-radius:18px; background:#fff; padding:35px; color:#65657b; }
+</style>
+<section class="container py-4 py-md-5" style="max-width:1180px">
+    <div class="gym-hero mb-4 mb-md-5">
+        <span class="fw-bold small text-uppercase" style="letter-spacing:.12em">GymFlow · Área do aluno</span>
+        <h1 class="fw-bold mt-2 mb-2">Minhas aulas coletivas</h1>
+        <p class="lead fs-6 mb-0">Consulte horários, reserve sua vaga e acompanhe suas próximas aulas em um só lugar.</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string success)
+    {
+        <div class="alert alert-success rounded-3" role="status">@success</div>
+    }
+    @if (TempData["ErrorMessage"] is string error)
+    {
+        <div class="alert alert-danger rounded-3" role="alert">@error</div>
+    }
+
+    @if (Model.NeedsLink)
+    {
+        <div class="gym-empty text-center" role="status">
+            <i class="bi bi-person-check fs-1" style="color:#070093"></i>
+            <h2 class="gym-section-title mt-3">Ative seu acesso às aulas</h2>
+            <p>Peça ao SuperAdmin para vincular sua conta ao seu cadastro de aluno. Depois, saia e entre novamente.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn gym-outline">Voltar ao início</a>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between gap-3 align-items-center flex-wrap mb-3">
+            <h2 class="gym-section-title mb-0"><i class="bi bi-bookmark-check me-2" style="color:#070093"></i>Minhas reservas</h2>
+            <span class="gym-pill">@Model.MyBookings.Count reserva(s)</span>
+        </div>
+
+        @if (Model.MyBookings.Count == 0)
+        {
+            <div class="gym-empty mb-5">
+                <strong>Você ainda não reservou nenhuma aula.</strong>
+                <p class="mb-0 mt-1">Escolha uma aula disponível abaixo para começar.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3 mb-5">
+                @foreach (var reserva in Model.MyBookings)
+                {
+                    var futura = reserva.StartDate > agora;
+                    <div class="col-md-6">
+                        <article class="gym-class h-100 p-4">
+                            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                <span class="gym-pill">@(reserva.IsAttended ? "Presença registrada" : futura ? "Confirmada" : "Realizada")</span>
+                                <i class="bi bi-calendar-check fs-4" style="color:#070093"></i>
+                            </div>
+                            <h3 class="h5 fw-bold mt-3">@reserva.Description</h3>
+                            <div class="gym-muted mt-2 mb-1">
+                                <i class="bi bi-calendar3 me-2"></i>@reserva.StartDate.ToString("dd/MM/yyyy")
+                                <span class="ms-2">@reserva.StartDate.ToString("HH:mm")–@reserva.EndDate.ToString("HH:mm")</span>
+                            </div>
+                            <p class="gym-muted mb-3"><i class="bi bi-person me-2"></i>@reserva.TrainerName</p>
+                            @if (futura)
+                            {
+                                <form asp-controller="StudentBooking" asp-action="Cancel" method="post"
+                                      onsubmit="return confirm('Deseja cancelar sua vaga nesta aula?');">
+                                    <input type="hidden" name="sessionId" value="@reserva.SessionId" />
+                                    <button type="submit" class="btn btn-outline-danger rounded-3 w-100 fw-semibold">
+                                        Cancelar reserva
+                                    </button>
+                                </form>
+                            }
+                        </article>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (!Model.HasActiveMembership)
+        {
+            <div class="alert alert-warning rounded-4 border mb-4" role="status">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Matrícula inativa ou vencida.</strong>
+                Você pode consultar os horários, mas precisa de uma matrícula ativa para reservar uma vaga.
+                Procure a recepção para regularizar seu plano.
+            </div>
+        }
+
+        <div class="d-flex justify-content-between gap-3 flex-wrap align-items-center mb-3">
+            <h2 class="gym-section-title mb-0"><i class="bi bi-calendar-event me-2" style="color:#070093"></i>Aulas disponíveis</h2>
+            <span class="gym-muted small">Horário de Brasília · vagas atualizadas</span>
+        </div>
+
+        @if (Model.AvailableSessions.Count == 0)
+        {
+            <div class="gym-empty">
+                <strong>Nenhuma aula futura disponível no momento.</strong>
+                <p class="mb-0 mt-1">Quando a equipe cadastrar aulas coletivas, os horários aparecerão aqui.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var aula in Model.AvailableSessions)
+                {
+                    var reservada = minhasReservas.ContainsKey(aula.Id);
+                    var lotada = aula.AvailableSlots <= 0;
+                    <div class="col-md-6 col-lg-4">
+                        <article class="gym-class h-100 d-flex flex-column p-4">
+                            <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                                <span class="gym-pill">@aula.CategoryName</span>
+                                <span class="small fw-bold @(lotada ? "text-danger" : "text-success")">
+                                    @(lotada ? "Lotada" : aula.AvailableSlots + " vaga(s)")
+                                </span>
+                            </div>
+                            <h3 class="h5 fw-bold mb-2">@aula.Description</h3>
+                            <p class="gym-muted mb-1"><i class="bi bi-person-circle me-2"></i>@aula.TrainerName</p>
+                            <p class="gym-muted mb-1"><i class="bi bi-calendar3 me-2"></i>@aula.StartDate.ToString("dd/MM/yyyy")</p>
+                            <p class="gym-muted mb-4">
+                                <i class="bi bi-clock me-2"></i>@aula.StartDate.ToString("HH:mm")–@aula.EndDate.ToString("HH:mm")
+                            </p>
+                            <div class="mt-auto">
+                                @if (reservada)
+                                {
+                                    <button class="btn btn-light border rounded-3 w-100 fw-semibold" disabled>Vaga já reservada</button>
+                                }
+                                else if (!Model.HasActiveMembership)
+                                {
+                                    <button class="btn btn-light border rounded-3 w-100 fw-semibold" disabled title="É necessário ter matrícula ativa">Matrícula necessária</button>
+                                }
+                                else if (lotada)
+                                {
+                                    <button class="btn btn-light border rounded-3 w-100 fw-semibold" disabled>Sem vagas</button>
+                                }
+                                else
+                                {
+                                    <form asp-controller="StudentBooking" asp-action="Reserve" method="post">
+                                        <input type="hidden" name="sessionId" value="@aula.Id" />
+                                        <button class="btn gym-primary w-100" type="submit">
+                                            <i class="bi bi-check2-circle me-2"></i>Reservar vaga
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
+        }
+    }
+</section>

@@ -25,33 +25,71 @@ namespace GymManagementPL.Controllers
 
         public IActionResult GetMembersForUpcomingSession(int id)
         {
+            if (id <= 0) return RedirectToAction(nameof(Index));
             var members = _bookingService.GetMembersSession(id);
             return View(members);
         }
 
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Create(int id)
         {
-            var members = _bookingService.GetMembersForDropDown(id);
-            ViewBag.members = new SelectList(members, "Id", "Name");
-            return View();
+            if (!PrepareCreateForm(id))
+            {
+                TempData["ErrorMessage"] = "Esta aula não está disponível para novas reservas.";
+                return RedirectToAction(nameof(Index));
+            }
+            return View(new CreateBookingViewModel { SessionId = id });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Create(CreateBookingViewModel createdBooking)
         {
-            var result = _bookingService.CreateNewBooking(createdBooking);
+            if (!PrepareCreateForm(createdBooking.SessionId))
+            {
+                TempData["ErrorMessage"] = "Esta aula não está mais disponível para reservas.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            if (result)
-                TempData["SuccessMessage"] = "Reserva realizada com sucesso.";
-            else
-                TempData["ErrorMessage"] = "Não foi possível criar a reserva.";
+            if (!ModelState.IsValid)
+                return View(createdBooking);
 
+            if (!_bookingService.CreateNewBooking(createdBooking))
+            {
+                ModelState.AddModelError("", "Não foi possível reservar. Confira a matrícula ativa, as vagas e se o aluno já possui reserva nesta aula.");
+                return View(createdBooking);
+            }
+
+            TempData["SuccessMessage"] = "Reserva realizada com sucesso.";
             return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = createdBooking.SessionId });
+        }
+
+        private bool PrepareCreateForm(int sessionId)
+        {
+            if (sessionId <= 0) return false;
+            var session = _bookingService.GetAllSessions()
+                .FirstOrDefault(s => s.Id == sessionId && s.Status == "Upcoming" && s.AvailableSlots > 0);
+            if (session is null) return false;
+
+            ViewBag.SessionId = sessionId;
+            ViewBag.SessionName = session.CategoryName;
+            ViewBag.Members = new SelectList(_bookingService.GetMembersForDropDown(sessionId), "Id", "Name");
+            return true;
         }
 
         public IActionResult GetMembersForOngoingSession(int id)
         {
+            if (id <= 0) return RedirectToAction(nameof(Index));
+
+            var ongoing = _bookingService.GetAllSessions()
+                .Any(session => session.Id == id && session.Status == "Ongoing");
+            if (!ongoing)
+            {
+                TempData["ErrorMessage"] = "A presença só pode ser registrada durante o horário da aula.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var members = _bookingService.GetMembersSession(id);
             return View(members);
         }
@@ -72,6 +110,7 @@ namespace GymManagementPL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Cancel(int MemberId, int SessionId)
         {
             var result = _bookingService.CancelBooking(MemberId, SessionId);
