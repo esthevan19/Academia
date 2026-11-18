@@ -20,6 +20,9 @@ namespace GymManagementDAL.Data.Configurations
                    .WithOne(m => m.HealthRecord)
                    .HasForeignKey<HealthRecord>(hr => hr.Id);
 
+            builder.Property(hr => hr.Height).HasPrecision(5, 2);
+            builder.Property(hr => hr.Weight).HasPrecision(6, 2);
+
             builder.Ignore(hr => hr.CreatedAt);
 
         }
