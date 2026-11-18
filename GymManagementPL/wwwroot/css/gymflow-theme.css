@@ -5,7 +5,16 @@ body{background:var(--gf-bg)!important;color:var(--gf-ink);font-family:Rubik,sys
 .navbar .container{max-width:1440px}
 .navbar-brand{color:var(--gf-primary)!important;font-weight:900;letter-spacing:-.5px}
 .navbar .nav-link{font-size:.88rem!important;color:var(--gf-muted)!important;border-radius:12px;margin:2px;white-space:nowrap}
-.navbar .nav-link:hover,.navbar .nav-link.active{color:var(--gf-primary)!important;background:#eae9ff}
+.navbar .nav-link:hover{color:var(--gf-primary)!important;background:#eae9ff}
+.navbar .navbar-nav a.nav-link.active,
+.navbar .navbar-nav a.nav-link.active:hover,
+.navbar .navbar-nav a.nav-link.active:focus-visible{
+  background:var(--gf-primary)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff;
+  box-shadow:0 5px 12px rgba(7,0,147,.18);
+}
+.navbar .nav-link:focus-visible{outline:3px solid rgba(7,0,147,.35);outline-offset:2px}
 .navbar .navbar-nav{flex-wrap:wrap;gap:2px}
 main[role=main]{padding-top:28px}
 .card,.modal-content{border:1px solid var(--gf-border)!important;border-radius:20px!important;box-shadow:0 12px 30px rgba(20,18,90,.045)!important;overflow:hidden}
