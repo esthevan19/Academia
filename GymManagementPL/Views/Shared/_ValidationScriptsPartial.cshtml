@@ -1,2 +1,44 @@
 ﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+// Traduções utilizadas pela validação JavaScript (além das mensagens do servidor).
+(function () {
+    if (!window.jQuery || !jQuery.validator) return;
+
+    function formatarDataHora(valor) {
+        const correspondencia = String(valor).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+        return correspondencia
+            ? correspondencia[3] + "/" + correspondencia[2] + "/" + correspondencia[1] +
+              " às " + correspondencia[4] + ":" + correspondencia[5]
+            : String(valor);
+    }
+
+    jQuery.extend(jQuery.validator.messages, {
+        required: "Este campo é obrigatório.",
+        remote: "Corrija este campo.",
+        email: "Informe um e-mail válido.",
+        url: "Informe um endereço de internet válido.",
+        date: "Informe uma data válida.",
+        dateISO: "Informe uma data válida.",
+        number: "Informe um número válido.",
+        digits: "Use apenas números inteiros.",
+        equalTo: "Informe novamente o mesmo valor.",
+        maxlength: jQuery.validator.format("Informe no máximo {0} caracteres."),
+        minlength: jQuery.validator.format("Informe pelo menos {0} caracteres."),
+        rangelength: jQuery.validator.format("Informe entre {0} e {1} caracteres."),
+        range: jQuery.validator.format("Informe um valor entre {0} e {1}."),
+        min: function (limite, elemento) {
+            return elemento && elemento.type === "datetime-local"
+                ? "Escolha uma data e horário a partir de " + formatarDataHora(limite) + "."
+                : "Informe um valor maior ou igual a " + limite + ".";
+        },
+        max: function (limite, elemento) {
+            return elemento && elemento.type === "datetime-local"
+                ? "Escolha uma data e horário até " + formatarDataHora(limite) + "."
+                : "Informe um valor menor ou igual a " + limite + ".";
+        },
+        step: jQuery.validator.format("Informe um valor múltiplo de {0}.")
+    });
+})();
+</script>

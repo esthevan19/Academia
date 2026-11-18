@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<TrainerViewModel>
 
 @{
-    ViewData["Title"] = "Trainers";
+    ViewData["Title"] = "Professores";
 }
 
 @if (TempData["SuccessMessage"] is not null)
@@ -25,12 +25,12 @@
 <div class="container">
     <header class="d-flex justify-content-between mt-5 mb-4 align-items-center">
         <div>
-            <h2 class="text-primary-color mb-0">Our Trainers</h2>
-            <p class="text-muted">Professional fitness instructors</p>
+            <h2 class="text-primary-color mb-0">Professores da academia</h2>
+            <p class="text-muted">Gerencie os profissionais e suas especializações</p>
         </div>
         <a asp-controller="Trainer" asp-action="Create"
            class="btn btn-fill fw-medium rounded-pill px-4 py-3">
-            <i class="bi bi-plus-lg me-2"></i>Add Trainer
+            <i class="bi bi-plus-lg me-2"></i>Cadastrar professor
         </a>
     </header>
     @if (Model != null && Model.Any())
@@ -39,11 +39,11 @@
             <table class="table table-borderless">
                 <thead>
                     <tr>
-                        <th><span>@nameof(TrainerViewModel.Name)</span></th>
-                        <th><span>@nameof(TrainerViewModel.Email)</span></th>
-                        <th><span>@nameof(TrainerViewModel.Phone)</span></th>
-                        <th><span>@nameof(TrainerViewModel.Specialties)</span></th>
-                        <th><span>Action</span></th>
+                        <th><span>Nome</span></th>
+                        <th><span>E-mail</span></th>
+                        <th><span>Telefone</span></th>
+                        <th><span>Especialização</span></th>
+                        <th><span>Ações</span></th>
                     </tr>
                 </thead>
 
@@ -55,14 +55,14 @@
                             <td><span>@trainer.Email</span></td>
                             <td><span>@trainer.Phone</span></td>
                             <td>
-                                <span class="badge bg-primary-color">@trainer.Specialties</span>
+                                <span class="badge bg-primary-color">@GymManagementPL.Models.GymSpecialtiesPtBr.Display(trainer.Specialties)</span>
                             </td>
                             <td class="action position-relative">
                                 <div class="dropdown">
                                     <button class="btn btn-link p-0 border-0" type="button"
                                             id="dropdownMenuButton-@trainer.Id" data-bs-toggle="dropdown"
                                             aria-expanded="false">
-                                        <img src="~/images/action dots.jpg" alt="action icon" />
+                                        <img src="~/images/action dots.jpg" alt="Ações" />
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-start"
                                         aria-labelledby="dropdownMenuButton-@trainer.Id">
@@ -70,7 +70,7 @@
                                             <a asp-controller="Trainer" asp-action="TrainerDetails" asp-route-id="@trainer.Id"
                                                class="dropdown-item d-flex align-items-center gap-3">
                                                 <i class="bi bi-eye text-primary-color"></i>
-                                                <span>View Details</span>
+                                                <span>Ver detalhes</span>
                                             </a>
                                         </li>
                                         <li>
@@ -80,7 +80,7 @@
                                             <a asp-controller="Trainer" asp-action="EditTrainer" asp-route-id="@trainer.Id"
                                                class="dropdown-item d-flex align-items-center gap-3">
                                                 <i class="bi bi-pencil text-primary-color"></i>
-                                                <span>Edit Details</span>
+                                                <span>Editar dados</span>
                                             </a>
                                         </li>
                                         <li>
@@ -90,7 +90,7 @@
                                             <a asp-controller="Trainer" asp-action="Delete" asp-route-id="@trainer.Id"
                                                class="dropdown-item d-flex align-items-center gap-3 text-danger">
                                                 <i class="bi bi-trash"></i>
-                                                <span>Delete</span>
+                                                <span>Excluir</span>
                                             </a>
                                         </li>
                                     </ul>
@@ -106,8 +106,8 @@
     {
         <div class="text-center py-5">
             <i class="bi bi-person-workspace display-1 text-muted"></i>
-            <h4 class="mt-3 text-muted">No Trainers Available</h4>
-            <p class="text-muted">Add your first trainer to get started</p>
+            <h4 class="mt-3 text-muted">Nenhum professor cadastrado</h4>
+            <p class="text-muted">Cadastre o primeiro professor para começar</p>
         </div>
     }
 
