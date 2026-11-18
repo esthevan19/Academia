@@ -15,6 +15,6 @@ public class CreatePlanViewModel
     [Range(1, 365, ErrorMessage = "A duração deve estar entre 1 e 365 dias.")]
     public int DurationDays { get; set; }
 
-    [Range(typeof(decimal), "0.01", "10000", ErrorMessage = "O valor deve ser maior que zero.")]
+    [Range(typeof(decimal), "0.01", "10000", ErrorMessage = "Informe um preço em reais entre R$ 0,01 e R$ 10.000,00.")]
     public decimal Price { get; set; }
 }
