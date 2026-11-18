@@ -197,6 +197,8 @@ namespace GymManagementPL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (string.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), id, StringComparison.Ordinal))
+                return Forbid();
             if (await IsSuperAdminTargetForOtherRole(id)) return Forbid();
             var result = _adminService.DeleteAdmin(id);
 
@@ -250,6 +252,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
         public IActionResult AddRole(string userId, string role)
         {
@@ -265,9 +268,17 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
         public IActionResult RemoveRole(string userId, string role)
         {
+            if (string.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), userId, StringComparison.Ordinal) &&
+                string.Equals(role, "SuperAdmin", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["ErrorMessage"] = "Você não pode remover o próprio perfil SuperAdmin.";
+                return RedirectToAction("ManageRoles", new { id = userId });
+            }
+
             var result = _adminService.RemoveRole(userId, role);
 
             if (!result.Succeeded)
