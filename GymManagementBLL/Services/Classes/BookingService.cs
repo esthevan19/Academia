@@ -137,7 +137,7 @@ namespace GymManagementBLL.Services.Classes
                 if (memberSession is null || memberSession.IsAttended) return false;
 
                 memberSession.IsAttended = true;
-                memberSession.UpdatedAt = DateTime.Now;
+                memberSession.UpdatedAt = DateTime.UtcNow;
 
                 _unitOfWork.GetRepository<Booking>().Update(memberSession);
 
@@ -156,7 +156,7 @@ namespace GymManagementBLL.Services.Classes
             try
             {
                 var session = _unitOfWork.SessionRepository.GetById(sessionId);
-                if (session is null || session.StartDate <= DateTime.Now) return false;
+                if (session is null || session.StartDate <= BrazilClock.Now) return false;
 
                 var Booking = _unitOfWork.BookingRepository.GetAll(X => X.SessionId == sessionId && X.MemberId == memberId)
                                                            .FirstOrDefault();
