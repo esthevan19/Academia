@@ -15,6 +15,8 @@ namespace GymManagementPL.Controllers
         }
         public IActionResult Index()
         {
+            // Aluno não visualiza indicadores administrativos da academia.
+            if (User.IsInRole("Aluno")) return View("Aluno");
             var data = _analyticsService.GetAnalyticsData();
             return View(data);
         }
