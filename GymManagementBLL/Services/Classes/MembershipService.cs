@@ -70,11 +70,24 @@ namespace GymManagementBLL.Services.Classes
 
         public bool DeleteMembership(int id)
         {
-            var Repo = _unitOfWork.MembershipRepository;
-            var ActiveMemberships = Repo.GetAll(X => X.MemberId == id && X.EndDate >= BrazilClock.Now).FirstOrDefault();
-            if (ActiveMemberships is null) return false;
-            Repo.Delete(ActiveMemberships);
-            return _unitOfWork.SaveChanges() > 0;
+            try
+            {
+                // Cancelar encerra a vigência sem apagar o histórico financeiro do aluno.
+                var now = BrazilClock.Now;
+                var repo = _unitOfWork.MembershipRepository;
+                var membership = repo.GetAll(x => x.MemberId == id &&
+                    x.CreatedAt <= now && x.EndDate >= now)
+                    .OrderByDescending(x => x.EndDate).FirstOrDefault();
+                if (membership is null) return false;
+
+                membership.EndDate = now.AddTicks(-1);
+                repo.Update(membership);
+                return _unitOfWork.SaveChanges() > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public IEnumerable<MemberSelectListViewModel> GetMembersForDropDown()

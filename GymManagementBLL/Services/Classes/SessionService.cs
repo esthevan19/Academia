@@ -39,11 +39,10 @@ namespace GymManagementBLL.Services.Classes
             try
             {
 
+                if (createdSession is null) return false;
                 if (!IsTrainerExist(createdSession.TrainerId)) return false;
                 if (!IsCategoryExist(createdSession.CategoryId)) return false;
                 if (!IsValidDateRange(createdSession.StartDate, createdSession.EndDate)) return false;
-
-                if (createdSession is null) return false;
 
                 var mappedSession = _mapper.Map<Session>(createdSession);
 
@@ -104,7 +103,7 @@ namespace GymManagementBLL.Services.Classes
             var sessionRepo = _unitOfWork.GetRepository<Session>();
             var session = sessionRepo.GetById(sessionId);
 
-            if (!IsSessionValidToUpdate(session!)) return null;
+            if (session is null || !IsSessionValidToUpdate(session)) return null;
 
             return _mapper.Map<UpdateSessionViewModel>(session);
 
@@ -118,9 +117,10 @@ namespace GymManagementBLL.Services.Classes
                 var sessionRepo = _unitOfWork.GetRepository<Session>();
                 var session = sessionRepo.GetById(sessionId);
 
+                if (updateSession is null || session is null) return false;
                 if (!IsTrainerExist(updateSession.TrainerId)) return false;
                 if (!IsValidDateRange(updateSession.StartDate, updateSession.EndDate)) return false;
-                if (!IsSessionValidToUpdate(session!)) return false;
+                if (!IsSessionValidToUpdate(session)) return false;
 
 
                 _mapper.Map(updateSession, session);
@@ -151,7 +151,7 @@ namespace GymManagementBLL.Services.Classes
                 var sessionRepo = _unitOfWork.GetRepository<Session>();
                 var session = sessionRepo.GetById(sessionId);
 
-                if (!IsSessionValidToRemove(session!)) return false;
+                if (session is null || !IsSessionValidToRemove(session)) return false;
 
                 sessionRepo.Delete(session!);
 
@@ -202,7 +202,7 @@ namespace GymManagementBLL.Services.Classes
             return EndDate > startDate && startDate > BrazilClock.Now;
         }
 
-        private bool IsSessionValidToUpdate(Session session)
+        private bool IsSessionValidToUpdate(Session? session)
         {
             return session != null &&
                    session.EndDate >= BrazilClock.Now &&
@@ -210,7 +210,7 @@ namespace GymManagementBLL.Services.Classes
                    _unitOfWork.SessionRepository.GetCountOfBooksSlots(session.Id) == 0;
         }
 
-        private bool IsSessionValidToRemove(Session session)
+        private bool IsSessionValidToRemove(Session? session)
         {
             return session != null &&
             session.StartDate > BrazilClock.Now &&
