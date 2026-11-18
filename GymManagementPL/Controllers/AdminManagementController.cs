@@ -39,7 +39,7 @@ namespace GymManagementPL.Controllers
 
             if (result.Succeeded)
             {
-                TempData["SuccessMessage"] = "Admin Added Successfully";
+                TempData["SuccessMessage"] = "Usuário criado com sucesso.";
                 return RedirectToAction("Index");
             }
 
@@ -95,7 +95,7 @@ namespace GymManagementPL.Controllers
             }
             else
             {
-                TempData["SuccessMessage"] = "Admin Deleted Successfully!";
+                TempData["SuccessMessage"] = "Usuário excluído com sucesso.";
             }
 
             return RedirectToAction("Index");
@@ -116,7 +116,7 @@ namespace GymManagementPL.Controllers
 
             if (result.Succeeded)
             {
-                TempData["SuccessMessage"] = "Password Reset Successfully";
+                TempData["SuccessMessage"] = "Senha redefinida com sucesso.";
                 return RedirectToAction("Index");
             }
 
@@ -142,7 +142,7 @@ namespace GymManagementPL.Controllers
             if (!result.Succeeded)
                 TempData["ErrorMessage"] = string.Join(", ", result.Errors.Select(e => e.Description));
             else
-                TempData["SuccessMessage"] = "Role added successfully!";
+                TempData["SuccessMessage"] = "Perfil adicionado com sucesso.";
 
             return RedirectToAction("ManageRoles", new { id = userId });
         }
@@ -156,7 +156,7 @@ namespace GymManagementPL.Controllers
             if (!result.Succeeded)
                 TempData["ErrorMessage"] = string.Join(", ", result.Errors.Select(e => e.Description));
             else
-                TempData["SuccessMessage"] = "Role removed successfully!";
+                TempData["SuccessMessage"] = "Perfil removido com sucesso.";
 
             return RedirectToAction("ManageRoles", new { id = userId });
         }
