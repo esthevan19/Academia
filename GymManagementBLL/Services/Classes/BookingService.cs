@@ -45,7 +45,7 @@ namespace GymManagementBLL.Services.Classes
         public IEnumerable<SessionViewModel> GetAllSessions()
         {
             var sessionsToBook = _unitOfWork.SessionRepository
-                                      .GetAllSessionsWithTrainerAndCategory(x => x.EndDate >= DateTime.Now)
+                                      .GetAllSessionsWithTrainerAndCategory(x => x.EndDate >= BrazilClock.Now)
                                       .OrderByDescending(x => x.StartDate);
 
             if (!sessionsToBook.Any()) return [];
@@ -93,7 +93,7 @@ namespace GymManagementBLL.Services.Classes
             try
             {
                 var session = _unitOfWork.SessionRepository.GetById(createdBooking.SessionId);
-                if (session is null || session.StartDate <= DateTime.Now) return false;
+                if (session is null || session.StartDate <= BrazilClock.Now) return false;
 
                 var hasActiveMembership = _unitOfWork.MembershipRepository
                                                      .GetAll(x => x.MemberId == createdBooking.MemberId && x.Status == "Active").Any();
@@ -128,7 +128,7 @@ namespace GymManagementBLL.Services.Classes
             try
             {
                 var session = _unitOfWork.SessionRepository.GetById(sessionId);
-                var now = DateTime.Now;
+                var now = BrazilClock.Now;
                 if (session is null || session.StartDate > now || session.EndDate < now) return false;
 
                 var memberSession = _unitOfWork.GetRepository<Booking>()

@@ -50,7 +50,7 @@ public class WorkoutManagementController : Controller
             if (string.IsNullOrWhiteSpace(exerciseName[i]) || exerciseName[i].Length > 150 ||
                 string.IsNullOrWhiteSpace(reps[i]) || reps[i].Length > 50 ||
                 sets[i] is < 1 or > 30 || restSeconds[i] is < 0 or > 3600 ||
-                (!string.IsNullOrWhiteSpace(loadKg[i]) && (!decimal.TryParse(loadKg[i], System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CurrentCulture, out var parsedLoad) || parsedLoad < 0 || parsedLoad > 999999)))
+                !TryParseLoad(loadKg[i], out var parsedLoad))
             {
                 TempData["WorkoutError"] = "Confira as séries, repetições, cargas e descansos.";
                 return RedirectToAction(nameof(Index));
@@ -58,7 +58,7 @@ public class WorkoutManagementController : Controller
             workout.Exercises.Add(new WorkoutExercise
             {
                 Name = exerciseName[i].Trim(), Sets = sets[i], Reps = reps[i].Trim(),
-                LoadKg = decimal.TryParse(loadKg[i], System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CurrentCulture, out var kg) ? kg : null, RestSeconds = restSeconds[i], SortOrder = i
+                LoadKg = parsedLoad, RestSeconds = restSeconds[i], SortOrder = i
             });
         }
         _db.Workouts.Add(workout);
@@ -78,4 +78,20 @@ public class WorkoutManagementController : Controller
         TempData["WorkoutSuccess"] = "Treino excluído.";
         return RedirectToAction(nameof(Index));
     }
+    // Aceita tanto 2,5 quanto 2.5 sem interpretar ponto como separador de milhar.
+    private static bool TryParseLoad(string? text, out decimal? loadKg)
+    {
+        loadKg = null;
+        if (string.IsNullOrWhiteSpace(text)) return true;
+        var normalized = text.Trim().Replace(',', '.');
+        if (!decimal.TryParse(normalized,
+            System.Globalization.NumberStyles.AllowDecimalPoint | System.Globalization.NumberStyles.AllowLeadingSign,
+            System.Globalization.CultureInfo.InvariantCulture, out var parsed) ||
+            parsed < 0 || parsed > 999999)
+            return false;
+
+        loadKg = parsed;
+        return true;
+    }
+
 }

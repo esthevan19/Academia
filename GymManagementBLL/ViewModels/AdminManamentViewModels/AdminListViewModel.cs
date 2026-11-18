@@ -12,6 +12,7 @@ namespace GymManagementBLL.ViewModels.AdminManamentViewModels
         public string Email { get; set; } = null!;
         public string UserName { get; set; } = null!;
         public string Role { get; set; } = string.Empty;
+        public int? LinkedMemberId { get; set; }
     }
 
 }

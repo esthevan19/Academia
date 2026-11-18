@@ -56,7 +56,7 @@
                             </li>
                         }
 
-                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Instrutor"))
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Trainer" ? "active" : "")"
@@ -69,6 +69,14 @@
                             <li class="nav-item"><a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "WorkoutManagement" ? "active" : "")" asp-controller="WorkoutManagement" asp-action="Index">Treinos</a></li>
                         }
 
+                        @if (User.IsInRole("Aluno"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Student" ? "active" : "")"
+                                   asp-controller="Student" asp-action="Index">Meus treinos</a>
+                            </li>
+                        }
+
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Session" ? "active" : "")"
                                asp-controller="Session" asp-action="Index">Aulas Coletivas</a>
@@ -79,7 +87,8 @@
                                asp-controller="Plan" asp-action="Index">Planos</a>
                         </li>
 
-                        @if (!User.IsInRole("Aluno"))
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") ||
+                            User.IsInRole("Gerente") || User.IsInRole("Recepcionista"))
                         {
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Membership" ? "active" : "")"
@@ -87,7 +96,8 @@
                         </li>
                         }
 
-                        @if (!User.IsInRole("Aluno"))
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") ||
+                            User.IsInRole("Gerente") || User.IsInRole("Recepcionista") || User.IsInRole("Instrutor"))
                         {
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Booking" ? "active" : "")"

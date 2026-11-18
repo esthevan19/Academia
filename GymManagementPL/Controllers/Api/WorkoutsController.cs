@@ -46,6 +46,19 @@ public class WorkoutsController : ControllerBase
         }).ToList()
     };
 
+    // Cadastro mínimo de alunos para selecionar a ficha no aplicativo,
+    // sem expor dados pessoais ou informações de saúde.
+    [HttpGet("member-lookup")]
+    public async Task<IActionResult> GetMemberLookup()
+    {
+        if (!CanManage()) return Forbid();
+        var members = await _db.Members.AsNoTracking()
+            .OrderBy(member => member.Name)
+            .Select(member => new { member.Id, member.Name })
+            .ToListAsync();
+        return Ok(new { success = true, members });
+    }
+
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] int? memberId)
     {

@@ -1,0 +1,62 @@
+@model IEnumerable<GymManagementDAL.Entities.Workout>
+@{
+    ViewData["Title"] = "Meus treinos";
+}
+<section class="py-4">
+    <header class="mb-4">
+        <span class="small fw-bold" style="color:#070093">GYMFLOW · ÁREA DO ALUNO</span>
+        <h1 class="h2 fw-bold mt-2">Meus treinos de musculação</h1>
+        <p class="text-muted">Confira as fichas de exercícios preparadas para você pela academia.</p>
+    </header>
+
+    @if (ViewBag.NeedsLink == true)
+    {
+        <div class="alert alert-info" role="status">
+            Sua conta ainda não está vinculada ao cadastro de aluno.
+            Solicite ao administrador que faça esse vínculo em Gerenciar Usuários.
+            Depois, saia e entre novamente.
+        </div>
+    }
+    else if (!Model.Any())
+    {
+        <div class="card p-4 border-0 shadow-sm">
+            <p class="mb-0">Você ainda não tem fichas cadastradas. Peça ao instrutor para preparar seu treino.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+        @foreach (var treino in Model)
+        {
+            <div class="col-md-6">
+                <article class="card h-100 border-0 shadow-sm rounded-4 p-4">
+                    <span class="badge rounded-pill align-self-start" style="background:#070093">Ficha @treino.Letter</span>
+                    <h2 class="h4 fw-bold mt-3">@treino.Name</h2>
+                    <p class="text-muted small">@treino.Category</p>
+                    @if (!string.IsNullOrWhiteSpace(treino.Notes))
+                    {
+                        <p>@treino.Notes</p>
+                    }
+                    <ol class="list-group list-group-numbered">
+                    @foreach (var exercicio in treino.Exercises.OrderBy(x => x.SortOrder))
+                    {
+                        <li class="list-group-item border-0 border-bottom">
+                            <strong>@exercicio.Name</strong>
+                            <div class="small text-muted">
+                                @exercicio.Sets séries · @exercicio.Reps repetições ·
+                                @(exercicio.LoadKg.HasValue ? exercicio.LoadKg.Value.ToString("0.##") + " kg" : "Carga não informada")
+                                · @exercicio.RestSeconds s de descanso
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(exercicio.Notes))
+                            {
+                                <div class="small">@exercicio.Notes</div>
+                            }
+                        </li>
+                    }
+                    </ol>
+                </article>
+            </div>
+        }
+        </div>
+    }
+</section>

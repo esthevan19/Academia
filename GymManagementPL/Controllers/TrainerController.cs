@@ -131,6 +131,8 @@ namespace GymManagementPL.Controllers
             return View(trainer);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed([FromForm] int id)
         {
 
