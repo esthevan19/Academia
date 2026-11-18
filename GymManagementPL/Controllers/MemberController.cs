@@ -43,21 +43,22 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult CreateMember(CreateMemberViewModel createdMember)
         {
 
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("DataMissed", "Check Missing Fields");
+                ModelState.AddModelError("DataMissed", "Confira os campos obrigatórios do aluno.");
                 return View(nameof(Create), createdMember);
             }
 
             bool result = _memberService.CreateMember(createdMember);
 
             if (result)
-                TempData["SuccessMessage"] = $"Member Added Successfully";
+                TempData["SuccessMessage"] = $"Aluno cadastrado com sucesso.";
             else
-                TempData["ErrorMessage"] = $"Member Failed To Added , Phone Number Or Email already exists";
+                TempData["ErrorMessage"] = $"Não foi possível cadastrar o aluno. E-mail ou telefone já cadastrado.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -70,7 +71,7 @@ namespace GymManagementPL.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid member ID. Please provide a valid identifier.";
+                TempData["ErrorMessage"] = "Identificador do aluno inválido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -78,7 +79,7 @@ namespace GymManagementPL.Controllers
 
             if (memberDetails == null)
             {
-                TempData["ErrorMessage"] = $"No member found with ID: {id}. Please check and try again.";
+                TempData["ErrorMessage"] = $"Nenhum aluno encontrado com o código {id}.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -91,7 +92,7 @@ namespace GymManagementPL.Controllers
 
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid member ID. Please provide a valid identifier.";
+                TempData["ErrorMessage"] = "Identificador do aluno inválido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -99,7 +100,7 @@ namespace GymManagementPL.Controllers
 
             if (memberHealthRecordData == null)
             {
-                TempData["ErrorMessage"] = $"No member found with ID: {id}. Please check and try again.";
+                TempData["ErrorMessage"] = $"Nenhum aluno encontrado com o código {id}.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -115,7 +116,7 @@ namespace GymManagementPL.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid member ID. Please provide a valid identifier.";
+                TempData["ErrorMessage"] = "Identificador do aluno inválido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -123,7 +124,7 @@ namespace GymManagementPL.Controllers
 
             if (member == null)
             {
-                TempData["ErrorMessage"] = $"No member found with ID: {id}. Please check and try again.";
+                TempData["ErrorMessage"] = $"Nenhum aluno encontrado com o código {id}.";
                 return RedirectToAction(nameof(Index));
             }
             return View(member);
@@ -135,15 +136,15 @@ namespace GymManagementPL.Controllers
 
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("DataMissed", "Email Or Phone Exist");
+                ModelState.AddModelError("DataMissed", "Confira os dados e tente novamente.");
                 return View(memberToUpdate);
             }
             bool result = _memberService.UpdateMember(id, memberToUpdate);
 
             if (result)
-                TempData["SuccessMessage"] = "Member Updated Successfully.";
+                TempData["SuccessMessage"] = "Dados do aluno atualizados com sucesso.";
             else
-                TempData["ErrorMessage"] = "Member Failed To Update .";
+                TempData["ErrorMessage"] = "Não foi possível atualizar os dados do aluno.";
 
             return RedirectToAction(nameof(Index));
 
@@ -157,7 +158,7 @@ namespace GymManagementPL.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid member ID. Please provide a valid identifier.";
+                TempData["ErrorMessage"] = "Identificador do aluno inválido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -165,7 +166,7 @@ namespace GymManagementPL.Controllers
 
             if (memberDetails == null)
             {
-                TempData["ErrorMessage"] = $"No member found with ID: {id}. Please check and try again.";
+                TempData["ErrorMessage"] = $"Nenhum aluno encontrado com o código {id}.";
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.MemberId = id;
@@ -178,9 +179,9 @@ namespace GymManagementPL.Controllers
             var result = _memberService.RemoveMember(id);
 
             if (result)
-                TempData["SuccessMessage"] = "Member Removed Successfully";
+                TempData["SuccessMessage"] = "Aluno excluído com sucesso.";
             else
-                TempData["ErrorMessage"] = "Member Not Removed";
+                TempData["ErrorMessage"] = "Não foi possível excluir o aluno. Verifique vínculos ativos.";
 
             return RedirectToAction(nameof(Index));
 
