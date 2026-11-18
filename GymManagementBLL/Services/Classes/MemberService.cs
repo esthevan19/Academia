@@ -155,27 +155,30 @@ namespace GymManagementBLL.Services.Classes
 
         public bool UpdateMember(int id, MemberToUpdateViewModel updatedMember)
         {
+            if (id <= 0 || updatedMember is null) return false;
 
-            var emailExist = _unitOfWork.GetRepository<Member>().GetAll(x => x.Email == updatedMember.Email && x.Id != id);
-            var phoneExist = _unitOfWork.GetRepository<Member>().GetAll(x => x.Phone == updatedMember.Phone && x.Id != id);
+            try
+            {
+                var emailExist = _unitOfWork.GetRepository<Member>()
+                    .GetAll(x => x.Email == updatedMember.Email && x.Id != id);
+                var phoneExist = _unitOfWork.GetRepository<Member>()
+                    .GetAll(x => x.Phone == updatedMember.Phone && x.Id != id);
+                if (emailExist.Any() || phoneExist.Any()) return false;
 
-            if (emailExist.Any() || phoneExist.Any())
+                var repo = _unitOfWork.GetRepository<Member>();
+                var existingMember = repo.GetById(id);
+                if (existingMember is null) return false;
+
+                _mapper.Map(updatedMember, existingMember);
+                repo.Update(existingMember);
+                return _unitOfWork.SaveChanges() > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Falha ao atualizar aluno {MemberId}.", id);
                 return false;
-
-            var repo = _unitOfWork.GetRepository<Member>();
-
-            var existingMember = repo.GetById(id);
-            if (existingMember is null) return false;
-
-
-            _mapper.Map(updatedMember, existingMember);
-
-            repo.Update(existingMember);
-
-            return _unitOfWork.SaveChanges() > 0;
-
+            }
         }
-
 
         #endregion
 
@@ -215,8 +218,9 @@ namespace GymManagementBLL.Services.Classes
                 return isDeleted;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Falha ao excluir aluno {MemberId}.", id);
                 return false;
             }
 
