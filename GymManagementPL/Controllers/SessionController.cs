@@ -41,7 +41,7 @@ namespace GymManagementPL.Controllers
             return View(session);
         }
 
-        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Create()
         {
             LoadCategoriesDropDown();
@@ -51,7 +51,7 @@ namespace GymManagementPL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Create(CreateSessionViewModel createdSession)
         {
             if (!ModelState.IsValid)
@@ -78,7 +78,7 @@ namespace GymManagementPL.Controllers
 
         }
 
-        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Edit(int id)
         {
             if (id <= 0)
@@ -101,7 +101,8 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Edit(int id, UpdateSessionViewModel updatedSession)
         {
 
@@ -128,7 +129,7 @@ namespace GymManagementPL.Controllers
 
         }
 
-        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
         public IActionResult Delete(int id)
         {
             if (id <= 0)
@@ -149,7 +150,8 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
         public IActionResult DeleteConfirmed([FromForm] int id)
         {
             var result = _sessionService.RemoveSession(id);
