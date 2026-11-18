@@ -35,11 +35,12 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(CreateMembershipViewModel createdMember)
         {
             if (!ModelState.IsValid)
             {
-                TempData["ErrorMessage"] = "Cannot create membership. Member may have an active membership.";
+                TempData["ErrorMessage"] = "Não foi possível criar a matrícula. Confira os dados e se o aluno já possui matrícula ativa.";
                 LoadDropdownsData();
                 return View(createdMember);
             }
@@ -47,10 +48,10 @@ namespace GymManagementPL.Controllers
             bool isCreated = _membershipService.CreateMembership(createdMember);
 
             if (isCreated)
-                TempData["SuccessMessage"] = "Member added successfully.";
+                TempData["SuccessMessage"] = "Matrícula criada com sucesso.";
             else
             {
-                TempData["ErrorMessage"] = "cannot to Create membership. Member may have an active membership.";
+                TempData["ErrorMessage"] = "Não foi possível criar a matrícula. O aluno pode já possuir uma matrícula ativa.";
                 LoadDropdownsData();
                 return View(createdMember);
             }
@@ -62,17 +63,18 @@ namespace GymManagementPL.Controllers
         #region CancelMembership
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Cancel(int id)
         {
             var result = _membershipService.DeleteMembership(id);
 
             if (result)
             {
-                TempData["SuccessMessage"] = "Membership cancelled successfully!";
+                TempData["SuccessMessage"] = "Matrícula cancelada com sucesso.";
             }
             else
             {
-                TempData["ErrorMessage"] = "Failed to cancel membership.";
+                TempData["ErrorMessage"] = "Não foi possível cancelar a matrícula.";
             }
 
             return RedirectToAction(nameof(Index));
