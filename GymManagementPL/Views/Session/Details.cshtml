@@ -101,6 +101,12 @@
 
                 <div class="card-footer bg-white border-0 p-4">
                     <div class="d-flex justify-content-between gap-2">
+                        @if (User.IsInRole("Aluno") && Model.Status == "Upcoming")
+                        {
+                            <a asp-controller="StudentBooking" asp-action="Index" class="btn text-white flex-fill fw-bold" style="background:#070093">
+                                <i class="bi bi-calendar-check me-1"></i>Reservar vaga
+                            </a>
+                        }
                         <a asp-action="Index" class="btn btn-outline flex-fill">
                             <i class="bi bi-arrow-left me-1"></i>Back to List
                         </a>
