@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
 using GymManagementBLL.Services.Interfaces;
+using GymManagementDAL.Data.Contexts;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 using GymManagementBLL.ViewModels.BookingViewModels;
 using GymManagementBLL.ViewModels.MembershipViewModels;
 using GymManagementBLL.ViewModels.SessionViewModels;
@@ -18,11 +21,13 @@ namespace GymManagementBLL.Services.Classes
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly GymDbContext _db;
 
-        public BookingService(IUnitOfWork unitOfWork, IMapper mapper)
+        public BookingService(IUnitOfWork unitOfWork, IMapper mapper, GymDbContext db)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _db = db;
         }
 
         public IEnumerable<MemberBookingViewModel> GetMemberBookings(int memberId)
@@ -70,7 +75,7 @@ namespace GymManagementBLL.Services.Classes
                                                  .ToList();
 
             var activeMemberIds = _unitOfWork.MembershipRepository
-                .GetAll(x => x.EndDate >= BrazilClock.Now)
+                .GetAll(x => x.CreatedAt <= BrazilClock.Now && x.EndDate >= BrazilClock.Now)
                 .Select(x => x.MemberId).ToHashSet();
 
             var members = _unitOfWork.GetRepository<Member>()
@@ -93,35 +98,43 @@ namespace GymManagementBLL.Services.Classes
         #region CreateNewBooking
         public bool CreateNewBooking(CreateBookingViewModel createdBooking)
         {
+            if (createdBooking is null || createdBooking.MemberId <= 0 || createdBooking.SessionId <= 0)
+                return false;
 
             try
             {
-                var session = _unitOfWork.SessionRepository.GetById(createdBooking.SessionId);
-                if (session is null || session.StartDate <= BrazilClock.Now) return false;
+                // Todas as verificações e a gravação acontecem na mesma transação.
+                // Serializable evita que duas reservas simultâneas excedam a última vaga.
+                using var transaction = _db.Database.BeginTransaction(IsolationLevel.Serializable);
+                var now = BrazilClock.Now;
+                var session = _db.Sessions.AsNoTracking()
+                    .SingleOrDefault(x => x.Id == createdBooking.SessionId);
+                if (session is null || session.StartDate <= now ||
+                    session.EndDate <= now || session.Capacity <= 0)
+                    return false;
 
-                var hasActiveMembership = _unitOfWork.MembershipRepository
-                                                     .GetAll(x => x.MemberId == createdBooking.MemberId && x.EndDate >= BrazilClock.Now).Any();
+                var hasActiveMembership = _db.Memberships.AsNoTracking().Any(x =>
+                    x.MemberId == createdBooking.MemberId &&
+                    x.CreatedAt <= now && x.EndDate >= now);
                 if (!hasActiveMembership) return false;
 
-                var hasExistingBooking = _unitOfWork.BookingRepository
-                                                    .GetAll(x => x.MemberId == createdBooking.MemberId && x.SessionId == createdBooking.SessionId)
-                                                    .Any();
-                if (hasExistingBooking) return false;
+                if (_db.Bookings.Any(x => x.MemberId == createdBooking.MemberId &&
+                                          x.SessionId == createdBooking.SessionId))
+                    return false;
 
-                var availableSlots = session.Capacity - _unitOfWork.SessionRepository.GetCountOfBooksSlots(createdBooking.SessionId);
-                if (availableSlots <= 0) return false;
+                if (_db.Bookings.Count(x => x.SessionId == createdBooking.SessionId) >= session.Capacity)
+                    return false;
 
-                var mappedCreatedBooking = _mapper.Map<Booking>(createdBooking);
-
-                _unitOfWork.BookingRepository.Add(mappedCreatedBooking);
-
-                return _unitOfWork.SaveChanges() > 0;
+                _db.Bookings.Add(_mapper.Map<Booking>(createdBooking));
+                if (_db.SaveChanges() <= 0) return false;
+                transaction.Commit();
+                return true;
             }
             catch
             {
+                // Falha de concorrência/duplicidade: transação descartada sem exceder vagas.
                 return false;
             }
-
         }
 
         #endregion
