@@ -26,7 +26,13 @@ public sealed class StudentController : Controller
             return View(new List<Workout>());
         }
 
-        if (!await _db.Members.AnyAsync(m => m.Id == memberId))
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isStillLinked = !string.IsNullOrWhiteSpace(userId) &&
+            await _db.UserClaims.AsNoTracking().AnyAsync(link =>
+                link.UserId == userId && link.ClaimType == "gymflow:member_id" &&
+                link.ClaimValue == memberId.ToString());
+
+        if (!isStillLinked || !await _db.Members.AsNoTracking().AnyAsync(m => m.Id == memberId))
         {
             ViewBag.NeedsLink = true;
             return View(new List<Workout>());
