@@ -214,7 +214,7 @@ namespace GymManagementBLL.Services.Classes
         private bool IsSessionValidToRemove(Session session)
         {
             return session != null &&
-            session.EndDate <= BrazilClock.Now &&
+            session.StartDate > BrazilClock.Now &&
             _unitOfWork.SessionRepository.GetCountOfBooksSlots(session.Id) == 0;
         }
 
