@@ -34,6 +34,7 @@ namespace GymManagementPL.Controllers
         public IActionResult Create(CreateAdminViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
+            if (!User.IsInRole("SuperAdmin") && model.Role == "SuperAdmin") return Forbid();
 
             var result = _adminService.CreateAdmin(model);
 
@@ -101,6 +102,7 @@ namespace GymManagementPL.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult ResetPassword(string id)
         {
             return View(new ResetPasswordViewModel { Id = id });
@@ -108,6 +110,7 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -126,6 +129,7 @@ namespace GymManagementPL.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult ManageRoles(string id)
         {
             var model = _adminService.GetRoles(id);
@@ -135,6 +139,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult AddRole(string userId, string role)
         {
             var result = _adminService.AddRole(userId, role);
@@ -149,6 +154,7 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult RemoveRole(string userId, string role)
         {
             var result = _adminService.RemoveRole(userId, role);
