@@ -12,11 +12,11 @@ namespace GymManagementBLL.ViewModels.AdminManamentViewModels
         [Required]
         public string Id { get; set; } = null!;
 
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid Email Address")]
+        [Required(ErrorMessage = "Informe o e-mail.")]
+        [EmailAddress(ErrorMessage = "Informe um e-mail válido.")]
         public string Email { get; set; } = null!;
 
-        [Required(ErrorMessage = "UserName is required")]
+        [Required(ErrorMessage = "Informe o nome de usuário.")]
         public string UserName { get; set; } = null!;
     }
 }
