@@ -37,8 +37,23 @@ namespace GymManagementBLL.Services.Classes
 
         public IEnumerable<AdminListViewModel> GetAllUsers()
         {
-            var users = _userManager.Users.ToList();
-            return _mapper.Map<IEnumerable<AdminListViewModel>>(users);
+            // O painel web e o aplicativo devem listar todas as contas, não apenas Admin.
+            var users = _userManager.Users.OrderBy(x => x.Email).ToList();
+            var priority = new[] { "SuperAdmin", "Admin", "Gerente", "Recepcionista", "Instrutor", "Aluno" };
+            return users.Select(user =>
+            {
+                var roles = _userManager.GetRolesAsync(user).GetAwaiter().GetResult();
+                var claims = _userManager.GetClaimsAsync(user).GetAwaiter().GetResult();
+                var memberValue = claims.FirstOrDefault(c => c.Type == "gymflow:member_id")?.Value;
+                return new AdminListViewModel
+                {
+                    Id = user.Id,
+                    Email = user.Email ?? "",
+                    UserName = user.UserName ?? "",
+                    Role = priority.FirstOrDefault(roles.Contains) ?? roles.FirstOrDefault() ?? "Sem perfil",
+                    LinkedMemberId = int.TryParse(memberValue, out var memberId) ? memberId : null
+                };
+            }).ToList();
         }
 
         // =========================
@@ -46,14 +61,20 @@ namespace GymManagementBLL.Services.Classes
         // =========================
         public IdentityResult CreateAdmin(CreateAdminViewModel model)
         {
+            // Respeita a função escolhida, sem permitir valores inesperados.
+            var allowedRoles = new[] { "SuperAdmin", "Admin", "Gerente", "Recepcionista", "Instrutor", "Aluno" };
+            if (!allowedRoles.Contains(model.Role) || !_roleManager.RoleExistsAsync(model.Role).GetAwaiter().GetResult())
+                return IdentityResult.Failed(new IdentityError { Description = "Selecione um perfil cadastrado no sistema." });
+
             var user = _mapper.Map<ApplicationUser>(model);
+            var created = _userManager.CreateAsync(user, model.Password).GetAwaiter().GetResult();
+            if (!created.Succeeded) return created;
 
-            var result = _userManager.CreateAsync(user, model.Password).Result;
+            var assigned = _userManager.AddToRoleAsync(user, model.Role).GetAwaiter().GetResult();
+            if (!assigned.Succeeded)
+                _userManager.DeleteAsync(user).GetAwaiter().GetResult();
 
-            if (result.Succeeded)
-                _userManager.AddToRoleAsync(user, "Admin").Wait();
-
-            return result;
+            return assigned;
         }
 
 
