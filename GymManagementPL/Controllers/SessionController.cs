@@ -129,7 +129,7 @@ namespace GymManagementPL.Controllers
 
         }
 
-        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
         public IActionResult Delete(int id)
         {
             if (id <= 0)
