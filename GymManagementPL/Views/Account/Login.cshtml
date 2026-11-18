@@ -38,7 +38,6 @@
                 <div class="alert alert-success" role="status">@successMessage</div>
             }
             <form asp-action="Login" asp-controller="Account" method="post" id="loginForm">
-                @Html.AntiForgeryToken()
                 @Html.ValidationMessage("InvalidLogin", new { @class = "text-danger" })
 
                 <div class="form-floating">
