@@ -1,157 +1,138 @@
-﻿@model IEnumerable<MemberViewModel>
-
+@model IEnumerable<MemberViewModel>
 @{
     ViewData["Title"] = "Alunos";
+    var alunos = Model?.ToList() ?? new List<MemberViewModel>();
+    var podeExcluir = User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente");
 }
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div id="Alert" class="alert alert-success alert-dismissible fade show">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-else if (TempData["ErrorMessage"] != null)
-{
-    <div id="Alert" class="alert alert-danger alert-dismissible fade show">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
-
-
-<div class="container">
-    <header class="d-flex justify-content-end mt-5 mb-4 align-items-center">
-        <a asp-controller="Member" asp-action="Create" class="btn btn-fill fw-medium rounded-pill px-3 py-3">
-            + Cadastrar aluno
+<style>
+    .alunos-hero { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; border-radius:24px; padding:clamp(24px,4vw,42px); background:linear-gradient(115deg,#070093,#2921b9); color:#fff; }
+    .alunos-hero p { color:#e3e1ff; }
+    .alunos-busca { background:#fff; border:1px solid #e8e7f4; border-radius:17px; padding:19px 21px; }
+    .alunos-busca .form-control { border:1px solid #d7d6e8; border-radius:12px; min-height:47px; }
+    .alunos-busca .form-control:focus { border-color:#070093; box-shadow:0 0 0 .2rem rgba(7,0,147,.1); }
+    .aluno-card { display:flex; flex-direction:column; height:100%; border:1px solid #e7e6f2; border-radius:19px; background:#fff; padding:22px; box-shadow:0 10px 32px rgba(7,0,147,.045); transition:transform .15s ease,box-shadow .15s ease; }
+    .aluno-card:hover { transform:translateY(-2px); box-shadow:0 15px 38px rgba(7,0,147,.08); }
+    .aluno-avatar { display:grid; place-items:center; flex-shrink:0; width:50px; height:50px; border-radius:15px; background:#eeedff; color:#070093; font-size:1.5rem; }
+    .aluno-card h2 { font-size:1.1rem; font-weight:800; color:#24243b; overflow-wrap:anywhere; }
+    .aluno-meta { display:flex; gap:10px; align-items:flex-start; margin-bottom:12px; color:#55556e; font-size:.89rem; overflow-wrap:anywhere; }
+    .aluno-meta i { color:#070093; font-size:1rem; flex-shrink:0; }
+    .aluno-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:auto; padding-top:14px; border-top:1px solid #efedf8; }
+    .aluno-actions .btn { border-radius:10px; padding:10px 9px; font-weight:700; font-size:.84rem; }
+    .aluno-primary { background:#070093; border-color:#070093; color:#fff; }
+    .aluno-primary:hover { background:#2118b9; border-color:#2118b9; color:#fff; }
+    .aluno-secondary { border:1px solid #d9d7ef; color:#070093; background:#fff; }
+    .aluno-secondary:hover { background:#f0efff; color:#070093; }
+    .aluno-empty { text-align:center; background:#fff; border:1px dashed #d2d0e7; border-radius:19px; padding:48px 25px; }
+    @@media(max-width:575px) { .aluno-card { padding:19px; } .alunos-hero { padding:25px; } }
+</style>
+<section class="container py-4 py-md-5" style="max-width:1200px">
+    <header class="alunos-hero mb-4">
+        <div>
+            <span class="fw-bold small text-uppercase" style="letter-spacing:.12em">GymFlow · Gestão de alunos</span>
+            <h1 class="h2 fw-bold mt-2 mb-2">Alunos da academia</h1>
+            <p class="mb-0">Cadastros, contatos e informações organizados em um só lugar.</p>
+        </div>
+        <a asp-controller="Member" asp-action="Create" class="btn btn-light fw-bold rounded-3 px-4 py-3">
+            <i class="bi bi-person-plus me-2"></i>Cadastrar aluno
         </a>
     </header>
 
-    @if (Model != null && Model.Any())
+    @if (TempData["SuccessMessage"] is string sucesso)
     {
-        <div class="table-responsive " style="overflow: visible;">
-            <table class="table table-borderless">
-                <thead>
-                    <tr>
-                        <th><span>Foto</span></th>
-                        <th><span>Nome</span></th>
-                        <th><span>E-mail</span></th>
-                        <th><span>Gênero</span></th>
-                        <th><span>Telefone</span></th>
-                        <th><span>Ações</span></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var member in Model)
-                    {
-                        <tr>
-                            <td>
-                                <span class="avatar">
-                                    @if (string.IsNullOrEmpty(member.Photo))
-                                    {
-                                        <img src="~/images/User.jpg" alt="Foto padrão" class="rounded-circle"
-                                             style="width: 40px; height: 40px;" />
-                                    }
-                                    else
-                                    {
-                                        <img src="~/images/members/@member.Photo" alt="@member.Name" class="rounded-circle"
-                                             style="width: 40px; height: 40px;" />
-                                    }
-                                </span>
-                            </td>
-                            <td><span>@member.Name</span></td>
-                            <td><span>@member.Email</span></td>
-                            <td><span>@(member.Gender == "Male" ? "Masculino" : member.Gender == "Female" ? "Feminino" : member.Gender)</span></td>
-                            <td><span>@member.Phone</span></td>
-                            <td class="action position-relative">
-                                <div class="dropdown">
-                                    <button class="btn btn-link p-0 border-0" type="button"
-                                            id="dropdownMenuButton-@member.Id" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        <img src="~/images/action dots.jpg" alt="Ações" />
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-start"
-                                        aria-labelledby="dropdownMenuButton-@member.Id">
-                                        <li>
-                                            <a asp-controller="Member" asp-action="MemberDetails" asp-route-id="@member.Id"
-                                               class="dropdown-item d-flex align-items-center gap-3">
-                                                <img src="~/images/info 1.jpg" alt="Informações"
-                                                     style="width: 20px; height: 20px;" />
-                                                <span>Ver dados do aluno</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a asp-controller="Member" asp-action="HealthRecordDetails" asp-route-id="@member.Id"
-                                               class="dropdown-item d-flex align-items-center gap-3">
-                                                <img src="~/images/info 1.jpg" alt="Informações"
-                                                     style="width: 20px; height: 20px;" />
-                                                <span>Ver ficha de saúde</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li>
-                                            <a asp-controller="Member" asp-action="EditMember" asp-route-id="@member.Id"
-                                               class="dropdown-item d-flex align-items-center gap-3">
-                                                <img src="~/images/edit.jpg" alt="Editar"
-                                                     style="width: 20px; height: 20px;" />
-                                                <span>Editar aluno</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente"))
-                                        {
-                                        <li>
-                                            <a asp-controller="Member" asp-action="Delete" asp-route-id="@member.Id"
-                                               class="dropdown-item d-flex align-items-center gap-3 text-danger">
-                                                <img src="~/images/x-circle 1.jpg" alt="Excluir"
-                                                     style="width: 20px; height: 20px;" />
-                                                <span>Excluir</span>
-                                            </a>
-                                        </li>
-                                        }
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
+        <div class="alert alert-success rounded-3" role="status"><i class="bi bi-check-circle me-2"></i>@sucesso</div>
+    }
+    @if (TempData["ErrorMessage"] is string erro)
+    {
+        <div class="alert alert-danger rounded-3" role="alert"><i class="bi bi-exclamation-circle me-2"></i>@erro</div>
+    }
 
-                    }
-
-                </tbody>
-            </table>
+    @if (alunos.Count == 0)
+    {
+        <div class="aluno-empty">
+            <i class="bi bi-people fs-1" style="color:#7772c6" aria-hidden="true"></i>
+            <h2 class="h5 fw-bold mt-3">Nenhum aluno cadastrado</h2>
+            <p class="text-muted mb-3">Comece cadastrando o primeiro aluno da academia.</p>
+            <a asp-controller="Member" asp-action="Create" class="btn aluno-primary fw-bold rounded-3 px-4 py-2">Cadastrar primeiro aluno</a>
         </div>
     }
     else
     {
-        <div class="text-center py-5">
-            <i class="bi bi-person-workspace display-1 text-muted"></i>
-            <h4 class="mt-3 text-muted">Nenhum aluno cadastrado</h4>
-            <p class="text-muted">Cadastre o primeiro aluno para começar</p>
+        <div class="alunos-busca d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+            <div class="flex-grow-1" style="min-width:min(100%,280px)">
+                <label for="buscaAlunos" class="form-label fw-bold mb-2" style="color:#24243b">
+                    <i class="bi bi-search me-2" style="color:#070093"></i>Buscar aluno
+                </label>
+                <input id="buscaAlunos" type="search" class="form-control" autocomplete="off"
+                       placeholder="Pesquise por nome, e-mail ou telefone" />
+            </div>
+            <span class="text-muted small fw-semibold" id="contagemAlunos" aria-live="polite">
+                @alunos.Count @(alunos.Count == 1 ? "aluno encontrado" : "alunos encontrados")
+            </span>
+        </div>
+        <div class="row g-3" id="listaAlunos">
+            @foreach (var aluno in alunos)
+            {
+                var busca = $"{aluno.Name} {aluno.Email} {aluno.Phone}";
+                var genero = aluno.Gender == "Male" ? "Masculino" :
+                             aluno.Gender == "Female" ? "Feminino" :
+                             string.IsNullOrWhiteSpace(aluno.Gender) ? "Não informado" : aluno.Gender;
+                <div class="col-12 col-md-6 col-xl-4 aluno-item" data-search="@busca">
+                    <article class="aluno-card">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <span class="aluno-avatar"><i class="bi bi-person" aria-hidden="true"></i></span>
+                            <div class="min-width-0">
+                                <h2 class="mb-1">@aluno.Name</h2>
+                                <span class="small text-muted">Cadastro #@aluno.Id</span>
+                            </div>
+                        </div>
+                        <div class="aluno-meta"><i class="bi bi-envelope"></i><span>@aluno.Email</span></div>
+                        <div class="aluno-meta"><i class="bi bi-telephone"></i><span>@aluno.Phone</span></div>
+                        <div class="aluno-meta mb-4"><i class="bi bi-person-badge"></i><span>@genero</span></div>
+                        <div class="aluno-actions">
+                            <a asp-controller="Member" asp-action="MemberDetails" asp-route-id="@aluno.Id"
+                               class="btn aluno-primary"><i class="bi bi-eye me-1"></i>Ver cadastro</a>
+                            <a asp-controller="Member" asp-action="EditMember" asp-route-id="@aluno.Id"
+                               class="btn aluno-secondary"><i class="bi bi-pencil me-1"></i>Editar</a>
+                            <a asp-controller="Member" asp-action="HealthRecordDetails" asp-route-id="@aluno.Id"
+                               class="btn aluno-secondary"><i class="bi bi-clipboard2-pulse me-1"></i>Ficha de saúde</a>
+                            @if (podeExcluir)
+                            {
+                                <a asp-controller="Member" asp-action="Delete" asp-route-id="@aluno.Id"
+                                   class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Excluir</a>
+                            }
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+        <div id="semResultados" class="aluno-empty mt-3" hidden>
+            <i class="bi bi-search fs-1" style="color:#7772c6" aria-hidden="true"></i>
+            <h2 class="h5 fw-bold mt-3">Nenhum aluno encontrado</h2>
+            <p class="text-muted mb-0">Tente pesquisar por outro nome, e-mail ou telefone.</p>
         </div>
     }
-
-</div>
-
-
+</section>
 @section Scripts
 {
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const alertBox = document.getElementById("Alert");
-            if (alertBox) {
-                setTimeout(() => {
-                    alertBox.style.transition = "opacity 0.5s ease";
-                    alertBox.style.opacity = "0";
-                    setTimeout(() => alertBox.remove(), 500);
-                }, 1500);
-            }
+        document.addEventListener("DOMContentLoaded", () => {
+            const input = document.getElementById("buscaAlunos");
+            if (!input) return;
+            const cards = Array.from(document.querySelectorAll(".aluno-item"));
+            const counter = document.getElementById("contagemAlunos");
+            const empty = document.getElementById("semResultados");
+            const normalize = (value) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim();
+            input.addEventListener("input", () => {
+                const query = normalize(input.value);
+                let count = 0;
+                for (const card of cards) {
+                    const matches = normalize(card.dataset.search || "").includes(query);
+                    card.hidden = !matches;
+                    if (matches) count++;
+                }
+                if (counter) counter.textContent = count + (count === 1 ? " aluno encontrado" : " alunos encontrados");
+                if (empty) empty.hidden = count !== 0;
+            });
         });
     </script>
-
 }
