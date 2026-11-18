@@ -15,7 +15,6 @@
     @Html.ValidationMessage("DataMissed", new { @class = "text-danger" })
 
     <form asp-controller="Member" asp-action="CreateMember" method="post" class="card border-0 shadow-sm rounded-4 p-4">
-        @Html.AntiForgeryToken()
 
         <h2 class="h5 fw-bold mb-3" style="color:#070093">Dados pessoais</h2>
         <div class="row g-3">
