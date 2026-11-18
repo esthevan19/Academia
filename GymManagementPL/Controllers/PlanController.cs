@@ -26,7 +26,7 @@ namespace GymManagementPL.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Id Of Plan Can Not Be 0 Or Negative";
+                TempData["ErrorMessage"] = "Identificador do plano inválido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -34,7 +34,7 @@ namespace GymManagementPL.Controllers
 
             if (plan == null)
             {
-                TempData["ErrorMessage"] = $"Plan Of Idetifier {id} Not Found";
+                TempData["ErrorMessage"] = $"Plano não encontrado: {id}";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -47,7 +47,7 @@ namespace GymManagementPL.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Id Of Plan Can Not Be 0 Or Negative";
+                TempData["ErrorMessage"] = "Identificador do plano inválido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -55,7 +55,7 @@ namespace GymManagementPL.Controllers
 
             if (plan == null)
             {
-                TempData["ErrorMessage"] = "Plan Can not be Updated";
+                TempData["ErrorMessage"] = "Não foi possível localizar o plano para editar.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -63,42 +63,45 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Edit(int id, UpdatePlanViewModel updatedPlan)
         {
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("WrongData", "Check Data Validation");
+                ModelState.AddModelError("WrongData", "Confira as informações do plano.");
                 return View(updatedPlan);
             }
 
             var result = _planService.UpdatePlan(id, updatedPlan);
 
             if (result)
-                TempData["SuccessMessage"] = "Plan updated successfully!";
+                TempData["SuccessMessage"] = "Plano atualizado com sucesso!";
             else
-                TempData["ErrorMessage"] = "Failed to update plan.";
+                TempData["ErrorMessage"] = "Não foi possível atualizar o plano.";
 
             return RedirectToAction(nameof(Index));
 
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Activate(int id)
         {
 
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Id Of Plan Can Not Be 0 Or Negative";
+                TempData["ErrorMessage"] = "Identificador do plano inválido.";
                 return RedirectToAction(nameof(Index));
             }
 
             var result = _planService.PlanStatusToggle(id);
 
             if (result)
-                TempData["SuccessMessage"] = "Plan Status Changed";
+                TempData["SuccessMessage"] = "Situação do plano atualizada com sucesso!";
             else
-                TempData["ErrorMessage"] = "Failed to Change plan Status";
+                TempData["ErrorMessage"] = "Não foi possível alterar a situação do plano.";
 
             return RedirectToAction(nameof(Index));
 
