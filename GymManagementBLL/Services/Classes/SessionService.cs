@@ -200,21 +200,21 @@ namespace GymManagementBLL.Services.Classes
             // Corrigido: o formulário envia o horário local do usuário (ex: horário do Brasil),
             // então comparamos com DateTime.Now (horário local do servidor) em vez de
             // DateTime.UtcNow, que ficava várias horas à frente e rejeitava sessões futuras válidas.
-            return EndDate > startDate && EndDate > DateTime.Now;
+            return EndDate > startDate && startDate > BrazilClock.Now;
         }
 
         private bool IsSessionValidToUpdate(Session session)
         {
             return session != null &&
-                   session.EndDate >= DateTime.Now &&
-                   session.StartDate > DateTime.Now &&
+                   session.EndDate >= BrazilClock.Now &&
+                   session.StartDate > BrazilClock.Now &&
                    _unitOfWork.SessionRepository.GetCountOfBooksSlots(session.Id) == 0;
         }
 
         private bool IsSessionValidToRemove(Session session)
         {
             return session != null &&
-            session.EndDate <= DateTime.Now &&
+            session.EndDate <= BrazilClock.Now &&
             _unitOfWork.SessionRepository.GetCountOfBooksSlots(session.Id) == 0;
         }
 
