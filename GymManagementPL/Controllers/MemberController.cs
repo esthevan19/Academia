@@ -56,11 +56,14 @@ namespace GymManagementPL.Controllers
             bool result = _memberService.CreateMember(createdMember);
 
             if (result)
-                TempData["SuccessMessage"] = $"Aluno cadastrado com sucesso.";
-            else
-                TempData["ErrorMessage"] = $"Não foi possível cadastrar o aluno. E-mail ou telefone já cadastrado.";
+            {
+                TempData["SuccessMessage"] = "Aluno cadastrado com sucesso.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError(string.Empty,
+                "Não foi possível salvar o aluno. Confira os dados ou tente novamente. Se persistir, contate o administrador.");
+            return View(nameof(Create), createdMember);
         }
 
         #endregion
