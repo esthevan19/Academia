@@ -42,6 +42,7 @@ namespace GymManagementPL.Controllers
 
         }
 
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Edit(int id)
         {
             if (id <= 0)
@@ -62,6 +63,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Edit(int id, UpdatePlanViewModel updatedPlan)
         {
             if (!ModelState.IsValid)
@@ -81,6 +83,7 @@ namespace GymManagementPL.Controllers
 
         }
 
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Activate(int id)
         {
 
