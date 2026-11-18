@@ -11,11 +11,20 @@
             <a class="btn btn-outline-primary" asp-controller="Session" asp-action="Index">Ver aulas coletivas</a>
             <a class="btn btn-outline-secondary" asp-controller="Plan" asp-action="Index">Consultar planos</a>
         </div>
-        <div class="alert alert-info mt-4" role="status">
-            Para consultar matrícula, treinos e reservas individuais, solicite à recepção
-            o vínculo desta conta ao seu cadastro de aluno na academia.
-            Isso protege suas informações pessoais.
-        </div>
+        @if (User.HasClaim(claim => claim.Type == "gymflow:member_id"))
+        {
+            <div class="alert alert-success mt-4" role="status">
+                Sua conta está vinculada ao cadastro de aluno.
+                Você pode consultar suas fichas em <strong>Meus treinos</strong>.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mt-4" role="status">
+                Para consultar seus treinos, peça ao SuperAdmin para vincular esta conta
+                ao seu cadastro de aluno. Depois, saia e entre novamente.
+            </div>
+        }
         <p class="mb-1"><strong>E-mail da conta:</strong> @User.Identity?.Name</p>
         <p class="small text-muted mb-0">Cadastros de alunos, mensalidades e gerenciamento da academia ficam disponíveis apenas para a equipe autorizada.</p>
     </div>
