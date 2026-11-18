@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<MemberViewModel>
 
 @{
-    ViewData["Title"] = "Members";
+    ViewData["Title"] = "Alunos";
 }
 
 @if (TempData["SuccessMessage"] != null)
@@ -26,7 +26,7 @@ else if (TempData["ErrorMessage"] != null)
 <div class="container">
     <header class="d-flex justify-content-end mt-5 mb-4 align-items-center">
         <a asp-controller="Member" asp-action="Create" class="btn btn-fill fw-medium rounded-pill px-3 py-3">
-            + Add Member
+            + Cadastrar aluno
         </a>
     </header>
 
@@ -36,12 +36,12 @@ else if (TempData["ErrorMessage"] != null)
             <table class="table table-borderless">
                 <thead>
                     <tr>
-                        <th><span>@nameof(MemberViewModel.Photo)</span></th>
-                        <th><span>@nameof(MemberViewModel.Name)</span></th>
-                        <th><span>@nameof(MemberViewModel.Email)</span></th>
-                        <th><span>@nameof(MemberViewModel.Gender)</span></th>
-                        <th><span>@nameof(MemberViewModel.Phone)</span></th>
-                        <th><span>Action</span></th>
+                        <th><span>Foto</span></th>
+                        <th><span>Nome</span></th>
+                        <th><span>E-mail</span></th>
+                        <th><span>Gênero</span></th>
+                        <th><span>Telefone</span></th>
+                        <th><span>Ações</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,7 +52,7 @@ else if (TempData["ErrorMessage"] != null)
                                 <span class="avatar">
                                     @if (string.IsNullOrEmpty(member.Photo))
                                     {
-                                        <img src="~/images/User.jpg" alt="Default Avatar" class="rounded-circle"
+                                        <img src="~/images/User.jpg" alt="Foto padrão" class="rounded-circle"
                                              style="width: 40px; height: 40px;" />
                                     }
                                     else
@@ -64,31 +64,31 @@ else if (TempData["ErrorMessage"] != null)
                             </td>
                             <td><span>@member.Name</span></td>
                             <td><span>@member.Email</span></td>
-                            <td><span>@member.Gender</span></td>
+                            <td><span>@(member.Gender == "Male" ? "Masculino" : member.Gender == "Female" ? "Feminino" : member.Gender)</span></td>
                             <td><span>@member.Phone</span></td>
                             <td class="action position-relative">
                                 <div class="dropdown">
                                     <button class="btn btn-link p-0 border-0" type="button"
                                             id="dropdownMenuButton-@member.Id" data-bs-toggle="dropdown"
                                             aria-expanded="false">
-                                        <img src="~/images/action dots.jpg" alt="action icon" />
+                                        <img src="~/images/action dots.jpg" alt="Ações" />
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-start"
                                         aria-labelledby="dropdownMenuButton-@member.Id">
                                         <li>
                                             <a asp-controller="Member" asp-action="MemberDetails" asp-route-id="@member.Id"
                                                class="dropdown-item d-flex align-items-center gap-3">
-                                                <img src="~/images/info 1.jpg" alt="info icon"
+                                                <img src="~/images/info 1.jpg" alt="Informações"
                                                      style="width: 20px; height: 20px;" />
-                                                <span>View Member Data</span>
+                                                <span>Ver dados do aluno</span>
                                             </a>
                                         </li>
                                         <li>
                                             <a asp-controller="Member" asp-action="HealthRecordDetails" asp-route-id="@member.Id"
                                                class="dropdown-item d-flex align-items-center gap-3">
-                                                <img src="~/images/info 1.jpg" alt="info icon"
+                                                <img src="~/images/info 1.jpg" alt="Informações"
                                                      style="width: 20px; height: 20px;" />
-                                                <span>View Health Record Data</span>
+                                                <span>Ver ficha de saúde</span>
                                             </a>
                                         </li>
                                         <li>
@@ -97,9 +97,9 @@ else if (TempData["ErrorMessage"] != null)
                                         <li>
                                             <a asp-controller="Member" asp-action="EditMember" asp-route-id="@member.Id"
                                                class="dropdown-item d-flex align-items-center gap-3">
-                                                <img src="~/images/edit.jpg" alt="edit icon"
+                                                <img src="~/images/edit.jpg" alt="Editar"
                                                      style="width: 20px; height: 20px;" />
-                                                <span>Edit Member Data</span>
+                                                <span>Editar aluno</span>
                                             </a>
                                         </li>
                                         <li>
@@ -108,9 +108,9 @@ else if (TempData["ErrorMessage"] != null)
                                         <li>
                                             <a asp-controller="Member" asp-action="Delete" asp-route-id="@member.Id"
                                                class="dropdown-item d-flex align-items-center gap-3 text-danger">
-                                                <img src="~/images/x-circle 1.jpg" alt="delete icon"
+                                                <img src="~/images/x-circle 1.jpg" alt="Excluir"
                                                      style="width: 20px; height: 20px;" />
-                                                <span>Delete</span>
+                                                <span>Excluir</span>
                                             </a>
                                         </li>
                                     </ul>
@@ -128,8 +128,8 @@ else if (TempData["ErrorMessage"] != null)
     {
         <div class="text-center py-5">
             <i class="bi bi-person-workspace display-1 text-muted"></i>
-            <h4 class="mt-3 text-muted">No Members Available</h4>
-            <p class="text-muted">Add your first Member to get started</p>
+            <h4 class="mt-3 text-muted">Nenhum aluno cadastrado</h4>
+            <p class="text-muted">Cadastre o primeiro aluno para começar</p>
         </div>
     }
 
