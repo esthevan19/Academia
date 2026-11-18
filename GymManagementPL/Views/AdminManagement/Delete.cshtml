@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Excluir Admin";
+    ViewData["Title"] = "Excluir usuário";
 }
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -8,12 +8,12 @@
             <div class="card p-5 shadow" style="border-radius:15px;">
                 <!-- Cabeçalho -->
                 <h2 class="text-center fw-bold mb-4" style="color:#070093; letter-spacing:1px;">
-                    Excluir Admin
+                    Excluir usuário
                 </h2>
-                <p class="fs-5 text-center mb-4">Tem certeza que deseja excluir este Admin?</p>
+                <p class="fs-5 text-center mb-4">Tem certeza que deseja excluir este usuário?</p>
                 <!-- Alerta de Aviso -->
                 <div class="alert alert-warning text-start" role="alert">
-                    <strong>Atenção!</strong> Esta ação não pode ser desfeita. Todos os dados do Admin serão excluídos permanentemente.
+                    <strong>Atenção!</strong> Esta ação não pode ser desfeita. Todos os dados deste usuário serão excluídos permanentemente.
                 </div>
                 <!-- Formulário -->
                 <form method="post" asp-action="DeleteConfirmed" class="mt-4">
