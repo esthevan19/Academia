@@ -18,7 +18,6 @@
                         <h4 class="mb-0 text-black">@Model.Name</h4>
                     </div>
                     <form asp-action="EditTrainer" asp-route-id="@trainerId" method="post">
-                        @Html.AntiForgeryToken()
                         <input hidden asp-for="Name" />
                         <!-- Dados pessoais -->
                         <div class="section-header mb-3">
@@ -91,7 +90,7 @@
 
                         <div class="d-flex justify-content-between mt-4 pt-3 border-top">
                             <a asp-action="Index" class="btn btn-outline">
-                                <i class="bi bi-arrow-left me-1"></i>Cancel
+                                <i class="bi bi-arrow-left me-1"></i>Cancelar
                             </a>
                             <button type="submit" class="btn btn-fill">
                                 <i class="bi bi-check-lg me-1"></i>Salvar alterações
