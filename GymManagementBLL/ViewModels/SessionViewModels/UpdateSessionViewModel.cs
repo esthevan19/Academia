@@ -18,7 +18,7 @@ namespace GymManagementBLL.ViewModels.SessionViewModels
 
 		[Required(ErrorMessage = "Selecione o professor responsável.")]
 		[Display(Name = "Professor responsável")]
-		public int Professor responsávelId { get; set; }
+		public int TrainerId { get; set; }
 
 	}
 }
