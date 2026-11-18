@@ -75,11 +75,11 @@ namespace GymManagementBLL.Services.Classes
                 // Cancelar encerra a vigência sem apagar o histórico financeiro do aluno.
                 var now = BrazilClock.Now;
                 var repo = _unitOfWork.MembershipRepository;
-                var membership = repo.GetAll(x => x.MemberId == id && x.EndDate >= now)
+                var membership = repo.GetAll(x => x.MemberId == id &&
+                    x.CreatedAt <= now && x.EndDate >= now)
                     .OrderByDescending(x => x.EndDate).FirstOrDefault();
                 if (membership is null) return false;
 
-                // A matrícula agendada também pode ser cancelada antes de começar.
                 membership.EndDate = now.AddTicks(-1);
                 repo.Update(membership);
                 return _unitOfWork.SaveChanges() > 0;
