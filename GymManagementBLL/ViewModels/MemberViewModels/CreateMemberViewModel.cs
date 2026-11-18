@@ -12,7 +12,7 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
         public IFormFile PhotoFile { get; set; } = null!;
 
         [Required(ErrorMessage = "O Nome é obrigatório")]
-        [RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\s.\'-]*$", ErrorMessage = "Informe um nome válido, permitindo acentos, espaços, hífen e apóstrofo.")]
+        [RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\s.'-]*$", ErrorMessage = "Informe um nome válido, permitindo acentos, espaços, hífen e apóstrofo.")]
         [Display(Name = "Nome Completo")]
         public string Name { get; set; } = null!;
 
@@ -45,13 +45,13 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
 
         [Required(ErrorMessage = "A Cidade é obrigatória")]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "A Cidade deve ter entre 2 e 100 caracteres")]
-        [RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\s.\'-]*$", ErrorMessage = "Informe uma cidade válida, permitindo letras, acentos, espaços, hífen e apóstrofo.")]
+        [RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\s.'-]*$", ErrorMessage = "Informe uma cidade válida, permitindo letras, acentos, espaços, hífen e apóstrofo.")]
         [Display(Name = "Cidade")]
         public string City { get; set; } = null!;
 
         [Required(ErrorMessage = "A Rua é obrigatória")]
         [StringLength(150, MinimumLength = 2, ErrorMessage = "A Rua deve ter entre 2 e 150 caracteres")]
-        [RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ0-9][A-Za-zÀ-ÖØ-öø-ÿ0-9\s.,ºª°/()\'-]*$", ErrorMessage = "Informe uma rua válida, permitindo acentos, números e sinais usuais de endereço.")]
+        [RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ0-9][A-Za-zÀ-ÖØ-öø-ÿ0-9\s.,ºª°/()'-]*$", ErrorMessage = "Informe uma rua válida, permitindo acentos, números e sinais usuais de endereço.")]
         [Display(Name = "Rua")]
         public string Street { get; set; } = null!;
 
