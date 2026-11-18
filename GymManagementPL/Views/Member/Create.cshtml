@@ -1,183 +1,115 @@
-﻿@model CreateMemberViewModel
+@model CreateMemberViewModel
 @{
-    ViewData["Title"] = "Create Member";
+    ViewData["Title"] = "Cadastrar aluno";
 }
-<header class="mb-4">
-    <h3 class="text-primary-color">Add Member</h3>
-</header>
-
-@Html.ValidationMessage("DataMissed", new { @class = "text-danger" })
-
-
-<form method="post" asp-action="CreateMember" enctype="multipart/form-data">
-
-    <!-- Step navigation -->
-    <ul class="nav nav-tabs mb-4" id="addMemberTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="member-tab" data-bs-toggle="tab"
-                    data-bs-target="#member-info" type="button" role="tab">
-                Member Info
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="health-tab" data-bs-toggle="tab" data-bs-target="#health-info"
-                    type="button" role="tab">
-                Health Data
-            </button>
-        </li>
-    </ul>
-
-    <!-- Tab content -->
-    <div class="tab-content">
-        <!-- Member Info -->
-        <div class="tab-pane fade show active" id="member-info" role="tabpanel"
-             aria-labelledby="member-tab">
-            <div class="section-header mb-3">
-                <h5 class="text-primary fw-bold">Personal Information</h5>
-                <hr class="mt-2">
-            </div>
-            <div class="row g-3">
-                <div class="form-group">
-                    <!-- Photo Preview -->
-                    <div class="mt-2">
-                        <img id="photoPreview" src="#" alt="Photo Preview" style="max-width: 200px; display: none;"
-                             class="img-thumbnail" />
-                    </div>
-                    <label asp-for="PhotoFile" class="control-label">Profile Photo <span class="text-danger">*</span></label>
-                    <input asp-for="PhotoFile" type="file" class="form-control" accept="image/*" id="photoInput" required />
-                    <span asp-validation-for="PhotoFile" class="text-danger"></span>
-                    <small class="form-text text-muted">Max size: 5 MB. Allowed types: JPG, PNG, JPEG (Required)</small>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label asp-for="Name" class="form-label"></label>
-                    <input asp-for="Name" type="text" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"> </span>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" type="email" class="form-control" />
-                    <span asp-validation-for="Email" class="text-danger"></span>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label asp-for="Phone" class="form-label"></label>
-                    <input asp-for="Phone" type="tel" class="form-control" />
-                    <span asp-validation-for="Phone" class="text-danger"></span>
-                </div>
-                <div class="col-12 col-md-6">
-                    <label asp-for="DateOfBirth" class="form-label"></label>
-                    <input asp-for="DateOfBirth" class="form-control" type="date" />
-                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label asp-for="Gender" class="form-label"></label>
-                    <select asp-for="Gender" asp-items="Html.GetEnumSelectList<Gender>()" class="form-select">
-                        <option value="">-- Select Gender --</option>
-                    </select>
-                    <span asp-validation-for="Gender" class="text-danger"></span>
-                </div>
-
-            </div>
-            <div class="section-header mb-3 mt-4">
-                <h5 class="text-primary fw-bold">Address Information</h5>
-                <hr class="mt-2">
-            </div>
-            <div class="row g-3">
-
-                <div class="col-12 col-md-6">
-                    <label asp-for="BuildingNumber" class="form-label"></label>
-                    <input asp-for="BuildingNumber" class="form-control" />
-                    <span asp-validation-for="BuildingNumber" class="text-danger"></span>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label asp-for="Street" class="form-label"></label>
-                    <input asp-for="Street" class="form-control" />
-                    <span asp-validation-for="Street" class="text-danger"></span>
-                </div>
-                <div class="col-12 col-md-6">
-                    <label asp-for="City" class="form-label">City</label>
-                    <input asp-for="City" class="form-control" />
-                    <span asp-validation-for="City" class="text-danger"></span>
-                </div>
-            </div>
+<section class="py-4" style="max-width: 1050px; margin: auto">
+    <div class="d-flex justify-content-between flex-wrap align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="h2 fw-bold" style="color:#070093">Cadastrar aluno</h1>
+            <p class="text-muted">Preencha os dados de matrícula. A foto não é obrigatória.</p>
         </div>
-
-        <!-- Health Data -->
-        <div class="tab-pane fade" id="health-info" role="tabpanel" aria-labelledby="health-tab">
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <label asp-for="HealthRecordViewModel.Height" class="form-label"></label>
-                    <input asp-for="HealthRecordViewModel.Height" class="form-control" />
-                    <span asp-validation-for="HealthRecordViewModel.Height" class="text-danger"></span>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label asp-for="HealthRecordViewModel.Weight" class="form-label"></label>
-                    <input asp-for="HealthRecordViewModel.Weight" class="form-control" />
-                    <span asp-validation-for="HealthRecordViewModel.Weight" class="text-danger"></span>
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label asp-for="HealthRecordViewModel.BloodType" class="form-label"></label>
-                    <select asp-for="HealthRecordViewModel.BloodType" class="form-select">
-                        <option value="">Select</option>
-                        <option>A+</option>
-                        <option>A-</option>
-                        <option>B+</option>
-                        <option>B-</option>
-                        <option>O+</option>
-                        <option>O-</option>
-                        <option>AB+</option>
-                        <option>AB-</option>
-                    </select>
-                    <span asp-validation-for="HealthRecordViewModel.BloodType" class="text-danger"></span>
-                </div>
-                <div class="col-12 col-md-6">
-                    <label asp-for="HealthRecordViewModel.Note" class="form-label"></label>
-                    <input asp-for="HealthRecordViewModel.Note" class="form-control" />
-                    <span asp-validation-for="HealthRecordViewModel.Note" class="text-danger"></span>
-                </div>
-            </div>
-        </div>
+        <a asp-controller="Member" asp-action="Index" class="btn btn-outline-secondary">Voltar aos alunos</a>
     </div>
 
-    <footer class="d-flex justify-content-end gap-3 mt-4">
-        <a asp-controller="Member" asp-action="Index" class="btn btn-outline-secondary px-4">
-            <i class="bi bi-arrow-left me-2"></i> Back to List
-        </a>
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+    @Html.ValidationMessage("DataMissed", new { @class = "text-danger" })
 
-        <button type="submit" class="btn btn-primary px-4">
-            <i class="bi bi-plus-circle me-2"></i> Add
-        </button>
-    </footer>
+    <form asp-controller="Member" asp-action="CreateMember" method="post" class="card border-0 shadow-sm rounded-4 p-4">
+        @Html.AntiForgeryToken()
 
-</form>
+        <h2 class="h5 fw-bold mb-3" style="color:#070093">Dados pessoais</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label">Nome completo</label>
+                <input asp-for="Name" class="form-control" placeholder="Nome e sobrenome" autocomplete="name" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label">E-mail</label>
+                <input asp-for="Email" class="form-control" type="email" autocomplete="email" placeholder="email@exemplo.com" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Phone" class="form-label">Celular com DDD</label>
+                <input asp-for="Phone" class="form-control" type="tel" inputmode="numeric" maxlength="11" placeholder="51987654321" />
+                <span asp-validation-for="Phone" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="DateOfBirth" class="form-label">Data de nascimento</label>
+                <input asp-for="DateOfBirth" class="form-control" type="date" />
+                <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Gender" class="form-label">Gênero</label>
+                <select asp-for="Gender" asp-items="Html.GetEnumSelectList<Gender>()" class="form-select">
+                    <option value="">Selecione</option>
+                </select>
+                <span asp-validation-for="Gender" class="text-danger small"></span>
+            </div>
+        </div>
 
-@section Scripts
-{
+        <hr class="my-4" />
+        <h2 class="h5 fw-bold mb-3" style="color:#070093">Endereço</h2>
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label asp-for="Street" class="form-label">Rua</label>
+                <input asp-for="Street" class="form-control" placeholder="Ex.: Rua São José" />
+                <span asp-validation-for="Street" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="City" class="form-label">Cidade</label>
+                <input asp-for="City" class="form-control" placeholder="Ex.: Parobé" />
+                <span asp-validation-for="City" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="BuildingNumber" class="form-label">Número</label>
+                <input asp-for="BuildingNumber" class="form-control" type="number" min="1" max="999999" />
+                <span asp-validation-for="BuildingNumber" class="text-danger small"></span>
+            </div>
+        </div>
 
-    @{
-        <partial name="_ValidationScriptsPartial" />
-        // Server Side Validations
-    }
+        <hr class="my-4" />
+        <h2 class="h5 fw-bold mb-2" style="color:#070093">Ficha de saúde</h2>
+        <p class="small text-muted">Preenchida pela equipe da academia. Dados de saúde não são solicitados na criação de conta de acesso.</p>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label asp-for="HealthRecordViewModel.Height" class="form-label">Altura (m)</label>
+                <input asp-for="HealthRecordViewModel.Height" type="text" inputmode="decimal" class="form-control" placeholder="Ex.: 1,75" />
+                <span asp-validation-for="HealthRecordViewModel.Height" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="HealthRecordViewModel.Weight" class="form-label">Peso (kg)</label>
+                <input asp-for="HealthRecordViewModel.Weight" type="text" inputmode="decimal" class="form-control" placeholder="Ex.: 70,5" />
+                <span asp-validation-for="HealthRecordViewModel.Weight" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="HealthRecordViewModel.BloodType" class="form-label">Tipo sanguíneo</label>
+                <select asp-for="HealthRecordViewModel.BloodType" class="form-select">
+                    <option value="">Selecione</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+                <span asp-validation-for="HealthRecordViewModel.BloodType" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="HealthRecordViewModel.Note" class="form-label">Observações de saúde (opcional)</label>
+                <textarea asp-for="HealthRecordViewModel.Note" class="form-control" rows="2" placeholder="Informações relevantes para o acompanhamento"></textarea>
+                <span asp-validation-for="HealthRecordViewModel.Note" class="text-danger small"></span>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+            <a asp-controller="Member" asp-action="Index" class="btn btn-outline-secondary px-4">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-4" style="background:#070093;border-color:#070093">Salvar aluno</button>
+        </div>
+    </form>
+</section>
 
-    <script>
-        // Preview photo before upload
-        document.getElementById('photoInput').addEventListener('change', function(e) {
-            var file = e.target.files[0];
-            if (file) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var preview = document.getElementById('photoPreview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-    </script>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }
