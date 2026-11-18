@@ -100,7 +100,6 @@ namespace GymManagementPL
             using var scope = app.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<GymDbContext>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             // Production schema changes require an explicit deployment opt-in.
             // Back up the SQL Server database before setting Database__ApplyMigrations=true.
             var applyMigrations = app.Environment.IsDevelopment() ||
@@ -111,8 +110,12 @@ namespace GymManagementPL
                 if (pendingMigrations.Any())
                     dbContext.Database.Migrate();
             }
-            GymDataSeeding.SeedData(dbContext);
-            IdentityDbContextSeeding.SeedData(roleManager, userManager);
+            // Dados de exemplo (planos/categorias) apenas no desenvolvimento.
+            // Produção mantém os cadastros reais e nunca cria contas com senhas fixas.
+            if (app.Environment.IsDevelopment())
+                GymDataSeeding.SeedData(dbContext);
+
+            IdentityDbContextSeeding.SeedRoles(roleManager);
 
             #endregion
 
