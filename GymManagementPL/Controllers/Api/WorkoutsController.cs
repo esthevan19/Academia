@@ -19,21 +19,33 @@ public class WorkoutsController : ControllerBase
     public sealed record ExerciseInput(string Name, int Sets, string Reps, decimal? LoadKg, int RestSeconds, string? Notes);
     public sealed record WorkoutInput(int MemberId, string Name, string? Category, string? Letter, string? Notes, List<ExerciseInput> Exercises);
 
-    private int? LinkedMemberId()
+    // Nunca confiar apenas no vínculo gravado em um JWT antigo.
+    // O SuperAdmin pode revogar ou alterar o cadastro durante a validade do token.
+    private async Task<int?> LinkedMemberIdAsync()
     {
-        return int.TryParse(User.FindFirstValue("gymflow:member_id"), out var id) && id > 0 ? id : null;
+        if (!int.TryParse(User.FindFirstValue("gymflow:member_id"), out var memberId) || memberId <= 0)
+            return null;
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        if (string.IsNullOrWhiteSpace(userId))
+            return null;
+
+        var linked = await _db.UserClaims.AsNoTracking().AnyAsync(claim =>
+            claim.UserId == userId &&
+            claim.ClaimType == "gymflow:member_id" &&
+            claim.ClaimValue == memberId.ToString());
+        return linked ? memberId : null;
     }
 
     private bool CanManage() => User.IsInRole("SuperAdmin") || User.IsInRole("Admin") ||
                                 User.IsInRole("Gerente") || User.IsInRole("Instrutor");
 
-    private IQueryable<Workout> AccessibleWorkouts()
+    private IQueryable<Workout> AccessibleWorkouts(int? linkedMemberId)
     {
         var query = _db.Workouts.AsNoTracking().Include(x => x.Exercises).AsQueryable();
         if (CanManage()) return query;
-        var id = LinkedMemberId();
-        return User.IsInRole("Aluno") && id.HasValue
-            ? query.Where(x => x.MemberId == id.Value)
+        return User.IsInRole("Aluno") && linkedMemberId.HasValue
+            ? query.Where(x => x.MemberId == linkedMemberId.Value)
             : query.Where(x => false);
     }
 
@@ -63,9 +75,10 @@ public class WorkoutsController : ControllerBase
     public async Task<IActionResult> List([FromQuery] int? memberId)
     {
         if (!CanManage() && !User.IsInRole("Aluno")) return Forbid();
-        if (User.IsInRole("Aluno") && LinkedMemberId() is null)
-            return Conflict(new { success = false, message = "Conta sem vínculo com cadastro de aluno." });
-        var query = AccessibleWorkouts();
+        var linkedMemberId = CanManage() ? null : await LinkedMemberIdAsync();
+        if (!CanManage() && linkedMemberId is null)
+            return Conflict(new { success = false, message = "Vínculo com cadastro de aluno ausente ou revogado. Entre novamente após falar com o SuperAdmin." });
+        var query = AccessibleWorkouts(linkedMemberId);
         if (memberId.HasValue) query = query.Where(x => x.MemberId == memberId.Value);
         var data = await query.OrderByDescending(x => x.CreatedAt).ToListAsync();
         return Ok(new { success = true, workouts = data.Select(ToResponse).ToList() });
@@ -75,9 +88,10 @@ public class WorkoutsController : ControllerBase
     public async Task<IActionResult> Get(int id)
     {
         if (!CanManage() && !User.IsInRole("Aluno")) return Forbid();
-        if (User.IsInRole("Aluno") && LinkedMemberId() is null)
-            return Conflict(new { success = false, message = "Conta sem vínculo com cadastro de aluno." });
-        var workout = await AccessibleWorkouts().FirstOrDefaultAsync(x => x.Id == id);
+        var linkedMemberId = CanManage() ? null : await LinkedMemberIdAsync();
+        if (!CanManage() && linkedMemberId is null)
+            return Conflict(new { success = false, message = "Vínculo com cadastro de aluno ausente ou revogado. Entre novamente após falar com o SuperAdmin." });
+        var workout = await AccessibleWorkouts(linkedMemberId).FirstOrDefaultAsync(x => x.Id == id);
         return workout is null ? NotFound(new { success = false, message = "Treino não encontrado." })
             : Ok(new { success = true, workout = ToResponse(workout) });
     }
