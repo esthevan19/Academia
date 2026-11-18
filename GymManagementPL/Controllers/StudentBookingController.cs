@@ -33,6 +33,9 @@ public sealed class StudentBookingController : Controller
         if (memberId is null)
             return View(new StudentBookingPageViewModel { NeedsLink = true });
 
+        var hasActiveMembership = await _db.Memberships.AsNoTracking()
+            .AnyAsync(m => m.MemberId == memberId.Value && m.EndDate >= BrazilClock.Now);
+
         var bookings = _bookings.GetMemberBookings(memberId.Value)
             .OrderByDescending(b => b.StartDate).ToList();
         var sessions = _bookings.GetAllSessions()
@@ -42,7 +45,8 @@ public sealed class StudentBookingController : Controller
         return View(new StudentBookingPageViewModel
         {
             MyBookings = bookings,
-            AvailableSessions = sessions
+            AvailableSessions = sessions,
+            HasActiveMembership = hasActiveMembership
         });
     }
 
@@ -98,6 +102,16 @@ public sealed class StudentBookingController : Controller
         var claim = User.FindFirstValue("gymflow:member_id");
         if (!int.TryParse(claim, out var memberId) || memberId <= 0)
             return null;
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId)) return null;
+
+        // O vínculo pode ser removido pelo SuperAdmin enquanto o cookie antigo ainda existe.
+        // Revalidar no banco evita acessar ou reservar aulas usando um vínculo revogado.
+        var isStillLinked = await _db.UserClaims.AsNoTracking().AnyAsync(claim =>
+            claim.UserId == userId && claim.ClaimType == "gymflow:member_id" &&
+            claim.ClaimValue == memberId.ToString());
+        if (!isStillLinked) return null;
+
         return await _db.Members.AsNoTracking().AnyAsync(m => m.Id == memberId)
             ? memberId : null;
     }
