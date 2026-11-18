@@ -7,6 +7,9 @@
     var isStudent = User.IsInRole("Aluno");
     var canManage = User.IsInRole("SuperAdmin") || User.IsInRole("Admin") ||
                     User.IsInRole("Gerente") || User.IsInRole("Recepcionista") || User.IsInRole("Instrutor");
+    var canSchedule = User.IsInRole("SuperAdmin") || User.IsInRole("Admin") ||
+                      User.IsInRole("Gerente") || User.IsInRole("Recepcionista");
+    var canDelete = User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente");
     var proximas = aulas.Count(x => x.Status == "Upcoming");
     var acontecendo = aulas.Count(x => x.Status == "Ongoing");
 }
@@ -32,7 +35,7 @@
                 <h1 class="fw-bold mt-2 mb-2">Aulas coletivas</h1>
                 <p class="mb-0">@(isStudent ? "Escolha sua próxima aula, consulte horários e garanta sua vaga." : "Organize horários, professores, vagas e atividades da academia.")</p>
             </div>
-            @if (canManage)
+            @if (canSchedule)
             {
                 <a asp-controller="Session" asp-action="Create" class="btn btn-light fw-bold rounded-3 px-4 py-3">
                     <i class="bi bi-plus-lg me-2"></i>Nova aula
@@ -114,11 +117,14 @@
                                 </a>
                             }
                             <a asp-controller="Session" asp-action="Details" asp-route-id="@aula.Id" class="btn btn-outline-secondary rounded-3 fw-semibold">Ver detalhes</a>
-                            @if (canManage && aula.Status == "Upcoming" && aula.AvailableSlots == aula.Capacity)
+                            @if (canSchedule && aula.Status == "Upcoming" && aula.AvailableSlots == aula.Capacity)
                             {
                                 <div class="d-flex gap-2">
                                     <a asp-controller="Session" asp-action="Edit" asp-route-id="@aula.Id" class="btn btn-outline-primary rounded-3 flex-fill">Editar</a>
-                                    <a asp-controller="Session" asp-action="Delete" asp-route-id="@aula.Id" class="btn btn-outline-danger rounded-3 flex-fill">Excluir</a>
+                                    @if (canDelete)
+                                    {
+                                        <a asp-controller="Session" asp-action="Delete" asp-route-id="@aula.Id" class="btn btn-outline-danger rounded-3 flex-fill">Excluir</a>
+                                    }
                                 </div>
                             }
                         </div>
