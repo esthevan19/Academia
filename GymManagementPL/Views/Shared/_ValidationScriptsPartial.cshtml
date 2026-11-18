@@ -14,6 +14,37 @@
             : String(valor);
     }
 
+
+    // Campos decimais brasileiros aceitam vírgula: 1,75 m / R$ 99,90.
+    // Datas continuam com a comparação original do navegador.
+    const validacaoMinOriginal = jQuery.validator.methods.min;
+    const validacaoMaxOriginal = jQuery.validator.methods.max;
+    const validacaoIntervaloOriginal = jQuery.validator.methods.range;
+    const textoDecimal = value => String(value).trim().replace(",", ".");
+    const numeroDecimal = value => Number(textoDecimal(value));
+    const decimalValido = value => /^-?\d+(?:[.,]\d+)?$/.test(String(value).trim());
+
+    jQuery.validator.methods.number = function (value, element) {
+        return this.optional(element) || decimalValido(value);
+    };
+    jQuery.validator.methods.range = function (value, element, params) {
+        if (element.type === "date" || element.type === "datetime-local")
+            return validacaoIntervaloOriginal.call(this, value, element, params);
+        return this.optional(element) || (decimalValido(value) &&
+            numeroDecimal(value) >= numeroDecimal(params[0]) &&
+            numeroDecimal(value) <= numeroDecimal(params[1]));
+    };
+    jQuery.validator.methods.min = function (value, element, param) {
+        if (element.type === "date" || element.type === "datetime-local")
+            return validacaoMinOriginal.call(this, value, element, param);
+        return this.optional(element) || (decimalValido(value) && numeroDecimal(value) >= numeroDecimal(param));
+    };
+    jQuery.validator.methods.max = function (value, element, param) {
+        if (element.type === "date" || element.type === "datetime-local")
+            return validacaoMaxOriginal.call(this, value, element, param);
+        return this.optional(element) || (decimalValido(value) && numeroDecimal(value) <= numeroDecimal(param));
+    };
+
     jQuery.extend(jQuery.validator.messages, {
         required: "Este campo é obrigatório.",
         remote: "Corrija este campo.",
