@@ -51,3 +51,14 @@ dotnet build GymManagementSystemSolution.slnx -c Release
 Depois publique `GymManagementPL` pelo Visual Studio. Para gerar um novo APK após publicar a API, use o workflow **Build Android APK** no repositório `esthevan19/GymFlow-Mobile`, branch `main`, com `EXPO_TOKEN` válido.
 
 **Importante:** compilação aprovada no GitHub valida o código, mas não substitui os testes de ponta a ponta contra o servidor e em dispositivo Android.
+
+
+## Segurança adicional e matrículas (18/11/2026)
+
+- **Treinos no Android:** vincule uma conta de Aluno a um cadastro, autentique no aplicativo e confirme que as fichas são apenas daquele aluno. Remova o vínculo no SuperAdmin **sem sair do aplicativo** e tente consultar a lista e o detalhe de uma ficha: a API deve retornar **409**, sem dados de outro aluno. Um novo vínculo deve exigir novo login para renovar o JWT.
+- **Check-in da academia:** `POST /api/CheckIn` **não representa entrada real**. Até existir registro persistente e verificação de acesso na recepção, a API deve recusar requisições anônimas e retornar **501**, com `accessGranted=false`, para uma conta de Aluno autenticada. O check-in de aula coletiva permanece em `POST /api/bookings/attendance`, reservado à equipe e limitado ao horário da aula.
+- **Matrículas:** Recepcionista pode consultar e cadastrar, mas não cancelar matrículas no MVC nem na API. SuperAdmin/Admin/Gerente podem cancelar; confirme acesso negado à recepção ao tentar chamar a ação diretamente.
+- **Horário:** valide matrícula perto da meia-noite brasileira, bloqueio de exclusão de aluno/professor com aulas futuras e contagem de dias restantes; o resultado deve independer do fuso do servidor.
+- **Visual:** teste a página de matrículas em celular, tablet e desktop, incluindo lista vazia, confirmações, mensagens e tabela rolável.
+
+**Limitação de publicação:** o sistema de treinos persistentes depende das tabelas `Workouts` e `WorkoutExercises`. Se a migração correspondente ainda não foi aplicada na hospedagem, publicar o código sozinho não faz essas telas funcionarem. Confirme o estado das migrações em ambiente de homologação com backup antes de qualquer alteração no banco de produção. Não habilite migrações automáticas às cegas.
