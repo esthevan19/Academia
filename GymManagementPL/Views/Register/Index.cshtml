@@ -35,7 +35,6 @@
             <p class="subtitulo">Só precisa de e-mail e senha. Rápido e sem foto.</p>
 
             <form asp-controller="Register" asp-action="Index" method="post" autocomplete="on">
-                @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
 
                 <div class="mb-3">
