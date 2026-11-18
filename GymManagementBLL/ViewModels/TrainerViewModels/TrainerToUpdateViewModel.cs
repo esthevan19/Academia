@@ -10,34 +10,40 @@ namespace GymManagementBLL.ViewModels.TrainerViewModels
 {
 	public class TrainerToUpdateViewModel
 	{
+	[Display(Name = "Nome completo")]
 	public string Name { get; set; } = null!;
 
-		[Required(ErrorMessage = "Email Is Required")]
-		[EmailAddress(ErrorMessage = "Invalid email format")]
+		[Required(ErrorMessage = "Informe o e-mail.")]
+		[EmailAddress(ErrorMessage = "Informe um e-mail válido.")]
 
 		public string Email { get; set; } = null!;
 
-		[Required(ErrorMessage = "Phone Number Is Required")]
-		[Phone(ErrorMessage = "Invalid phone number")]
-		[RegularExpression(@"^[1-9]{2}9\d{8}$", ErrorMessage = "Informe um telefone brasileiro com DDD e 9 dígitos")]
+		[Required(ErrorMessage = "Informe o telefone.")]
+		[Phone(ErrorMessage = "Informe um telefone brasileiro válido.")]
+		[RegularExpression(@"^[1-9][0-9]9[0-9]{8}$", ErrorMessage = "Informe um telefone brasileiro com DDD e 9 dígitos")]
 
+		[Display(Name = "Telefone (DDD + número)")]
 		public string Phone { get; set; } = null!;
 
-		[Required(ErrorMessage = "Building Number Is Required")]
-		[Range(1, int.MaxValue, ErrorMessage = "Building Number must be greater than 0")]
+		[Required(ErrorMessage = "Informe o número do endereço.")]
+		[Range(1, int.MaxValue, ErrorMessage = "Informe um número de endereço maior que zero.")]
+		[Display(Name = "Número do endereço")]
 		public int BuildingNumber { get; set; }
 
-		[Required(ErrorMessage = "City Is Required")]
-		[StringLength(100, MinimumLength = 2, ErrorMessage = "City must be between 2 and 100 characters")]
-		[RegularExpression(@"^[\p{L}\s]+$", ErrorMessage = "City can only contain letters and spaces")]
+		[Required(ErrorMessage = "Informe a cidade.")]
+		[StringLength(100, MinimumLength = 2, ErrorMessage = "A cidade deve ter entre 2 e 100 caracteres.")]
+		[RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\\s.\'-]*$", ErrorMessage = "Informe uma cidade válida, permitindo letras, acentos, espaços, hífen e apóstrofo.")]
+		[Display(Name = "Cidade")]
 		public string City { get; set; } = null!;
 
-		[Required(ErrorMessage = "Street Is Required")]
-		[StringLength(150, MinimumLength = 2, ErrorMessage = "Street must be between 2 and 150 characters")]
-		[RegularExpression(@"^[\p{L}0-9\s]+$", ErrorMessage = "Street can only contain letters, numbers, and spaces")]
+		[Required(ErrorMessage = "Informe a rua.")]
+		[StringLength(150, MinimumLength = 2, ErrorMessage = "A rua deve ter entre 2 e 150 caracteres.")]
+		[RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ0-9][A-Za-zÀ-ÖØ-öø-ÿ0-9\\s.,ºª°/()\'-]*$", ErrorMessage = "Informe uma rua válida, permitindo acentos, números e sinais usuais de endereço.")]
+		[Display(Name = "Rua")]
 		public string Street { get; set; } = null!;
 
-		[Required(ErrorMessage = "Specialty is Required")]
+		[Required(ErrorMessage = "Selecione a especialização.")]
+		[Display(Name = "Especialização")]
 		public Specialties Specialties { get; set; }
 	}
 }
