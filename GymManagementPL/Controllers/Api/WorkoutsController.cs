@@ -19,21 +19,36 @@ public class WorkoutsController : ControllerBase
     public sealed record ExerciseInput(string Name, int Sets, string Reps, decimal? LoadKg, int RestSeconds, string? Notes);
     public sealed record WorkoutInput(int MemberId, string Name, string? Category, string? Letter, string? Notes, List<ExerciseInput> Exercises);
 
-    private int? LinkedMemberId()
+    // O JWT pode continuar válido mesmo depois que o SuperAdmin remove o vínculo.
+    // Conferir a propriedade da ficha no banco em toda consulta do aluno.
+    private async Task<int?> LinkedMemberIdAsync()
     {
-        return int.TryParse(User.FindFirstValue("gymflow:member_id"), out var id) && id > 0 ? id : null;
+        if (!int.TryParse(User.FindFirstValue("gymflow:member_id"), out var memberId) || memberId <= 0)
+            return null;
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        if (string.IsNullOrWhiteSpace(userId))
+            return null;
+
+        var isStillLinked = await _db.UserClaims.AsNoTracking().AnyAsync(link =>
+            link.UserId == userId && link.ClaimType == "gymflow:member_id" &&
+            link.ClaimValue == memberId.ToString());
+        if (!isStillLinked)
+            return null;
+
+        return await _db.Members.AsNoTracking().AnyAsync(member => member.Id == memberId)
+            ? memberId : null;
     }
 
     private bool CanManage() => User.IsInRole("SuperAdmin") || User.IsInRole("Admin") ||
                                 User.IsInRole("Gerente") || User.IsInRole("Instrutor");
 
-    private IQueryable<Workout> AccessibleWorkouts()
+    private IQueryable<Workout> AccessibleWorkouts(int? linkedMemberId)
     {
         var query = _db.Workouts.AsNoTracking().Include(x => x.Exercises).AsQueryable();
         if (CanManage()) return query;
-        var id = LinkedMemberId();
-        return User.IsInRole("Aluno") && id.HasValue
-            ? query.Where(x => x.MemberId == id.Value)
+        return User.IsInRole("Aluno") && linkedMemberId.HasValue
+            ? query.Where(x => x.MemberId == linkedMemberId.Value)
             : query.Where(x => false);
     }
 
@@ -63,9 +78,12 @@ public class WorkoutsController : ControllerBase
     public async Task<IActionResult> List([FromQuery] int? memberId)
     {
         if (!CanManage() && !User.IsInRole("Aluno")) return Forbid();
-        if (User.IsInRole("Aluno") && LinkedMemberId() is null)
-            return Conflict(new { success = false, message = "Conta sem vínculo com cadastro de aluno." });
-        var query = AccessibleWorkouts();
+        var linkedMemberId = !CanManage() && User.IsInRole("Aluno")
+            ? await LinkedMemberIdAsync()
+            : null;
+        if (!CanManage() && User.IsInRole("Aluno") && linkedMemberId is null)
+            return Conflict(new { success = false, message = "O vínculo da conta com o cadastro do aluno não está ativo. Peça ao SuperAdmin para conferir o vínculo e entre novamente." });
+        var query = AccessibleWorkouts(linkedMemberId);
         if (memberId.HasValue) query = query.Where(x => x.MemberId == memberId.Value);
         var data = await query.OrderByDescending(x => x.CreatedAt).ToListAsync();
         return Ok(new { success = true, workouts = data.Select(ToResponse).ToList() });
@@ -75,9 +93,12 @@ public class WorkoutsController : ControllerBase
     public async Task<IActionResult> Get(int id)
     {
         if (!CanManage() && !User.IsInRole("Aluno")) return Forbid();
-        if (User.IsInRole("Aluno") && LinkedMemberId() is null)
-            return Conflict(new { success = false, message = "Conta sem vínculo com cadastro de aluno." });
-        var workout = await AccessibleWorkouts().FirstOrDefaultAsync(x => x.Id == id);
+        var linkedMemberId = !CanManage() && User.IsInRole("Aluno")
+            ? await LinkedMemberIdAsync()
+            : null;
+        if (!CanManage() && User.IsInRole("Aluno") && linkedMemberId is null)
+            return Conflict(new { success = false, message = "O vínculo da conta com o cadastro do aluno não está ativo. Peça ao SuperAdmin para conferir o vínculo e entre novamente." });
+        var workout = await AccessibleWorkouts(linkedMemberId).FirstOrDefaultAsync(x => x.Id == id);
         return workout is null ? NotFound(new { success = false, message = "Treino não encontrado." })
             : Ok(new { success = true, workout = ToResponse(workout) });
     }
