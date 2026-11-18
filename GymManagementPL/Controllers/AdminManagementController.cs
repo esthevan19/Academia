@@ -12,10 +12,12 @@ namespace GymManagementPL.Controllers
     public class AdminManagementController : Controller
     {
         private readonly IAdminService _adminService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AdminManagementController(IAdminService adminService)
+        public AdminManagementController(IAdminService adminService, UserManager<ApplicationUser> userManager)
         {
             _adminService = adminService;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
@@ -51,8 +53,9 @@ namespace GymManagementPL.Controllers
         }
 
 
-        public IActionResult Edit(string id)
+        public async Task<IActionResult> Edit(string id)
         {
+            if (await IsSuperAdminTargetForOtherRole(id)) return Forbid();
             var model = _adminService.GetAdminForUpdate(id);
 
             if (model == null)
@@ -63,8 +66,9 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
-        public IActionResult Edit(EditAdminViewModel model)
+        public async Task<IActionResult> Edit(EditAdminViewModel model)
         {
+            if (await IsSuperAdminTargetForOtherRole(model.Id)) return Forbid();
             if (!ModelState.IsValid) return View(model);
 
             var result = _adminService.EditAdmin(model);
@@ -79,15 +83,17 @@ namespace GymManagementPL.Controllers
         }
 
 
-        public IActionResult Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
+            if (await IsSuperAdminTargetForOtherRole(id)) return Forbid();
             ViewBag.AdminId = id;
             return View();
         }
 
         [HttpPost]
-        public IActionResult DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (await IsSuperAdminTargetForOtherRole(id)) return Forbid();
             var result = _adminService.DeleteAdmin(id);
 
             if (!result.Succeeded)
@@ -166,5 +172,13 @@ namespace GymManagementPL.Controllers
 
             return RedirectToAction("ManageRoles", new { id = userId });
         }
+        private async Task<bool> IsSuperAdminTargetForOtherRole(string? id)
+        {
+            if (User.IsInRole("SuperAdmin")) return false;
+            if (string.IsNullOrWhiteSpace(id)) return true;
+            var user = await _userManager.FindByIdAsync(id);
+            return user is not null && await _userManager.IsInRoleAsync(user, "SuperAdmin");
+        }
+
     }
 }
