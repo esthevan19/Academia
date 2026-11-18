@@ -124,7 +124,7 @@ namespace GymManagementBLL.Services.Classes
 
 
                 _mapper.Map(updateSession, session);
-                session!.UpdatedAt = DateTime.Now;
+                session!.UpdatedAt = DateTime.UtcNow;
 
                 sessionRepo.Update(session);
 
@@ -197,9 +197,8 @@ namespace GymManagementBLL.Services.Classes
 
         private bool IsValidDateRange(DateTime startDate, DateTime EndDate)
         {
-            // Corrigido: o formulário envia o horário local do usuário (ex: horário do Brasil),
-            // então comparamos com DateTime.Now (horário local do servidor) em vez de
-            // DateTime.UtcNow, que ficava várias horas à frente e rejeitava sessões futuras válidas.
+            // Datas das aulas são armazenadas como horário civil de Brasília.
+            // Não utilizar a hora local do servidor nem UTC para validar esse horário.
             return EndDate > startDate && startDate > BrazilClock.Now;
         }
 

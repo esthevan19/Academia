@@ -25,7 +25,7 @@ namespace GymManagementBLL.Services.Classes
         public IEnumerable<MembershipViewModel> GetAllMemberships()
         {
 
-            var memberships = _unitOfWork.MembershipRepository.GetAllMembershipsWithMemberAndPLan(x => x.Status == "Active");
+            var memberships = _unitOfWork.MembershipRepository.GetAllMembershipsWithMemberAndPLan(x => x.EndDate >= BrazilClock.Now);
             if (!memberships.Any()) return [];
             return _mapper.Map<IEnumerable<MembershipViewModel>>(memberships);
         }
@@ -39,7 +39,7 @@ namespace GymManagementBLL.Services.Classes
                                                    .Any();
 
                 var hasActiveMembership = _unitOfWork.MembershipRepository
-                                                     .GetAllMembershipsWithMemberAndPLan(x => x.MemberId == createdMembership.MemberId && x.Status == "Active")
+                                                     .GetAllMembershipsWithMemberAndPLan(x => x.MemberId == createdMembership.MemberId && x.EndDate >= BrazilClock.Now)
                                                      .Any();
 
                 var isPlanExistandActive = _unitOfWork.GetRepository<Plan>()
@@ -51,7 +51,7 @@ namespace GymManagementBLL.Services.Classes
 
                 var membership = _mapper.Map<Membership>(createdMembership);
                 var plan = _unitOfWork.GetRepository<Plan>().GetById(createdMembership.PlanId);
-                var startDate = createdMembership.StartDate ?? DateTime.Now;
+                var startDate = createdMembership.StartDate ?? BrazilClock.Now;
                 membership.CreatedAt = startDate;
                 membership.EndDate = startDate.AddDays(plan!.DurationDays);
 
@@ -70,7 +70,7 @@ namespace GymManagementBLL.Services.Classes
         public bool DeleteMembership(int id)
         {
             var Repo = _unitOfWork.MembershipRepository;
-            var ActiveMemberships = Repo.GetAll(X => X.MemberId == id && X.Status == "Active").FirstOrDefault();
+            var ActiveMemberships = Repo.GetAll(X => X.MemberId == id && X.EndDate >= BrazilClock.Now).FirstOrDefault();
             if (ActiveMemberships is null) return false;
             Repo.Delete(ActiveMemberships);
             return _unitOfWork.SaveChanges() > 0;

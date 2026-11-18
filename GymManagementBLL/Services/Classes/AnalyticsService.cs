@@ -23,15 +23,16 @@ namespace GymManagementBLL.Services.Classes
         {
 
             var sessions = _unitOfWork.GetRepository<Session>().GetAll();
+            var now = BrazilClock.Now;
 
             return new AnalyticsViewModel()
             {
                 TotalMembers = _unitOfWork.GetRepository<Member>().GetAll().Count(),
-                ActiveMembers = _unitOfWork.GetRepository<Membership>().GetAll(x => x.Status == "Active").Count(),
+                ActiveMembers = _unitOfWork.GetRepository<Membership>().GetAll(x => x.EndDate >= now).Count(),
                 TotalTrainers = _unitOfWork.GetRepository<Trainer>().GetAll().Count(),
-                UpcomingSessions = sessions.Count(x => x.StartDate > DateTime.Now),
-                OngoingSessions = sessions.Count(x => x.StartDate <= DateTime.Now && x.EndDate >= DateTime.Now),
-                CompletedSessions = sessions.Count(x => x.EndDate < DateTime.Now)
+                UpcomingSessions = sessions.Count(x => x.StartDate > now),
+                OngoingSessions = sessions.Count(x => x.StartDate <= now && x.EndDate >= now),
+                CompletedSessions = sessions.Count(x => x.EndDate < now)
             };
         }
     }
