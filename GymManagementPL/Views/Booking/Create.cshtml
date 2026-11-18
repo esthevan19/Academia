@@ -1,58 +1,36 @@
-﻿@model CreateBookingViewModel
-
+@model CreateBookingViewModel
 @{
     ViewData["Title"] = "Nova reserva";
 }
-
-<h1>Nova reserva</h1>
-
-<hr />
-<div class="row">
-    <div class="d-flex justify-content-center align-items-center h-100">
-
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Dados da reserva</h5>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Create" method="post">
-                        <div asp-validation-summary="All" class="text-danger"></div>
-
-                        <div class="mb-3">
-                            <input type="hidden" asp-for="SessionId" value="@ViewContext.RouteData.Values["id"]" readonly />
-                            <label asp-for="MemberId" class="form-label">Aluno</label>
-                            <select asp-for="MemberId" asp-items="ViewBag.Members" class="form-select">
-                                <option value="">Selecione o aluno</option>
-                            </select>
-                            <span asp-validation-for="MemberId" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Salvar reserva
-                            </button>
-                            <a asp-action="GetMembersForUpcomingSession" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Voltar
-                            </a>
-                        </div>
-                    </form>
-                </div>
+<section class="container py-5" style="max-width:760px">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+        <span class="small fw-bold text-uppercase" style="color:#070093">GymFlow · Agenda</span>
+        <h1 class="h2 fw-bold mt-2 mb-2">Reservar vaga</h1>
+        <p class="text-muted mb-4">
+            Aula: <strong>@ViewBag.SessionName</strong>.
+            Selecione o aluno que já possui matrícula ativa.
+        </p>
+        <form asp-controller="Booking" asp-action="Create" method="post">
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+            <input asp-for="SessionId" type="hidden" />
+            <div class="mb-4">
+                <label asp-for="MemberId" class="form-label fw-bold">Aluno</label>
+                <select asp-for="MemberId" asp-items="ViewBag.Members" class="form-select form-select-lg" required>
+                    <option value="">Selecione um aluno</option>
+                </select>
+                <span asp-validation-for="MemberId" class="text-danger small"></span>
+                <p class="small text-muted mt-2">Uma reserva por aluno e por aula. O sistema também verifica as vagas disponíveis.</p>
             </div>
-        </div>
-
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <button class="btn flex-fill text-white fw-bold py-3" style="background:#070093;border-radius:12px" type="submit">
+                    Confirmar reserva
+                </button>
+                <a asp-action="GetMembersForUpcomingSession" asp-route-id="@Model.SessionId"
+                   class="btn btn-outline-secondary flex-fill py-3 rounded-3">Cancelar</a>
+            </div>
+        </form>
     </div>
-</div>
-
+</section>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        $(document).ready(function() {
-            // Initialize Select2 for better dropdown experience
-            if (jQuery.fn.select2) $('#MemberId').select2({
-                placeholder: "Selecione o aluno",
-                allowClear: true,
-                width: '100%'
-            });
-        });
-    </script>
 }
