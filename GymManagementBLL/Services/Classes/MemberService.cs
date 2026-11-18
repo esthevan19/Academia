@@ -76,12 +76,11 @@ namespace GymManagementBLL.Services.Classes
             var mappedMember = _mapper.Map<MemberViewModel>(member);
 
             var ActiveMembership = _unitOfWork.GetRepository<Membership>()
-                .GetAll(m => m.MemberId == id && m.Status == "Active").FirstOrDefault();
+                .GetAll(m => m.MemberId == id && m.EndDate >= BrazilClock.Now).FirstOrDefault();
 
             if (ActiveMembership is not null)
             {
                 var activePlan = _unitOfWork.GetRepository<Plan>().GetById(ActiveMembership.PlanId);
-                if (activePlan is null) return null;
                 mappedMember.PlanName = activePlan?.Name;
                 mappedMember.MembershipEndDate = ActiveMembership.EndDate.ToShortDateString();
                 mappedMember.MembershipStartDate = ActiveMembership.CreatedAt.ToShortDateString();
@@ -188,7 +187,7 @@ namespace GymManagementBLL.Services.Classes
                 .GetAll(x => x.MemberId == id).Select(x => x.SessionId);
 
             var hasFutureSessions = _unitOfWork.GetRepository<Session>()
-                .GetAll(S => sessionIds.Contains(S.Id) && S.StartDate > DateTime.Now).Any();
+                .GetAll(S => sessionIds.Contains(S.Id) && S.StartDate > BrazilClock.Now).Any();
 
             if (hasFutureSessions) return false;
 

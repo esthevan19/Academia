@@ -140,7 +140,7 @@ namespace GymManagementBLL.Services.Classes
             if (trainer is null) return false;
 
             var associatedSessions = _unitOfWork.GetRepository<Session>()
-                .GetAll(s => s.TrainerId == trainerId && s.StartDate > DateTime.Now);
+                .GetAll(s => s.TrainerId == trainerId && s.StartDate > BrazilClock.Now);
 
             if (associatedSessions.Any()) return false;
 

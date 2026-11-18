@@ -158,7 +158,7 @@ namespace GymManagementBLL.Services.Classes
         private bool HasActivateMemberships(int planId)
         {
             var activateMemberships = _unitOfWork.GetRepository<Membership>().GetAll(
-                mp => mp.PlanId == planId && mp.Status == "Active").Any();
+                mp => mp.PlanId == planId && mp.EndDate >= BrazilClock.Now).Any();
 
             if (activateMemberships)
                 return true;

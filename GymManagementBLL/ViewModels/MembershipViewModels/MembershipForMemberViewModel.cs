@@ -1,3 +1,4 @@
+using GymManagementBLL.Services.Classes;
 ﻿namespace GymManagementBLL.ViewModels.MembershipViewModels
 {
 	public class MembershipForMemberViewModel
@@ -11,7 +12,7 @@
 		{
 			get
 			{
-				return (EndDate - DateTime.Now).Days;
+				return Math.Max(0, (int)Math.Ceiling((EndDate - BrazilClock.Now).TotalDays));
 			}
 		}
 	}

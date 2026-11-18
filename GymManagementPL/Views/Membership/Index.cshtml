@@ -1,80 +1,104 @@
-﻿@model IEnumerable<MembershipViewModel>
-
-<div class="container-fluid">
-    <header class="bg-primary text-white rounded-3 p-4 shadow-sm mt-5 mb-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="mb-1 fw-semibold">Matrículas ativas</h2>
-                <p class="mb-0 text-light opacity-75">Alunos com planos ativos</p>
-            </div>
-            <div class="col text-end">
-                <a asp-action="Create" class="btn btn-light">
-                    <i class="fas fa-plus"></i> Nova matrícula
-                </a>
-            </div>
+@model IEnumerable<MembershipViewModel>
+@{
+    ViewData["Title"] = "Matrículas ativas";
+    var matriculas = Model?.ToList() ?? new List<MembershipViewModel>();
+    var podeCancelar = User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente");
+}
+<style>
+    .mat-hero { background:linear-gradient(115deg,#070093,#2a22b9); border-radius:24px; color:#fff; padding:clamp(24px,4vw,42px); }
+    .mat-hero p { color:#e3e1ff; }
+    .mat-stat { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #e7e6f2; border-radius:17px; padding:18px 21px; }
+    .mat-stat i { display:grid; place-items:center; width:44px; height:44px; background:#efedff; color:#070093; border-radius:13px; font-size:1.3rem; }
+    .mat-stat strong { display:block; font-size:1.5rem; line-height:1.2; color:#070093; }
+    .mat-card { background:#fff; border:1px solid #e6e5f3; border-radius:19px; overflow:hidden; box-shadow:0 10px 32px rgba(7,0,147,.055); }
+    .mat-card .table { margin-bottom:0; }
+    .mat-card .table thead th { background:#f3f2ff; color:#070093; font-size:.82rem; font-weight:800; padding:17px; white-space:nowrap; border:0; }
+    .mat-card .table tbody td { vertical-align:middle; padding:17px; border-color:#efeff6; }
+    .mat-pill { display:inline-flex; gap:5px; align-items:center; border-radius:999px; padding:6px 11px; background:#e9f8ee; color:#19663b; font-weight:800; font-size:.79rem; }
+    .mat-name { font-weight:800; color:#24243c; }
+    .mat-subtle { color:#66667d; font-size:.87rem; }
+    .mat-empty { text-align:center; border:1px dashed #d1d0e7; border-radius:18px; padding:44px 24px; background:#fff; }
+    .mat-cancel { border:1px solid #e3c5cd; color:#a52339; background:#fff; border-radius:10px; font-weight:700; padding:8px 13px; }
+    .mat-cancel:hover { background:#fff0f2; color:#8b152b; }
+    @@media (max-width:575px) { .mat-card .table tbody td,.mat-card .table thead th { padding:12px; } }
+</style>
+<section class="container py-4 py-md-5" style="max-width:1180px">
+    <header class="mat-hero d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <span class="small fw-bold text-uppercase" style="letter-spacing:.12em">GymFlow · Administração</span>
+            <h1 class="h2 fw-bold mt-2 mb-2">Matrículas ativas</h1>
+            <p class="mb-0">Acompanhe os planos dos alunos e gerencie novas matrículas.</p>
         </div>
+        <a asp-action="Create" class="btn btn-light fw-bold rounded-3 px-4 py-3">
+            <i class="bi bi-plus-circle me-2"></i>Nova matrícula
+        </a>
     </header>
-    @if (TempData["SuccessMessage"] is not null)
+
+    @if (TempData["SuccessMessage"] is string sucesso)
     {
-        <div id="Alert" class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert alert-success rounded-3" role="status"><i class="bi bi-check-circle me-2"></i>@sucesso</div>
     }
-    else if (TempData["ErrorMessage"] is not null)
+    @if (TempData["ErrorMessage"] is string erro)
     {
-        <div id="Alert" class="alert alert-danger alert-dismissible fade show">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div class="alert alert-danger rounded-3" role="alert"><i class="bi bi-exclamation-circle me-2"></i>@erro</div>
     }
 
-    <div class="card">
-        <div class="card-body">
-            @if (Model != null && Model.Any())
-            {
-                <table class="table table-striped table-hover">
+    <div class="mat-stat mb-4" aria-label="Total de matrículas ativas">
+        <i class="bi bi-person-check" aria-hidden="true"></i>
+        <div><strong>@matriculas.Count</strong><span class="mat-subtle">@(matriculas.Count == 1 ? "matrícula ativa" : "matrículas ativas")</span></div>
+    </div>
+
+    @if (matriculas.Count == 0)
+    {
+        <div class="mat-empty">
+            <i class="bi bi-person-vcard fs-1" style="color:#7772c6" aria-hidden="true"></i>
+            <h2 class="h5 fw-bold mt-3">Nenhuma matrícula ativa</h2>
+            <p class="text-muted mb-3">Quando um aluno contratar um plano, a matrícula aparecerá aqui.</p>
+            <a asp-action="Create" class="btn fw-bold text-white rounded-3 px-4 py-2" style="background:#070093">Cadastrar matrícula</a>
+        </div>
+    }
+    else
+    {
+        <div class="mat-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
                     <thead>
                         <tr>
-                            <th>Aluno</th>
-                            <th>Plano</th>
-                            <th>Data de Início</th>
-                            <th>Data de Término</th>
-                            <th>Ações</th>
+                            <th scope="col">Aluno</th>
+                            <th scope="col">Plano</th>
+                            <th scope="col">Início</th>
+                            <th scope="col">Vencimento</th>
+                            <th scope="col">Situação</th>
+                            @if (podeCancelar) { <th scope="col" class="text-end">Ações</th> }
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @foreach (var item in matriculas)
                         {
                             <tr>
-                                <td>@item.MemberName</td>
+                                <td class="mat-name">@item.MemberName</td>
                                 <td>@item.PlanName</td>
-                                <td>@item.StartDate.ToString("dd/MM/yyyy")</td>
-                                <td>@item.EndDate.ToString("dd/MM/yyyy")</td>
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <form method="post" asp-action="Cancel" class="m-0" onsubmit="return confirm(\'Cancelar esta matrícula?\')">
+                                <td class="text-nowrap">@item.StartDate.ToString("dd/MM/yyyy")</td>
+                                <td class="text-nowrap">@item.EndDate.ToString("dd/MM/yyyy")</td>
+                                <td><span class="mat-pill"><i class="bi bi-check-circle"></i>Ativa</span></td>
+                                @if (podeCancelar)
+                                {
+                                    <td class="text-end">
+                                        <form asp-controller="Membership" asp-action="Cancel" method="post" class="d-inline"
+                                              onsubmit="return confirm('Deseja realmente cancelar esta matrícula?');">
                                             <input type="hidden" name="id" value="@item.MemberId" />
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-times"></i> Cancelar
+                                            <button type="submit" class="btn mat-cancel btn-sm text-nowrap">
+                                                <i class="bi bi-x-circle me-1"></i>Cancelar
                                             </button>
                                         </form>
-                                    </div>
-                                </td>
+                                    </td>
+                                }
                             </tr>
                         }
                     </tbody>
                 </table>
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <i class="bi bi-person-workspace display-1 text-muted"></i>
-                    <h4 class="mt-3 text-muted">Nenhuma matrícula ativa no momento</h4>
-                </div>
-            }
+            </div>
         </div>
-    </div>
-</div>
+        <p class="mat-subtle mt-3"><i class="bi bi-info-circle me-1"></i>Somente a administração ou gerência pode cancelar matrículas.</p>
+    }
+</section>

@@ -71,7 +71,7 @@ namespace GymManagementBLL
                    dest.Address.City = src.City;
                    dest.Address.Street = src.Street;
                    dest.Address.BuildingNumber = src.BuildingNumber;
-                   dest.UpdatedAt = DateTime.Now;
+                   dest.UpdatedAt = DateTime.UtcNow;
                });
 
 
@@ -113,7 +113,7 @@ namespace GymManagementBLL
                    dest.Address.City = src.City;
                    dest.Address.Street = src.Street;
                    dest.Address.BuildingNumber = src.BuildingNumber;
-                   dest.UpdatedAt = DateTime.Now;
+                   dest.UpdatedAt = DateTime.UtcNow;
                });
 
         }
@@ -132,7 +132,7 @@ namespace GymManagementBLL
 
             CreateMap<UpdatePlanViewModel, Plan>()
                 .ForMember(dest => dest.Name, options => options.MapFrom(src => src.PlanName))
-                .ForMember(dest => dest.UpdatedAt, options => options.MapFrom(src => DateTime.Now));
+                .ForMember(dest => dest.UpdatedAt, options => options.MapFrom(src => DateTime.UtcNow));
 
         }
 
