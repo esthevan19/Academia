@@ -92,6 +92,16 @@
             </div>
         }
 
+        @if (!Model.HasActiveMembership)
+        {
+            <div class="alert alert-warning rounded-4 border mb-4" role="status">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Matrícula inativa ou vencida.</strong>
+                Você pode consultar os horários, mas precisa de uma matrícula ativa para reservar uma vaga.
+                Procure a recepção para regularizar seu plano.
+            </div>
+        }
+
         <div class="d-flex justify-content-between gap-3 flex-wrap align-items-center mb-3">
             <h2 class="gym-section-title mb-0"><i class="bi bi-calendar-event me-2" style="color:#070093"></i>Aulas disponíveis</h2>
             <span class="gym-muted small">Horário de Brasília · vagas atualizadas</span>
@@ -129,6 +139,10 @@
                                 @if (reservada)
                                 {
                                     <button class="btn btn-light border rounded-3 w-100 fw-semibold" disabled>Vaga já reservada</button>
+                                }
+                                else if (!Model.HasActiveMembership)
+                                {
+                                    <button class="btn btn-light border rounded-3 w-100 fw-semibold" disabled title="É necessário ter matrícula ativa">Matrícula necessária</button>
                                 }
                                 else if (lotada)
                                 {
