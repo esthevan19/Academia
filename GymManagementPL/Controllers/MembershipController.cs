@@ -64,6 +64,7 @@ namespace GymManagementPL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
         public IActionResult Cancel(int id)
         {
             var result = _membershipService.DeleteMembership(id);
