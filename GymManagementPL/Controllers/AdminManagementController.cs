@@ -134,6 +134,7 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(CreateAdminViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -167,6 +168,7 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditAdminViewModel model)
         {
             if (await IsSuperAdminTargetForOtherRole(model.Id)) return Forbid();
@@ -192,6 +194,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             if (await IsSuperAdminTargetForOtherRole(id)) return Forbid();
@@ -217,6 +220,7 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
         public IActionResult ResetPassword(ResetPasswordViewModel model)
         {
