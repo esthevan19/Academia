@@ -50,6 +50,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
         public IActionResult Create(CreateSessionViewModel createdSession)
         {
