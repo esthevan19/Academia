@@ -1,11 +1,12 @@
 ﻿@model TrainerToUpdateViewModel
 @{
-    ViewData["Title"] = "Edit Trainer";
+    ViewData["Title"] = "Editar Professor";
+    var trainerId = ViewContext.RouteData.Values["id"];
 }
 <div class="container mt-4">
     <header class="mb-4">
-        <h3 class="text-primary-color">Edit Trainer</h3>
-        <p class="text-muted">Update trainer information</p>
+        <h3 class="text-primary-color">Editar Professor</h3>
+        <p class="text-muted">Atualize os dados do professor</p>
     </header>
 
     <div class="row justify-content-center">
@@ -13,14 +14,15 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <div class="mb-4 pb-3 border-bottom">
-                        <small class="text-muted d-block mb-1">Editing Profile For</small>
+                        <small class="text-muted d-block mb-1">Editando o perfil de</small>
                         <h4 class="mb-0 text-black">@Model.Name</h4>
                     </div>
-                    <form asp-action="EditTrainer" method="post">
+                    <form asp-action="EditTrainer" asp-route-id="@trainerId" method="post">
+                        @Html.AntiForgeryToken()
                         <input hidden asp-for="Name" />
-                        <!-- Personal Information -->
+                        <!-- Dados pessoais -->
                         <div class="section-header mb-3">
-                            <h5 class="text-primary fw-bold">Personal Information</h5>
+                            <h5 class="text-primary fw-bold">Dados pessoais</h5>
                             <hr class="mt-2">
                         </div>
                         <div class="row g-3 mb-4">
@@ -28,18 +30,18 @@
 
                             <div class="col-md-6">
                                 <label asp-for="Email" class="form-label"></label>
-                                <input asp-for="Email" type="text" class="form-control" />
+                                <input asp-for="Email" type="email" class="form-control" />
                                 <span asp-validation-for="Email" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6">
                                 <label asp-for="Phone" class="form-label"></label>
-                                <input asp-for="Phone" type="tel" class="form-control" />
+                                <input asp-for="Phone" type="tel" inputmode="numeric" maxlength="11" placeholder="Ex.: 51987654321" class="form-control" />
                                 <span asp-validation-for="Phone" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="BuildingNumber" class="form-label"></label>
-                                <input asp-for="BuildingNumber" type="text" class="form-control" />
+                                <input asp-for="BuildingNumber" type="number" min="1" max="999999" class="form-control" />
                                 <span asp-validation-for="BuildingNumber" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
@@ -54,35 +56,36 @@
                             </div>
                         </div>
 
-                        <!-- Professional Information -->
+                        <!-- Informações profissionais -->
                         <div class="section-header mb-3">
-                            <h5 class="text-primary fw-bold">Professional Information</h5>
+                            <h5 class="text-primary fw-bold">Informações profissionais</h5>
                             <hr class="mt-2">
                         </div>
                         <div class="row g-3">
 
                             <div class="col-12">
                                 <label class="form-label fw-semibold">
-                                    Specializations <span class="text-danger">*</span>
+                                    Especialização <span class="text-danger">*</span>
                                 </label>
 
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" asp-for="Specialties" value="@Specialties.GeneralFitness" />
-                                    <label class="form-check-label">@Specialties.GeneralFitness</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" asp-for="Specialties" value="@Specialties.Yoga" />
-                                    <label class="form-check-label">@Specialties.Yoga</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" asp-for="Specialties" value="@Specialties.Boxing" />
-                                    <label class="form-check-label">@Specialties.Boxing</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" asp-for="Specialties" value="@Specialties.CrossFit" />
-                                    <label class="form-check-label">@Specialties.CrossFit</label>
-                                </div>
-                                <span asp-validation-for="Specialties" class="text-danger"></span>
+                                @foreach (var opcao in GymManagementPL.Models.GymSpecialtiesPtBr.RegistrationOptions)
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="Specialties"
+                           value="@opcao.Value" id="especializacao-@opcao.Value" />
+                    <label class="form-check-label" for="especializacao-@opcao.Value">@opcao.Label</label>
+                </div>
+            }
+            @if (!GymManagementPL.Models.GymSpecialtiesPtBr.IsRegistrationOption(Model.Specialties))
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" asp-for="Specialties" value="@Model.Specialties" id="especializacao-anterior" />
+                    <label class="form-check-label" for="especializacao-anterior">
+                        @GymManagementPL.Models.GymSpecialtiesPtBr.Display(Model.Specialties.ToString()) (cadastro anterior)
+                    </label>
+                </div>
+            }
+            <span asp-validation-for="Specialties" class="text-danger"></span>
                             </div>
                         </div>
 
@@ -91,7 +94,7 @@
                                 <i class="bi bi-arrow-left me-1"></i>Cancel
                             </a>
                             <button type="submit" class="btn btn-fill">
-                                <i class="bi bi-check-lg me-1"></i>Update Trainer
+                                <i class="bi bi-check-lg me-1"></i>Salvar alterações
                             </button>
                         </div>
                     </form>
