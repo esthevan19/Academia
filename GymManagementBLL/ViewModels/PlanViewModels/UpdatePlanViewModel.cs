@@ -25,7 +25,7 @@ namespace GymManagementBLL.ViewModels.PlanViewModels
 		public int DurationDays { get; set; }
 
 		[Required(ErrorMessage = "Informe o preço em reais.")]
-		[Range(typeof(decimal), "0.01", "10000", ErrorMessage = "Informe um valor entre R$ 0,01 e R$ 10.000,00.")]
+		[Range(typeof(decimal), "0.01", "10000", ParseLimitsInInvariantCulture = true, ErrorMessage = "Informe um valor entre R$ 0,01 e R$ 10.000,00.")]
 		[Display(Name = "Preço (R$)")]
 		public decimal Price { get; set; }
 	}
