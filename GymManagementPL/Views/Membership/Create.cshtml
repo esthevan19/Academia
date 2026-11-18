@@ -1,7 +1,7 @@
 ﻿@model CreateMembershipViewModel
 
 @{
-    ViewData["Title"] = "Create Membership";
+    ViewData["Title"] = "Nova matrícula";
 }
 
 @if (TempData["ErrorMessage"] != null)
@@ -23,24 +23,24 @@
                 <div class="card-body">
                     <form method="post" asp-action="Create">
                         <div class="mb-3">
-                            <label asp-for="MemberId" class="form-label">Member</label>
-                            <select asp-for="MemberId" asp-items="ViewBag.Members" class="form-select">
-                                <option value="">-- Select Member --</option>
+                            <label asp-for="MemberId" class="form-label">Aluno</label>
+                            <select asp-for="MemberId" asp-items="ViewBag.members" class="form-select">
+                                <option value="">Selecione o aluno</option>
                             </select>
                             <span asp-validation-for="MemberId" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="PlanId" class="form-label">Plan</label>
-                            <select asp-for="PlanId" asp-items="ViewBag.Plans" class="form-select">
-                                <option value="">-- Select Plan --</option>
+                            <label asp-for="PlanId" class="form-label">Plano</label>
+                            <select asp-for="PlanId" asp-items="ViewBag.plans" class="form-select">
+                                <option value="">Selecione o plano</option>
                             </select>
                             <span asp-validation-for="PlanId" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
-                            <button type="submit" class="btn btn-primary">Create Membership</button>
-                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Salvar matrícula</button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
                         </div>
                     </form>
                 </div>
