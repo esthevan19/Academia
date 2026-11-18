@@ -114,7 +114,7 @@
                                 </a>
                             }
                             <a asp-controller="Session" asp-action="Details" asp-route-id="@aula.Id" class="btn btn-outline-secondary rounded-3 fw-semibold">Ver detalhes</a>
-                            @if (canManage && aula.Status == "Upcoming")
+                            @if (canManage && aula.Status == "Upcoming" && aula.AvailableSlots == aula.Capacity)
                             {
                                 <div class="d-flex gap-2">
                                     <a asp-controller="Session" asp-action="Edit" asp-route-id="@aula.Id" class="btn btn-outline-primary rounded-3 flex-fill">Editar</a>
