@@ -85,7 +85,7 @@
                                 {
                                     <td class="text-end">
                                         <form asp-controller="Membership" asp-action="Cancel" method="post" class="d-inline"
-                                              onsubmit="return confirm('Deseja cancelar a matrícula de @item.MemberName?');">
+                                              onsubmit="return confirm('Deseja realmente cancelar esta matrícula?');">
                                             <input type="hidden" name="id" value="@item.MemberId" />
                                             <button type="submit" class="btn mat-cancel btn-sm text-nowrap">
                                                 <i class="bi bi-x-circle me-1"></i>Cancelar
