@@ -105,6 +105,8 @@ else if (TempData["ErrorMessage"] != null)
                                         <li>
                                             <hr class="dropdown-divider">
                                         </li>
+                                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente"))
+                                        {
                                         <li>
                                             <a asp-controller="Member" asp-action="Delete" asp-route-id="@member.Id"
                                                class="dropdown-item d-flex align-items-center gap-3 text-danger">
@@ -113,6 +115,7 @@ else if (TempData["ErrorMessage"] != null)
                                                 <span>Excluir</span>
                                             </a>
                                         </li>
+                                        }
                                     </ul>
                                 </div>
                             </td>
