@@ -9,7 +9,7 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
 {
 	public class HealthRecordViewModel
 	{
-		[Range(typeof(decimal), "0.50", "2.80", ErrorMessage = "Informe a altura em metros, entre 0,50 e 2,80 m.")]
+		[Range(typeof(decimal), "0.50", "2.80", ParseLimitsInInvariantCulture = true, ErrorMessage = "Informe a altura em metros, entre 0,50 e 2,80 m.")]
 		[Display(Name = "Altura (m)")]
 		public decimal Height { get; set; }
 
