@@ -27,13 +27,16 @@
         {
             <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Member" asp-action="Index"><i class="bi bi-people"></i><span><strong>Alunos</strong><small>Cadastros e informações</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
         }
-        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Instrutor"))
+        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente"))
         {
             <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Trainer" asp-action="Index"><i class="bi bi-person-badge"></i><span><strong>Instrutores</strong><small>Equipe e profissionais</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
         }
         <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Plan" asp-action="Index"><i class="bi bi-card-checklist"></i><span><strong>Planos</strong><small>Planos da academia</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
         <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Session" asp-action="Index"><i class="bi bi-calendar-event"></i><span><strong>Aulas coletivas</strong><small>Atividades e horários</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
-        <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Membership" asp-action="Index"><i class="bi bi-person-vcard"></i><span><strong>Matrículas</strong><small>Vínculos e inscrições</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
+        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Recepcionista"))
+        {
+            <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Membership" asp-action="Index"><i class="bi bi-person-vcard"></i><span><strong>Matrículas</strong><small>Vínculos e inscrições</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
+        }
         <div class="col-12 col-md-6 col-xl-4"><a class="gf-shortcut" asp-controller="Booking" asp-action="Index"><i class="bi bi-calendar-week"></i><span><strong>Agenda</strong><small>Reservas e presença</small></span><i class="bi bi-chevron-right ms-auto"></i></a></div>
         @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
         {
