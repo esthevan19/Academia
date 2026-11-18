@@ -6,6 +6,11 @@
         <p class="fw-bold mb-2" style="color:#070093">GYMFLOW · ÁREA DO ALUNO</p>
         <h1 class="h2 fw-bold">Bem-vindo ao GymFlow!</h1>
         <p class="text-muted">Sua conta de acesso está pronta.</p>
+        <div class="d-flex flex-wrap gap-2 mt-4 mb-3">
+            <a class="btn text-white" style="background:#070093" asp-controller="Student" asp-action="Index">Ver meus treinos</a>
+            <a class="btn btn-outline-primary" asp-controller="Session" asp-action="Index">Ver aulas coletivas</a>
+            <a class="btn btn-outline-secondary" asp-controller="Plan" asp-action="Index">Consultar planos</a>
+        </div>
         <div class="alert alert-info mt-4" role="status">
             Para consultar matrícula, treinos e reservas individuais, solicite à recepção
             o vínculo desta conta ao seu cadastro de aluno na academia.
