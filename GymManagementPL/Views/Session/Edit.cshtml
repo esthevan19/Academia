@@ -1,13 +1,13 @@
 ﻿@model UpdateSessionViewModel
 
 @{
-    ViewData["Title"] = "Edit Session";
+    ViewData["Title"] = "Editar Aula Coletiva";
 }
 
 <div class="container mt-4">
     <header class="mb-4">
-        <h3 class="text-primary-color">Edit Session</h3>
-        <p class="text-muted">Update session information</p>
+        <h3 class="text-primary-color">Editar Aula Coletiva</h3>
+        <p class="text-muted">Atualize as informações da aula coletiva</p>
     </header>
 
     @Html.ValidationMessage("DataMissed", new { @class = "text-danger" })
@@ -18,42 +18,42 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-4">
 
-                        <!-- Session Information -->
+                        <!-- Informações da Aula -->
                         <div class="section-header mb-3">
-                            <h5 class="text-primary fw-bold">Session Information</h5>
+                            <h5 class="text-primary fw-bold">Informações da Aula</h5>
                             <hr class="mt-2">
                         </div>
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label asp-for="TrainerId" class="form-label fw-semibold">
-                                    Trainer <span class="text-danger">*</span>
+                                    Professor responsável <span class="text-danger">*</span>
                                 </label>
                                 <select asp-for="TrainerId" asp-items="@ViewBag.Trainers" class="form-select">
-                                    <option value="">Select Trainer</option>
+                                    <option value="">Selecione o professor</option>
                                 </select>
                                 <span asp-validation-for="TrainerId" class="text-danger"></span>
                             </div>
 
                             <div class="col-12">
                                 <label asp-for="Description" class="form-label fw-semibold">
-                                    Description <span class="text-danger">*</span>
+                                    Descrição <span class="text-danger">*</span>
                                 </label>
                                 <textarea asp-for="Description" class="form-control" rows="3"></textarea>
                                 <span asp-validation-for="Description" class="text-danger"></span>
                             </div>
                         </div>
 
-                        <!-- Date & Time -->
+                        <!-- Data e Horário -->
                         <div class="section-header mb-3">
-                            <h5 class="text-primary fw-bold">Date & Time</h5>
+                            <h5 class="text-primary fw-bold">Data e Horário</h5>
                             <hr class="mt-2">
                         </div>
 
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label asp-for="StartDate" class="form-label fw-semibold">
-                                    Start Date & Time <span class="text-danger">*</span>
+                                    Start Data e Horário <span class="text-danger">*</span>
                                 </label>
                                 <input asp-for="StartDate" type="datetime-local" class="form-control" />
                                 <span asp-validation-for="StartDate" class="text-danger"></span>
@@ -61,7 +61,7 @@
 
                             <div class="col-md-6">
                                 <label asp-for="EndDate" class="form-label fw-semibold">
-                                    End Date & Time <span class="text-danger">*</span>
+                                    End Data e Horário <span class="text-danger">*</span>
                                 </label>
                                 <input asp-for="EndDate" type="datetime-local" class="form-control" />
                                 <span asp-validation-for="EndDate" class="text-danger"></span>
@@ -73,7 +73,7 @@
                                 <i class="bi bi-arrow-left me-1"></i>Cancel
                             </a>
                             <button type="submit" class="btn btn-fill">
-                                <i class="bi bi-check-lg me-1"></i>Update Session
+                                <i class="bi bi-check-lg me-1"></i>Salvar Alterações
                             </button>
                         </div>
                     </div>
