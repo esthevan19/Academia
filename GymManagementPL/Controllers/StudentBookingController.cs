@@ -34,7 +34,7 @@ public sealed class StudentBookingController : Controller
             return View(new StudentBookingPageViewModel { NeedsLink = true });
 
         var hasActiveMembership = await _db.Memberships.AsNoTracking()
-            .AnyAsync(m => m.MemberId == memberId.Value && m.EndDate >= BrazilClock.Now);
+            .AnyAsync(m => m.MemberId == memberId.Value && m.CreatedAt <= BrazilClock.Now && m.EndDate >= BrazilClock.Now);
 
         var bookings = _bookings.GetMemberBookings(memberId.Value)
             .OrderByDescending(b => b.StartDate).ToList();
