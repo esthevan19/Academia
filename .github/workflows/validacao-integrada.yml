@@ -1,0 +1,68 @@
+name: GymFlow • validação integrada
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  academia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ASPNETCORE_ENVIRONMENT: Testing
+      Database__ApplyMigrations: 'false'
+      Bootstrap__AdminEmail: admin@gymflow.test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Iniciar SQL Server de teste
+        shell: bash
+        run: |
+          set -euo pipefail
+          sql_pass="Gf1!$(openssl rand -hex 20)"
+          admin_pass="Gf2!$(openssl rand -hex 20)"
+          jwt_key="$(openssl rand -hex 40)"
+          for secret in "$sql_pass" "$admin_pass" "$jwt_key"; do echo "::add-mask::$secret"; done
+          {
+            echo "ConnectionStrings__DefaultConnection=Server=127.0.0.1,1433;Database=GymFlowTeste;User ID=sa;Password=$sql_pass;TrustServerCertificate=True;"
+            echo "Bootstrap__AdminPassword=$admin_pass"
+            echo "Jwt__Key=$jwt_key"
+          } >> "$GITHUB_ENV"
+          docker run -d --name gymflow-sql -p 127.0.0.1:1433:1433 -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD="$sql_pass" mcr.microsoft.com/mssql/server:2022-latest
+      - name: Compilar e preparar os arquivos de publicação
+        run: dotnet publish GymManagementPL/GymManagementPL.csproj -c Release -o "$RUNNER_TEMP/site"
+      - name: Aplicar o histórico de migrações somente no banco de teste
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet tool install --tool-path "$RUNNER_TEMP/ef" dotnet-ef --version 9.0.11
+          "$RUNNER_TEMP/ef/dotnet-ef" migrations script --project GymManagementDAL --startup-project GymManagementPL --configuration Release --no-build --output "$RUNNER_TEMP/schema.sql"
+          docker cp "$RUNNER_TEMP/schema.sql" gymflow-sql:/tmp/schema.sql
+          docker exec gymflow-sql bash -ec '
+            export SQLCMDPASSWORD="$MSSQL_SA_PASSWORD"
+            sql=(/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b)
+            for i in {1..45}; do "${sql[@]}" -Q "SELECT 1" >/dev/null 2>&1 && break; sleep 2; done
+            "${sql[@]}" -Q "CREATE DATABASE GymFlowTeste"
+            "${sql[@]}" -d GymFlowTeste -i /tmp/schema.sql
+          '
+      - name: Testar o site publicado e a API usada pelo APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd "$RUNNER_TEMP/site" && exec dotnet GymManagementPL.dll --urls http://127.0.0.1:5080) >"$RUNNER_TEMP/gymflow.log" 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          for i in {1..60}; do curl -fsS http://127.0.0.1:5080/Account/Login >/dev/null 2>&1 && break; sleep 1; done
+          python3 tests/fluxos_academia.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GymFlow-site
+          path: ${{ runner.temp }}/site
+          retention-days: 7
