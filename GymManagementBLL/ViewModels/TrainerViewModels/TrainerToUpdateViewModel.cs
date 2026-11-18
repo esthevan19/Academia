@@ -43,6 +43,7 @@ namespace GymManagementBLL.ViewModels.TrainerViewModels
 		public string Street { get; set; } = null!;
 
 		[Required(ErrorMessage = "Selecione a especialização.")]
+		[EnumDataType(typeof(Specialties), ErrorMessage = "Selecione uma especialização válida.")]
 		[Display(Name = "Especialização")]
 		public Specialties Specialties { get; set; }
 	}
