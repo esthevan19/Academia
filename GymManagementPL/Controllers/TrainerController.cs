@@ -25,7 +25,7 @@ namespace GymManagementPL.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid member ID. Please provide a valid identifier.";
+                TempData["ErrorMessage"] = "Identificador do professor inválido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -33,7 +33,7 @@ namespace GymManagementPL.Controllers
 
             if (trainer == null)
             {
-                TempData["ErrorMessage"] = $"No member found with ID: {id}. Please check and try again.";
+                TempData["ErrorMessage"] = $"Nenhum professor encontrado com o código {id}.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -45,21 +45,23 @@ namespace GymManagementPL.Controllers
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult CreateTrainer(CreateTrainerViewModel createdTrainer)
         {
 
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("DataMissed", "Check Missing Fields");
+                ModelState.AddModelError("DataMissed", "Confira os campos obrigatórios do cadastro.");
                 return View(nameof(Create), createdTrainer);
             }
 
             var result = _trainerService.CreateTrainer(createdTrainer);
 
             if (result)
-                TempData["SuccessMessage"] = $"Member Added Successfully";
+                TempData["SuccessMessage"] = $"Professor cadastrado com sucesso.";
             else
-                TempData["ErrorMessage"] = $"Member Failed To Added , Phone Number Or Email already exists";
+                TempData["ErrorMessage"] = $"Não foi possível cadastrar. Verifique se o e-mail ou telefone já estão cadastrados.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -68,7 +70,7 @@ namespace GymManagementPL.Controllers
         {
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid member ID. Please provide a valid identifier.";
+                TempData["ErrorMessage"] = "Identificador do professor inválido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -76,7 +78,7 @@ namespace GymManagementPL.Controllers
 
             if (trainer == null)
             {
-                TempData["ErrorMessage"] = $"No member found with ID: {id}. Please check and try again.";
+                TempData["ErrorMessage"] = $"Nenhum professor encontrado com o código {id}.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -85,21 +87,22 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult EditTrainer([FromRoute] int id, TrainerToUpdateViewModel trainerToUpdate)
         {
 
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("DataMissed", "Email Or Phone Exist");
+                ModelState.AddModelError("DataMissed", "Confira os dados preenchidos antes de salvar.");
                 return View(trainerToUpdate);
             }
 
             var result = _trainerService.UpdateTrainer(id, trainerToUpdate);
 
             if (result)
-                TempData["SuccessMessage"] = "Trainer Updated Successfully";
+                TempData["SuccessMessage"] = "Dados do professor atualizados com sucesso.";
             else
-                TempData["ErrorMessage"] = "Trainer Failed To Updated";
+                TempData["ErrorMessage"] = "Não foi possível atualizar o professor. Verifique se e-mail ou telefone já existem.";
 
             return RedirectToAction(nameof(Index));
 
@@ -110,7 +113,7 @@ namespace GymManagementPL.Controllers
 
             if (id <= 0)
             {
-                TempData["ErrorMessage"] = "Invalid member ID. Please provide a valid identifier.";
+                TempData["ErrorMessage"] = "Identificador do professor inválido.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -120,7 +123,7 @@ namespace GymManagementPL.Controllers
 
             if (trainer == null)
             {
-                TempData["ErrorMessage"] = $"No member found with ID: {id}. Please check and try again.";
+                TempData["ErrorMessage"] = $"Nenhum professor encontrado com o código {id}.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -134,9 +137,9 @@ namespace GymManagementPL.Controllers
             var result = _trainerService.RemoveTrainer(id);
 
             if (result)
-                TempData["SuccessMessage"] = "Member Removed Successfully";
+                TempData["SuccessMessage"] = "Professor excluído com sucesso.";
             else
-                TempData["ErrorMessage"] = "Member Not Removed";
+                TempData["ErrorMessage"] = "Não foi possível excluir o professor. Verifique se há aulas futuras vinculadas.";
 
             return RedirectToAction(nameof(Index));
 
