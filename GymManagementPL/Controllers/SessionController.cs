@@ -41,6 +41,7 @@ namespace GymManagementPL.Controllers
             return View(session);
         }
 
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
         public IActionResult Create()
         {
             LoadCategoriesDropDown();
@@ -49,6 +50,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
         public IActionResult Create(CreateSessionViewModel createdSession)
         {
             if (!ModelState.IsValid)
@@ -75,6 +77,7 @@ namespace GymManagementPL.Controllers
 
         }
 
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
         public IActionResult Edit(int id)
         {
             if (id <= 0)
@@ -97,6 +100,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
         public IActionResult Edit(int id, UpdateSessionViewModel updatedSession)
         {
 
@@ -123,6 +127,7 @@ namespace GymManagementPL.Controllers
 
         }
 
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
         public IActionResult Delete(int id)
         {
             if (id <= 0)
@@ -143,6 +148,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
         public IActionResult DeleteConfirmed([FromForm] int id)
         {
             var result = _sessionService.RemoveSession(id);

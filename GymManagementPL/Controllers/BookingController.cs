@@ -2,10 +2,12 @@
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.BookingViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GymManagementPL.Controllers
 {
+    [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista,Instrutor")]
     public class BookingController : Controller
     {
         private readonly IBookingService _bookingService;
@@ -35,14 +37,15 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(CreateBookingViewModel createdBooking)
         {
             var result = _bookingService.CreateNewBooking(createdBooking);
 
             if (result)
-                TempData["SuccessMessage"] = "Booking Created successfully!";
+                TempData["SuccessMessage"] = "Reserva realizada com sucesso.";
             else
-                TempData["ErrorMessage"] = "Failed to Create Booking.";
+                TempData["ErrorMessage"] = "Não foi possível criar a reserva.";
 
             return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = createdBooking.SessionId });
         }
@@ -54,26 +57,29 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Attended(int MemberId, int SessionId)
         {
             var result = _bookingService.IsMemberAttended(MemberId, SessionId);
 
             if (result)
-                TempData["SuccessMessage"] = "Member attended successfully";
+                TempData["SuccessMessage"] = "Presença registrada com sucesso.";
             else
-                TempData["ErrorMessage"] = "Member attendance can't be marked";
+                TempData["ErrorMessage"] = "Não foi possível registrar a presença.";
 
             return RedirectToAction(nameof(GetMembersForOngoingSession), new { id = SessionId });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Cancel(int MemberId, int SessionId)
         {
             var result = _bookingService.CancelBooking(MemberId, SessionId);
 
             if (result)
-                TempData["SuccessMessage"] = "Booking cancelled successfully";
+                TempData["SuccessMessage"] = "Reserva cancelada com sucesso.";
             else
-                TempData["ErrorMessage"] = "Booking can't be cancelled";
+                TempData["ErrorMessage"] = "Não foi possível cancelar a reserva.";
 
             return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = SessionId });
         }

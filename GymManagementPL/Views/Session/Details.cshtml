@@ -1,7 +1,7 @@
 ﻿@model SessionViewModel
 
 @{
-    ViewData["Title"] = "Session Details";
+    ViewData["Title"] = "Detalhes da aula";
 }
 
 <div class="container mt-5">
@@ -11,7 +11,7 @@
                 <div class="card-header text-white py-3 @(Model.Status == "Ongoing" ? "bg-success" : Model.Status == "Upcoming" ? "bg-primary" : "bg-secondary") ">
                     <i class="bi bi-calendar-event display-4 mb-3"></i>
                     <h2 class="mb-2">@Model.CategoryName</h2>
-                    <span class="badge bg-light text-dark fs-6">@Model.Status</span>
+                    <span class="badge bg-light text-dark fs-6">@(Model.Status == "Upcoming" ? "Agendada" : Model.Status == "Ongoing" ? "Em andamento" : Model.Status == "Completed" ? "Concluída" : Model.Status)</span>
                 </div>
 
                 <div class="card-body p-4">
@@ -32,7 +32,7 @@
                                         <i class="bi bi-person-circle text-primary-color fs-3"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block">Trainer</small>
+                                        <small class="text-muted d-block">Professor</small>
                                         <strong>@Model.TrainerName</strong>
                                     </div>
                                 </div>
@@ -46,8 +46,8 @@
                                         <i class="bi bi-people text-primary-color fs-3"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block">Capacity</small>
-                                        <strong>@Model.AvailableSlots / @Model.Capacity spots</strong>
+                                        <small class="text-muted d-block">Capacidade</small>
+                                        <strong>@Model.AvailableSlots / @Model.Capacity vagas</strong>
                                     </div>
                                 </div>
                             </div>
@@ -60,8 +60,8 @@
                                         <i class="bi bi-calendar-check text-primary-color fs-3"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block">Start Time</small>
-                                        <strong>@Model.StartDate</strong>
+                                        <small class="text-muted d-block">Início</small>
+                                        <strong>@Model.StartDate.ToString("dd/MM/yyyy HH:mm")</strong>
                                     </div>
                                 </div>
                             </div>
@@ -74,8 +74,8 @@
                                         <i class="bi bi-calendar-x text-primary-color fs-3"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block">End Time</small>
-                                        <strong>@Model.EndDate</strong>
+                                        <small class="text-muted d-block">Término</small>
+                                        <strong>@Model.EndDate.ToString("dd/MM/yyyy HH:mm")</strong>
                                     </div>
                                 </div>
                             </div>
@@ -88,9 +88,9 @@
                                         <i class="bi bi-hourglass-split text-primary-color fs-3"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block">Duration</small>
+                                        <small class="text-muted d-block">Duração</small>
                                         <strong class="text-primary-color fs-5">
-                                            @Model.Duration.Hours Hours @Model.Duration.Minutes Minutes
+                                            @Model.Duration.Hours horas @Model.Duration.Minutes minutos
                                         </strong>
                                     </div>
                                 </div>

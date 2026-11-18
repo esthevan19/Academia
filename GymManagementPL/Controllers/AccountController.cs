@@ -25,6 +25,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Login(LoginViewModel viewModel)
         {
 
@@ -34,17 +35,17 @@ namespace GymManagementPL.Controllers
 
             if (user == null)
             {
-                ModelState.AddModelError("InvalidLogin", "Inalid Email or Password");
+                ModelState.AddModelError("InvalidLogin", "E-mail ou senha incorretos.");
                 return View(viewModel);
             }
 
             var result = _signInManager.PasswordSignInAsync(user, viewModel.Password, viewModel.RememberMe, false).Result;
 
             if (result.IsNotAllowed)
-                ModelState.AddModelError("InvalidLogin", "Your Acount Is Not Allowed");
+                ModelState.AddModelError("InvalidLogin", "Sua conta não está autorizada a entrar.");
 
             if (result.IsLockedOut)
-                ModelState.AddModelError("InvalidLogin", "Your Acount Is Locked Out");
+                ModelState.AddModelError("InvalidLogin", "Conta temporariamente bloqueada. Tente novamente mais tarde.");
 
             if (result.Succeeded)
                 return RedirectToAction("Index", "Home");

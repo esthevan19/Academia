@@ -2,8 +2,8 @@
 <div class="container mt-5">
     <!-- Cabeçalho -->
     <div class="text-center mb-4">
-        <h1 class="fw-bold" style="letter-spacing:1px; color:#070093;">Gerenciar Funções de @Model.Email</h1>
-        <p class="text-muted">Adicione ou remova funções para este admin</p>
+        <h1 class="fw-bold" style="letter-spacing:1px; color:#070093;">Gerenciar perfis de @Model.Email</h1>
+        <p class="text-muted">Adicione ou remova permissões deste usuário</p>
         <hr class="w-50 mx-auto" style="border-top:3px solid #070093;" />
     </div>
     <!-- Mensagens do TempData -->
@@ -22,10 +22,10 @@
         </div>
     }
     <div class="row mt-4 g-4">
-        <!-- Funções Atuais -->
+        <!-- Perfis atuais -->
         <div class="col-md-6">
             <div class="card shadow-sm p-3">
-                <h4 class="fw-semibold mb-3">Funções Atuais</h4>
+                <h4 class="fw-semibold mb-3">Perfis atuais</h4>
                 <ul class="list-group">
                     @foreach (var role in Model.UserRoles)
                     {
@@ -44,7 +44,7 @@
         <!-- Adicionar Funções -->
         <div class="col-md-6">
             <div class="card shadow-sm p-3">
-                <h4 class="fw-semibold mb-3">Adicionar Função</h4>
+                <h4 class="fw-semibold mb-3">Adicionar perfil</h4>
                 <ul class="list-group">
                     @foreach (var role in Model.AllRoles)
                     {

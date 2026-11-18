@@ -79,15 +79,21 @@
                                asp-controller="Plan" asp-action="Index">Planos</a>
                         </li>
 
+                        @if (!User.IsInRole("Aluno"))
+                        {
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Membership" ? "active" : "")"
                                asp-controller="Membership" asp-action="Index">Matrículas</a>
                         </li>
+                        }
 
+                        @if (!User.IsInRole("Aluno"))
+                        {
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Booking" ? "active" : "")"
                                asp-controller="Booking" asp-action="Index">Agenda</a>
                         </li>
+                        }
 
                         @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
                         {

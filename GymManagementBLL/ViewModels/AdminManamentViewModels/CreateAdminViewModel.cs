@@ -9,30 +9,44 @@ namespace GymManagementBLL.ViewModels.AdminManamentViewModels
 {
     public class CreateAdminViewModel
     {
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid Email Address")]
+        [Required(ErrorMessage = "Informe o e-mail.")]
+        [EmailAddress(ErrorMessage = "Informe um e-mail válido.")]
+        [Display(Name = "E-mail")]
+        
         public string Email { get; set; } = null!;
 
-        [Required(ErrorMessage = "User Name is required")]
+        [Required(ErrorMessage = "Informe o nome de usuário.")]
+        [Display(Name = "Nome de usuário")]
+        
         public string UserName { get; set; } = null!;
 
-        [Required(ErrorMessage = "First Name is required")]
+        [Required(ErrorMessage = "Informe o primeiro nome.")]
+        [Display(Name = "Nome")]
+        
         public string FirstName { get; set; } = null!;
 
-        [Required(ErrorMessage = "Last Name is required")]
+        [Required(ErrorMessage = "Informe o sobrenome.")]
+        [Display(Name = "Sobrenome")]
+        
         public string LastName { get; set; } = null!;
 
-        [Phone(ErrorMessage = "Invalid Phone Number")]
+        [Phone(ErrorMessage = "Informe um telefone válido.")]
+        [Display(Name = "Celular com DDD")]
+        
         public string? PhoneNumber { get; set; }
 
-        [Required(ErrorMessage = "Password is required")]
-        [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+        [Required(ErrorMessage = "Informe a senha.")]
+        [MinLength(8, ErrorMessage = "A senha precisa ter pelo menos 8 caracteres.")]
         [DataType(DataType.Password)]
+        [Display(Name = "Senha")]
+        
         public string Password { get; set; } = null!;
 
-        [Required(ErrorMessage = "Confirm Password is required")]
+        [Required(ErrorMessage = "Confirme a senha.")]
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "Passwords do not match")]
+        [Compare("Password", ErrorMessage = "As senhas não coincidem.")]
+        [Display(Name = "Confirmar senha")]
+        
         public string ConfirmPassword { get; set; } = null!;
 
         [Required(ErrorMessage = "O Perfil/Função é obrigatório")]

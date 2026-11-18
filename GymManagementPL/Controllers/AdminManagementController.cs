@@ -12,10 +12,12 @@ namespace GymManagementPL.Controllers
     public class AdminManagementController : Controller
     {
         private readonly IAdminService _adminService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AdminManagementController(IAdminService adminService)
+        public AdminManagementController(IAdminService adminService, UserManager<ApplicationUser> userManager)
         {
             _adminService = adminService;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
@@ -34,12 +36,13 @@ namespace GymManagementPL.Controllers
         public IActionResult Create(CreateAdminViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
+            if (!User.IsInRole("SuperAdmin") && model.Role == "SuperAdmin") return Forbid();
 
             var result = _adminService.CreateAdmin(model);
 
             if (result.Succeeded)
             {
-                TempData["SuccessMessage"] = "Admin Added Successfully";
+                TempData["SuccessMessage"] = "Usuário criado com sucesso.";
                 return RedirectToAction("Index");
             }
 
@@ -50,8 +53,9 @@ namespace GymManagementPL.Controllers
         }
 
 
-        public IActionResult Edit(string id)
+        public async Task<IActionResult> Edit(string id)
         {
+            if (await IsSuperAdminTargetForOtherRole(id)) return Forbid();
             var model = _adminService.GetAdminForUpdate(id);
 
             if (model == null)
@@ -62,8 +66,9 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
-        public IActionResult Edit(EditAdminViewModel model)
+        public async Task<IActionResult> Edit(EditAdminViewModel model)
         {
+            if (await IsSuperAdminTargetForOtherRole(model.Id)) return Forbid();
             if (!ModelState.IsValid) return View(model);
 
             var result = _adminService.EditAdmin(model);
@@ -78,15 +83,17 @@ namespace GymManagementPL.Controllers
         }
 
 
-        public IActionResult Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
+            if (await IsSuperAdminTargetForOtherRole(id)) return Forbid();
             ViewBag.AdminId = id;
             return View();
         }
 
         [HttpPost]
-        public IActionResult DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (await IsSuperAdminTargetForOtherRole(id)) return Forbid();
             var result = _adminService.DeleteAdmin(id);
 
             if (!result.Succeeded)
@@ -95,12 +102,13 @@ namespace GymManagementPL.Controllers
             }
             else
             {
-                TempData["SuccessMessage"] = "Admin Deleted Successfully!";
+                TempData["SuccessMessage"] = "Usuário excluído com sucesso.";
             }
 
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult ResetPassword(string id)
         {
             return View(new ResetPasswordViewModel { Id = id });
@@ -108,6 +116,7 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -116,7 +125,7 @@ namespace GymManagementPL.Controllers
 
             if (result.Succeeded)
             {
-                TempData["SuccessMessage"] = "Password Reset Successfully";
+                TempData["SuccessMessage"] = "Senha redefinida com sucesso.";
                 return RedirectToAction("Index");
             }
 
@@ -126,6 +135,7 @@ namespace GymManagementPL.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult ManageRoles(string id)
         {
             var model = _adminService.GetRoles(id);
@@ -135,6 +145,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult AddRole(string userId, string role)
         {
             var result = _adminService.AddRole(userId, role);
@@ -142,13 +153,14 @@ namespace GymManagementPL.Controllers
             if (!result.Succeeded)
                 TempData["ErrorMessage"] = string.Join(", ", result.Errors.Select(e => e.Description));
             else
-                TempData["SuccessMessage"] = "Role added successfully!";
+                TempData["SuccessMessage"] = "Perfil adicionado com sucesso.";
 
             return RedirectToAction("ManageRoles", new { id = userId });
         }
 
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult RemoveRole(string userId, string role)
         {
             var result = _adminService.RemoveRole(userId, role);
@@ -156,9 +168,17 @@ namespace GymManagementPL.Controllers
             if (!result.Succeeded)
                 TempData["ErrorMessage"] = string.Join(", ", result.Errors.Select(e => e.Description));
             else
-                TempData["SuccessMessage"] = "Role removed successfully!";
+                TempData["SuccessMessage"] = "Perfil removido com sucesso.";
 
             return RedirectToAction("ManageRoles", new { id = userId });
         }
+        private async Task<bool> IsSuperAdminTargetForOtherRole(string? id)
+        {
+            if (User.IsInRole("SuperAdmin")) return false;
+            if (string.IsNullOrWhiteSpace(id)) return true;
+            var user = await _userManager.FindByIdAsync(id);
+            return user is not null && await _userManager.IsInRoleAsync(user, "SuperAdmin");
+        }
+
     }
 }

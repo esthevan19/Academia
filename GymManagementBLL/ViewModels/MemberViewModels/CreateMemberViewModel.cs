@@ -7,9 +7,8 @@ namespace GymManagementBLL.ViewModels.MemberViewModels
     public class CreateMemberViewModel
     {
 
-        [Required(ErrorMessage = "A Foto de Perfil é obrigatória")]
         [Display(Name = "Foto de Perfil")]
-        public IFormFile PhotoFile { get; set; } = null!;
+        public IFormFile? PhotoFile { get; set; }
 
         [Required(ErrorMessage = "O Nome é obrigatório")]
         [RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\s.'-]*$", ErrorMessage = "Informe um nome válido, permitindo acentos, espaços, hífen e apóstrofo.")]
