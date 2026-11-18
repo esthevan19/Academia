@@ -77,6 +77,13 @@
                             </li>
                         }
 
+                        @if (User.IsInRole("Aluno"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "StudentBooking" ? "active" : "")"
+                                   asp-controller="StudentBooking" asp-action="Index">Minhas aulas</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 fw-semibold fs-5 @(CurrentController == "Session" ? "active" : "")"
                                asp-controller="Session" asp-action="Index">Aulas Coletivas</a>
