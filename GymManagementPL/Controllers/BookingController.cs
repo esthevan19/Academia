@@ -25,21 +25,40 @@ namespace GymManagementPL.Controllers
 
         public IActionResult GetMembersForUpcomingSession(int id)
         {
+            if (id <= 0) return RedirectToAction(nameof(Index));
             var members = _bookingService.GetMembersSession(id);
             return View(members);
         }
 
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Create(int id)
         {
-            var members = _bookingService.GetMembersForDropDown(id);
-            ViewBag.members = new SelectList(members, "Id", "Name");
-            return View();
+            if (id <= 0) return RedirectToAction(nameof(Index));
+            var session = _bookingService.GetAllSessions()
+                .FirstOrDefault(s => s.Id == id && s.Status == "Upcoming");
+            if (session is null || session.AvailableSlots <= 0)
+            {
+                TempData["ErrorMessage"] = "Esta aula não está disponível para novas reservas.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.SessionId = id;
+            ViewBag.SessionName = session.CategoryName;
+            ViewBag.Members = new SelectList(_bookingService.GetMembersForDropDown(id), "Id", "Name");
+            return View(new CreateBookingViewModel { SessionId = id });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Create(CreateBookingViewModel createdBooking)
         {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Selecione um aluno e uma aula válidos.";
+                return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = createdBooking.SessionId });
+            }
+
             var result = _bookingService.CreateNewBooking(createdBooking);
 
             if (result)
@@ -72,6 +91,7 @@ namespace GymManagementPL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Cancel(int MemberId, int SessionId)
         {
             var result = _bookingService.CancelBooking(MemberId, SessionId);
