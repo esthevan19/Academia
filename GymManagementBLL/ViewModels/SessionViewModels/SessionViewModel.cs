@@ -1,3 +1,4 @@
+using GymManagementBLL.Services.Classes;
 ﻿namespace GymManagementBLL.ViewModels.SessionViewModels
 {
 	public class SessionViewModel
@@ -12,14 +13,14 @@
 		public int AvailableSlots { get; set; }
 
 		// Computed properties
-		public string DateDisplay => $"{StartDate:MMM dd , yyyy}";
-		public string TimeRangeDisplay => $"{StartDate:hh:mm tt} - {EndDate:hh:mm tt}";
+		public string DateDisplay => StartDate.ToString("dd/MM/yyyy");
+		public string TimeRangeDisplay => $"{StartDate:HH:mm} - {EndDate:HH:mm}";
 		public TimeSpan Duration => EndDate - StartDate;
 		public string Status
 		{
 			get
 			{
-				if (StartDate > DateTime.UtcNow)
+				if (StartDate > BrazilClock.Now)
 					return "Upcoming";
 				else if (StartDate <= DateTime.UtcNow && EndDate >= DateTime.UtcNow)
 					return "Ongoing";
