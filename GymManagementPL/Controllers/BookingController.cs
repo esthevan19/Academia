@@ -71,6 +71,16 @@ namespace GymManagementPL.Controllers
 
         public IActionResult GetMembersForOngoingSession(int id)
         {
+            if (id <= 0) return RedirectToAction(nameof(Index));
+
+            var ongoing = _bookingService.GetAllSessions()
+                .Any(session => session.Id == id && session.Status == "Ongoing");
+            if (!ongoing)
+            {
+                TempData["ErrorMessage"] = "A presença só pode ser registrada durante o horário da aula.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var members = _bookingService.GetMembersSession(id);
             return View(members);
         }
