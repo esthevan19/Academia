@@ -1,5 +1,5 @@
 using GymManagementBLL.Services.Classes;
-﻿namespace GymManagementBLL.ViewModels.SessionViewModels
+namespace GymManagementBLL.ViewModels.SessionViewModels
 {
 	public class SessionViewModel
 	{
