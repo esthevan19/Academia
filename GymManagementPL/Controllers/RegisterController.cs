@@ -1,57 +1,93 @@
-﻿using GymManagementBLL.Services.Interfaces;
-using GymManagementBLL.ViewModels.MemberViewModels;
+using GymManagementDAL.Entities;
+using GymManagementPL.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GymManagementPL.Controllers
+namespace GymManagementPL.Controllers;
+
+[AllowAnonymous]
+public sealed class RegisterController : Controller
 {
-    // Controller público - qualquer pessoa pode acessar sem estar logada,
-    // por isso NÃO tem [Authorize] aqui em cima.
-    public class RegisterController : Controller
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
+
+    public RegisterController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
     {
-        #region Fields
+        _userManager = userManager;
+        _roleManager = roleManager;
+    }
 
-        private readonly IMemberService _memberService;
+    [HttpGet]
+    public IActionResult Index()
+    {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToAction("Index", "Home");
+        return View(new CadastroPublicoViewModel());
+    }
 
-        #endregion
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Index(CadastroPublicoViewModel model)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToAction("Index", "Home");
 
-        #region Constructors
+        if (!ModelState.IsValid) return View(model);
 
-        public RegisterController(IMemberService memberService)
+        var email = model.Email.Trim();
+        if (await _userManager.FindByEmailAsync(email) is not null)
         {
-            _memberService = memberService;
+            ModelState.AddModelError(nameof(model.Email), "Este e-mail já possui uma conta. Faça login.");
+            return View(model);
         }
 
-        #endregion
-
-        #region Register
-
-        [HttpGet]
-        public IActionResult Index()
+        // Cadastro público nunca cria perfis com permissões administrativas.
+        if (!await _roleManager.RoleExistsAsync("Aluno"))
         {
-            return View();
+            ModelState.AddModelError(string.Empty, "Cadastro temporariamente indisponível. Contate a academia.");
+            return View(model);
         }
 
-        [HttpPost]
-        public IActionResult Index(CreateMemberViewModel createdMember)
+        var usuario = new ApplicationUser
         {
-            if (!ModelState.IsValid)
+            UserName = email,
+            Email = email,
+            FirstName = string.Empty,
+            LastName = string.Empty
+        };
+
+        var resultado = await _userManager.CreateAsync(usuario, model.Password);
+        if (!resultado.Succeeded)
+        {
+            foreach (var erro in resultado.Errors)
             {
-                ModelState.AddModelError("DataMissed", "Verifique os campos obrigatórios");
-                return View(createdMember);
+                var mensagem = erro.Code switch
+                {
+                    "DuplicateEmail" or "DuplicateUserName" => "Este e-mail já possui uma conta.",
+                    "PasswordTooShort" => "A senha precisa ter pelo menos 8 caracteres.",
+                    "PasswordRequiresDigit" => "Inclua ao menos um número na senha.",
+                    "PasswordRequiresUpper" => "Inclua ao menos uma letra maiúscula na senha.",
+                    "PasswordRequiresLower" => "Inclua ao menos uma letra minúscula na senha.",
+                    "PasswordRequiresNonAlphanumeric" => "Inclua ao menos um caractere especial na senha.",
+                    _ => "Não foi possível concluir o cadastro. Confira seus dados."
+                };
+                ModelState.AddModelError(string.Empty, mensagem);
             }
-
-            bool result = _memberService.CreateMember(createdMember);
-
-            if (result)
-            {
-                TempData["SuccessMessage"] = "Cadastro realizado com sucesso! Faça login para continuar.";
-                return RedirectToAction("Login", "Account");
-            }
-
-            ModelState.AddModelError("DataMissed", "Não foi possível concluir o cadastro. Verifique se o Email ou Telefone já estão cadastrados.");
-            return View(createdMember);
+            return View(model);
         }
 
-        #endregion
+        var vinculo = await _userManager.AddToRoleAsync(usuario, "Aluno");
+        if (!vinculo.Succeeded)
+        {
+            await _userManager.DeleteAsync(usuario);
+            ModelState.AddModelError(string.Empty, "Não foi possível finalizar o cadastro. Tente novamente.");
+            return View(model);
+        }
+
+        // Uma conta de acesso não cria matrícula, ficha clínica ou vínculo a outro aluno.
+        // O vínculo ao cadastro de aluno existente é realizado somente pela equipe autorizada.
+        TempData["SuccessMessage"] = "Conta criada! Entre com seu e-mail e senha. Para consultar sua matrícula, peça à recepção para vincular sua conta ao cadastro de aluno.";
+        return RedirectToAction("Login", "Account");
     }
 }
