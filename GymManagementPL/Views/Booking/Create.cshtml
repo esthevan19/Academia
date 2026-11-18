@@ -1,10 +1,10 @@
 ﻿@model CreateBookingViewModel
 
 @{
-    ViewData["Title"] = "Create Booking";
+    ViewData["Title"] = "Nova reserva";
 }
 
-<h1>Create New Booking</h1>
+<h1>Nova reserva</h1>
 
 <hr />
 <div class="row">
@@ -13,7 +13,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Booking Information</h5>
+                    <h5 class="card-title mb-0">Dados da reserva</h5>
                 </div>
                 <div class="card-body">
                     <form asp-action="Create" method="post">
@@ -21,18 +21,18 @@
 
                         <div class="mb-3">
                             <input type="hidden" asp-for="SessionId" value="@ViewContext.RouteData.Values["id"]" readonly />
-                            <label asp-for="MemberId" class="form-label">Member</label>
+                            <label asp-for="MemberId" class="form-label">Aluno</label>
                             <select asp-for="MemberId" asp-items="ViewBag.Members" class="form-select">
-                                <option value="">-- Select Member --</option>
+                                <option value="">Selecione o aluno</option>
                             </select>
                             <span asp-validation-for="MemberId" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Create Booking
+                                <i class="fas fa-save"></i> Salvar reserva
                             </button>
                             <a asp-action="GetMembersForUpcomingSession" asp-route-id="@ViewContext.RouteData.Values["id"]" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Back to List
+                                <i class="fas fa-arrow-left"></i> Voltar
                             </a>
                         </div>
                     </form>
@@ -48,8 +48,8 @@
     <script>
         $(document).ready(function() {
             // Initialize Select2 for better dropdown experience
-            $('#MemberId').select2({
-                placeholder: "Select a member",
+            if (jQuery.fn.select2) $('#MemberId').select2({
+                placeholder: "Selecione o aluno",
                 allowClear: true,
                 width: '100%'
             });
