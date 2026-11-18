@@ -39,13 +39,18 @@ namespace GymManagementPL.Controllers
 
         public IActionResult Create()
         {
-            return View();
+            return View(new CreateMemberViewModel
+            {
+                HealthRecordViewModel = new HealthRecordViewModel()
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CreateMember(CreateMemberViewModel createdMember)
         {
+            if (createdMember is null)
+                return BadRequest("Dados de cadastro inválidos.");
 
             if (!ModelState.IsValid)
             {
