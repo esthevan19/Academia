@@ -69,8 +69,12 @@ namespace GymManagementBLL.Services.Classes
                                                  .Select(x => x.MemberId)
                                                  .ToList();
 
+            var activeMemberIds = _unitOfWork.MembershipRepository
+                .GetAll(x => x.EndDate >= BrazilClock.Now)
+                .Select(x => x.MemberId).ToHashSet();
+
             var members = _unitOfWork.GetRepository<Member>()
-                                     .GetAll(x => !membersIdHasBooking.Contains(x.Id));
+                .GetAll(x => !membersIdHasBooking.Contains(x.Id) && activeMemberIds.Contains(x.Id));
             // Get All Members That Not Have Booking Untill => !List.Contains(x.Id)
 
             return _mapper.Map<IEnumerable<MemberSelectListViewModel>>(members);
