@@ -24,3 +24,11 @@ Atenção: se houver migrations anteriores pendentes, o opt-in também tentará 
 
 ## APK
 Somente após publicar e testar o backend: integrar a PR Mobile, validar TypeScript e lint, gerar APK via GitHub Actions/EAS e instalar em Android real. Testar login e navegação de cada perfil.
+
+
+## Segurança obrigatória antes de usar com clientes reais
+
+- A inicialização do GymFlow **não cria mais contas de demonstração nem utiliza senhas fixas**. Apenas garante a existência dos seis perfis de acesso. Os dados de exemplo de planos e categorias só são carregados em ambiente de desenvolvimento.
+- Essa alteração **não remove contas já criadas**. No painel de usuários, revise cada conta antiga de teste, redefina senhas de contas mantidas e desative/exclua contas de demonstração que não são necessárias. Confira principalmente os perfis SuperAdmin, Admin e Gerente. Não compartilhe senhas ou tokens em conversas.
+- Confirme que existe pelo menos um SuperAdmin legítimo com acesso testado **antes** de excluir contas antigas. Para um banco novo, providencie um processo seguro de criação do primeiro administrador; não reintroduza contas de senha conhecida no código.
+- Mantenha `Database__ApplyMigrations=false` até verificar o histórico `__EFMigrationsHistory` e o backup em homologação. A ausência das tabelas de treinos não é resolvida por uma nova publicação do MVC.
