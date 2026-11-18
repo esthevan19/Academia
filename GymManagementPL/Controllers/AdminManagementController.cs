@@ -188,6 +188,8 @@ namespace GymManagementPL.Controllers
 
         public async Task<IActionResult> Delete(string id)
         {
+            if (string.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), id, StringComparison.Ordinal))
+                return BadRequest("Você não pode excluir sua própria conta.");
             if (await IsSuperAdminTargetForOtherRole(id)) return Forbid();
             ViewBag.AdminId = id;
             return View();
@@ -197,6 +199,11 @@ namespace GymManagementPL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
+            if (string.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), id, StringComparison.Ordinal))
+            {
+                TempData["ErrorMessage"] = "Você não pode excluir sua própria conta.";
+                return RedirectToAction(nameof(Index));
+            }
             if (await IsSuperAdminTargetForOtherRole(id)) return Forbid();
             var result = _adminService.DeleteAdmin(id);
 
@@ -250,6 +257,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
         public IActionResult AddRole(string userId, string role)
         {
@@ -265,9 +273,17 @@ namespace GymManagementPL.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
         public IActionResult RemoveRole(string userId, string role)
         {
+            if (string.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), userId, StringComparison.Ordinal) &&
+                string.Equals(role, "SuperAdmin", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["ErrorMessage"] = "Você não pode remover seu próprio perfil SuperAdmin.";
+                return RedirectToAction(nameof(ManageRoles), new { id = userId });
+            }
+
             var result = _adminService.RemoveRole(userId, role);
 
             if (!result.Succeeded)
