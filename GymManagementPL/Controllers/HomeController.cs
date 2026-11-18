@@ -13,6 +13,13 @@ namespace GymManagementPL.Controllers
         {
             _analyticsService = analyticsService;
         }
+        [AllowAnonymous]
+        public IActionResult Error()
+        {
+            Response.StatusCode = StatusCodes.Status500InternalServerError;
+            return View();
+        }
+
         public IActionResult Index()
         {
             // Aluno não visualiza indicadores administrativos da academia.

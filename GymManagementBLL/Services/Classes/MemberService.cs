@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using GymManagementBLL.Services.AttachmentService;
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.MemberViewModels;
@@ -20,16 +21,18 @@ namespace GymManagementBLL.Services.Classes
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IAttachmentService _attachmentService;
+        private readonly ILogger<MemberService> _logger;
 
         #endregion
 
         #region Constructor
 
-        public MemberService(IUnitOfWork unitOfWork, IMapper mapper, IAttachmentService attachmentService)
+        public MemberService(IUnitOfWork unitOfWork, IMapper mapper, IAttachmentService attachmentService, ILogger<MemberService> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _attachmentService = attachmentService;
+            _logger = logger;
         }
 
         #endregion
@@ -128,7 +131,9 @@ namespace GymManagementBLL.Services.Classes
             }
             catch (Exception ex)
             {
-                throw;
+                // Registrar detalhes apenas no log do servidor, sem expor dados ao navegador.
+                _logger.LogError(ex, "Falha ao cadastrar aluno no banco de dados.");
+                return false;
             }
 
         }
