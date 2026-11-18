@@ -96,7 +96,7 @@ namespace GymManagementBLL.Services.Classes
                 if (session is null || session.StartDate <= BrazilClock.Now) return false;
 
                 var hasActiveMembership = _unitOfWork.MembershipRepository
-                                                     .GetAll(x => x.MemberId == createdBooking.MemberId && x.Status == "Active").Any();
+                                                     .GetAll(x => x.MemberId == createdBooking.MemberId && x.EndDate >= BrazilClock.Now).Any();
                 if (!hasActiveMembership) return false;
 
                 var hasExistingBooking = _unitOfWork.BookingRepository
