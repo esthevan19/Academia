@@ -115,9 +115,16 @@ namespace GymManagementBLL.Services.Classes
         {
             var user = _userManager.FindByIdAsync(id).Result;
             if (user == null)
-                return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+                return IdentityResult.Failed(new IdentityError { Description = "Usuário não encontrado." });
 
-            return _userManager.DeleteAsync(user).Result;
+            if (_userManager.IsInRoleAsync(user, "SuperAdmin").GetAwaiter().GetResult() &&
+                _userManager.GetUsersInRoleAsync("SuperAdmin").GetAwaiter().GetResult().Count <= 1)
+                return IdentityResult.Failed(new IdentityError
+                {
+                    Description = "O último SuperAdmin não pode ser excluído."
+                });
+
+            return _userManager.DeleteAsync(user).GetAwaiter().GetResult();
         }
 
         // =========================
@@ -171,10 +178,17 @@ namespace GymManagementBLL.Services.Classes
         {
             var user = _userManager.FindByIdAsync(userId).Result;
             if (user == null)
-                return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+                return IdentityResult.Failed(new IdentityError { Description = "Usuário não encontrado." });
 
-            var result = _userManager.RemoveFromRoleAsync(user, role).Result;
-            return result;
+            if (string.Equals(role, "SuperAdmin", StringComparison.OrdinalIgnoreCase) &&
+                _userManager.IsInRoleAsync(user, "SuperAdmin").GetAwaiter().GetResult() &&
+                _userManager.GetUsersInRoleAsync("SuperAdmin").GetAwaiter().GetResult().Count <= 1)
+                return IdentityResult.Failed(new IdentityError
+                {
+                    Description = "O último SuperAdmin não pode perder seu perfil."
+                });
+
+            return _userManager.RemoveFromRoleAsync(user, role).GetAwaiter().GetResult();
         }
 
     }

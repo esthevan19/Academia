@@ -140,6 +140,9 @@ public class AdminsApiController : ControllerBase
         }
 
         var result = await _userManager.AddClaimAsync(user, requestedClaim);
+        if (!result.Succeeded && oldLinks.Count > 0)
+            await _userManager.AddClaimsAsync(user, oldLinks);
+
         return result.Succeeded
             ? Ok(new { success = true, message = "Conta de aluno vinculada com segurança.", memberId = request.MemberId })
             : Conflict(new { success = false, errors = result.Errors.Select(error => error.Description) });
