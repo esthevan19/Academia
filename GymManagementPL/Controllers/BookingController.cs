@@ -33,18 +33,11 @@ namespace GymManagementPL.Controllers
         [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Create(int id)
         {
-            if (id <= 0) return RedirectToAction(nameof(Index));
-            var session = _bookingService.GetAllSessions()
-                .FirstOrDefault(s => s.Id == id && s.Status == "Upcoming");
-            if (session is null || session.AvailableSlots <= 0)
+            if (!PrepareCreateForm(id))
             {
                 TempData["ErrorMessage"] = "Esta aula não está disponível para novas reservas.";
                 return RedirectToAction(nameof(Index));
             }
-
-            ViewBag.SessionId = id;
-            ViewBag.SessionName = session.CategoryName;
-            ViewBag.Members = new SelectList(_bookingService.GetMembersForDropDown(id), "Id", "Name");
             return View(new CreateBookingViewModel { SessionId = id });
         }
 
@@ -53,20 +46,36 @@ namespace GymManagementPL.Controllers
         [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
         public IActionResult Create(CreateBookingViewModel createdBooking)
         {
-            if (!ModelState.IsValid)
+            if (!PrepareCreateForm(createdBooking.SessionId))
             {
-                TempData["ErrorMessage"] = "Selecione um aluno e uma aula válidos.";
-                return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = createdBooking.SessionId });
+                TempData["ErrorMessage"] = "Esta aula não está mais disponível para reservas.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var result = _bookingService.CreateNewBooking(createdBooking);
+            if (!ModelState.IsValid)
+                return View(createdBooking);
 
-            if (result)
-                TempData["SuccessMessage"] = "Reserva realizada com sucesso.";
-            else
-                TempData["ErrorMessage"] = "Não foi possível criar a reserva.";
+            if (!_bookingService.CreateNewBooking(createdBooking))
+            {
+                ModelState.AddModelError("", "Não foi possível reservar. Confira a matrícula ativa, as vagas e se o aluno já possui reserva nesta aula.");
+                return View(createdBooking);
+            }
 
+            TempData["SuccessMessage"] = "Reserva realizada com sucesso.";
             return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = createdBooking.SessionId });
+        }
+
+        private bool PrepareCreateForm(int sessionId)
+        {
+            if (sessionId <= 0) return false;
+            var session = _bookingService.GetAllSessions()
+                .FirstOrDefault(s => s.Id == sessionId && s.Status == "Upcoming" && s.AvailableSlots > 0);
+            if (session is null) return false;
+
+            ViewBag.SessionId = sessionId;
+            ViewBag.SessionName = session.CategoryName;
+            ViewBag.Members = new SelectList(_bookingService.GetMembersForDropDown(sessionId), "Id", "Name");
+            return true;
         }
 
         public IActionResult GetMembersForOngoingSession(int id)
