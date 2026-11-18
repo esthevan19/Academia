@@ -131,6 +131,7 @@ namespace GymManagementPL.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult EditMember([FromRoute] int id, MemberToUpdateViewModel memberToUpdate)
         {
 
@@ -154,6 +155,7 @@ namespace GymManagementPL.Controllers
 
         #region DeleteMember
 
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
         public IActionResult Delete([FromRoute] int id)
         {
             if (id <= 0)
@@ -173,6 +175,9 @@ namespace GymManagementPL.Controllers
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
         public IActionResult DeleteConfirmed([FromForm] int id)
         {
 
