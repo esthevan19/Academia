@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Globalization;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymManagementPL
@@ -82,6 +83,50 @@ namespace GymManagementPL
                         ClockSkew = TimeSpan.FromMinutes(1),
                         RoleClaimType = System.Security.Claims.ClaimTypes.Role,
                         NameClaimType = System.Security.Claims.ClaimTypes.Name
+                    };
+                    // Tokens carregam papéis/vínculos do momento do login. Após revogação,
+                    // a API deve exigir novo login, sem aceitar direitos antigos por 8 horas.
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnTokenValidated = async context =>
+                        {
+                            var principal = context.Principal;
+                            var userId = principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                            if (principal is null || string.IsNullOrWhiteSpace(userId))
+                            {
+                                context.Fail("Sessão inválida.");
+                                return;
+                            }
+
+                            var userManager = context.HttpContext.RequestServices
+                                .GetRequiredService<UserManager<ApplicationUser>>();
+                            var currentUser = await userManager.FindByIdAsync(userId);
+                            if (currentUser is null || await userManager.IsLockedOutAsync(currentUser))
+                            {
+                                context.Fail("Conta indisponível. Faça login novamente.");
+                                return;
+                            }
+
+                            var tokenRoles = principal.FindAll(ClaimTypes.Role)
+                                .Select(claim => claim.Value)
+                                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                            var currentRoles = (await userManager.GetRolesAsync(currentUser))
+                                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                            var tokenMembers = principal.FindAll("gymflow:member_id")
+                                .Select(claim => claim.Value)
+                                .ToHashSet(StringComparer.Ordinal);
+                            var currentMembers = (await userManager.GetClaimsAsync(currentUser))
+                                .Where(claim => claim.Type == "gymflow:member_id")
+                                .Select(claim => claim.Value)
+                                .ToHashSet(StringComparer.Ordinal);
+
+                            if (!tokenRoles.SetEquals(currentRoles) ||
+                                !tokenMembers.SetEquals(currentMembers))
+                            {
+                                context.Fail("As permissões da conta foram alteradas. Entre novamente.");
+                            }
+                        }
                     };
                 });
 
