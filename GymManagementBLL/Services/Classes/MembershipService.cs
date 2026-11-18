@@ -25,7 +25,8 @@ namespace GymManagementBLL.Services.Classes
         public IEnumerable<MembershipViewModel> GetAllMemberships()
         {
 
-            var memberships = _unitOfWork.MembershipRepository.GetAllMembershipsWithMemberAndPLan(x => x.EndDate >= BrazilClock.Now);
+            var memberships = _unitOfWork.MembershipRepository.GetAllMembershipsWithMemberAndPLan(x => true)
+                .OrderByDescending(x => x.EndDate).ToList();
             if (!memberships.Any()) return [];
             return _mapper.Map<IEnumerable<MembershipViewModel>>(memberships);
         }
