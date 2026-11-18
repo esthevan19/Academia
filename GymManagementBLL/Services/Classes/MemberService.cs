@@ -126,9 +126,11 @@ namespace GymManagementBLL.Services.Classes
                 return isCreated;
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw;
+                // Erros de gravação/relacionamento não devem derrubar a página de cadastro.
+                // O controller devolve uma mensagem segura ao usuário.
+                return false;
             }
 
         }
