@@ -12,14 +12,14 @@ namespace GymManagementBLL.ViewModels.AdminManamentViewModels
         [Required]
         public string Id { get; set; } = null!;
          
-        [Required(ErrorMessage = "New Password is required")]
-        [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+        [Required(ErrorMessage = "Informe a nova senha.")]
+        [MinLength(8, ErrorMessage = "A senha precisa ter pelo menos 8 caracteres.")]
         [DataType(DataType.Password)]
         public string NewPassword { get; set; } = null!;
 
-        [Required(ErrorMessage = "Confirm Password is required")]
+        [Required(ErrorMessage = "Confirme a nova senha.")]
         [DataType(DataType.Password)]
-        [Compare("NewPassword", ErrorMessage = "Passwords do not match")]
+        [Compare("NewPassword", ErrorMessage = "As senhas não coincidem.")]
         public string ConfirmPassword { get; set; } = null!;
     }
 }
