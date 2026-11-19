@@ -1,0 +1,41 @@
+name: MVC MonsterASP publish package
+
+# Gera um pacote de publicação seguro; NÃO substitui o site automaticamente.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/mvc-publish-package.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Publish MVC/API
+        run: dotnet publish GymManagementPL/GymManagementPL.csproj --configuration Release --output ./publish --self-contained false /p:UseAppHost=false
+      - name: Create deploy package
+        shell: bash
+        run: |
+          cd publish
+          zip -qr ../GymFlow-MVC-MonsterASP.zip .
+          cd ..
+          unzip -t GymFlow-MVC-MonsterASP.zip > /dev/null
+          ls -lh GymFlow-MVC-MonsterASP.zip
+      - name: Upload deployable files
+        uses: actions/upload-artifact@v4
+        with:
+          name: GymFlow-MVC-MonsterASP
+          path: GymFlow-MVC-MonsterASP.zip
+          if-no-files-found: error
+          retention-days: 30
