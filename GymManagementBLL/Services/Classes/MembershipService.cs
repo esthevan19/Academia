@@ -87,11 +87,12 @@ namespace GymManagementBLL.Services.Classes
                 var now = BrazilClock.Now;
                 var repo = _unitOfWork.MembershipRepository;
                 var membership = repo.GetAll(x => x.MemberId == id &&
-                    x.CreatedAt <= now && x.EndDate >= now)
+                    x.EndDate >= now)
                     .OrderByDescending(x => x.EndDate).FirstOrDefault();
                 if (membership is null) return false;
 
                 membership.EndDate = now.AddTicks(-1);
+                membership.UpdatedAt = DateTime.UtcNow;
                 repo.Update(membership);
                 return _unitOfWork.SaveChanges() > 0;
             }
