@@ -1,5 +1,6 @@
 using AutoMapper;
 using GymManagementDAL.Data.Contexts;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Microsoft.Extensions.Logging;
 using GymManagementBLL.Services.AttachmentService;
