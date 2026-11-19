@@ -8,6 +8,9 @@ on:
       - main
     paths:
       - '.github/workflows/mvc-publish-package.yml'
+      - 'GymManagementPL/**'
+      - 'GymManagementBLL/**'
+      - 'GymManagementDAL/**'
 
 permissions:
   contents: read
