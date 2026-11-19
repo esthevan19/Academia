@@ -20,7 +20,7 @@ using (var db = new GymDbContext(options))
     {
         try
         {
-            db.Database.Migrate();
+            db.Database.EnsureCreated();
             created = true;
         }
         catch (Exception ex)
