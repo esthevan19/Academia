@@ -1,79 +1,66 @@
-﻿using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.AccountViewModels;
 using GymManagementDAL.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GymManagementPL.Controllers
+namespace GymManagementPL.Controllers;
+
+public class AccountController : Controller
 {
-    public class AccountController : Controller
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+
+    public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
     {
-        private readonly IAccountService _accountService;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        _userManager = userManager;
+        _signInManager = signInManager;
+    }
 
-        public AccountController(IAccountService accountService, SignInManager<ApplicationUser> signInManager)
+    [HttpGet]
+    public IActionResult Login() => View();
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(LoginViewModel viewModel)
+    {
+        if (!ModelState.IsValid) return View(viewModel);
+
+        // Nunca conferir a senha antecipadamente: o Identity precisa contabilizar
+        // tentativas inválidas para aplicar o bloqueio temporário da conta.
+        var email = viewModel.Email?.Trim();
+        var user = string.IsNullOrWhiteSpace(email)
+            ? null
+            : await _userManager.FindByEmailAsync(email);
+
+        if (user is null)
         {
-            _accountService = accountService;
-            _signInManager = signInManager;
-        }
-
-        #region Login
-
-        public IActionResult Login()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Login(LoginViewModel viewModel)
-        {
-
-            if (!ModelState.IsValid) return View(viewModel);
-
-            var user = _accountService.ValidateUser(viewModel);
-
-            if (user == null)
-            {
-                ModelState.AddModelError("InvalidLogin", "E-mail ou senha incorretos.");
-                return View(viewModel);
-            }
-
-            var result = _signInManager.PasswordSignInAsync(user, viewModel.Password, viewModel.RememberMe, false).Result;
-
-            if (result.IsNotAllowed)
-                ModelState.AddModelError("InvalidLogin", "Sua conta não está autorizada a entrar.");
-
-            if (result.IsLockedOut)
-                ModelState.AddModelError("InvalidLogin", "Conta temporariamente bloqueada. Tente novamente mais tarde.");
-
-            if (result.Succeeded)
-                return RedirectToAction("Index", "Home");
-
+            ModelState.AddModelError("InvalidLogin", "E-mail ou senha incorretos.");
             return View(viewModel);
         }
 
-        #endregion
+        var result = await _signInManager.PasswordSignInAsync(
+            user, viewModel.Password, viewModel.RememberMe, lockoutOnFailure: true);
 
-        #region Logout
+        if (result.Succeeded)
+            return RedirectToAction("Index", "Home");
 
-        [HttpPost]
-        public IActionResult Logout()
-        {
-            _signInManager.SignOutAsync().GetAwaiter().GetResult();
-            return RedirectToAction(nameof(Login));
-        }
+        ModelState.AddModelError("InvalidLogin", result.IsLockedOut
+            ? "Conta temporariamente bloqueada. Tente novamente mais tarde."
+            : result.IsNotAllowed
+                ? "Sua conta não está autorizada a entrar."
+                : "E-mail ou senha incorretos.");
 
-        #endregion
-
-        #region AccessDenied
-
-        public IActionResult AccessDenied()
-        {
-            return View();  
-        }
-
-        #endregion
-
+        return View(viewModel);
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Logout()
+    {
+        await _signInManager.SignOutAsync();
+        return RedirectToAction(nameof(Login));
+    }
+
+    [HttpGet]
+    public IActionResult AccessDenied() => View();
 }
