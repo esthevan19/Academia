@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using GymManagementDAL.Data.Contexts;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.MembershipViewModels;
 using GymManagementDAL.Entities;
@@ -15,11 +18,13 @@ namespace GymManagementBLL.Services.Classes
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly GymDbContext _db;
 
-        public MembershipService(IUnitOfWork unitOfWork, IMapper mapper)
+        public MembershipService(IUnitOfWork unitOfWork, IMapper mapper, GymDbContext db)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _db = db;
         }
 
         public IEnumerable<MembershipViewModel> GetAllMemberships()
@@ -33,40 +38,46 @@ namespace GymManagementBLL.Services.Classes
 
         public bool CreateMembership(CreateMembershipViewModel createdMembership)
         {
+            if (createdMembership is null || createdMembership.MemberId <= 0 || createdMembership.PlanId <= 0)
+                return false;
+
             try
             {
-                var isMemberExist = _unitOfWork.GetRepository<Member>()
-                                                   .GetAll(x => x.Id == createdMembership.MemberId)
-                                                   .Any();
+                // Impede duas requisições simultâneas de criarem matrículas conflitantes.
+                using var transaction = _db.Database.BeginTransaction(IsolationLevel.Serializable);
+                var now = BrazilClock.Now;
+                var startDate = createdMembership.StartDate ?? now;
+                var plan = _db.Plans.AsNoTracking()
+                    .SingleOrDefault(x => x.Id == createdMembership.PlanId && x.IsActive);
+                if (plan is null || plan.DurationDays <= 0 ||
+                    !_db.Members.Any(x => x.Id == createdMembership.MemberId))
+                    return false;
 
-                var hasActiveMembership = _unitOfWork.MembershipRepository
-                                                     .GetAllMembershipsWithMemberAndPLan(x => x.MemberId == createdMembership.MemberId && x.EndDate >= BrazilClock.Now)
-                                                     .Any();
+                if (_db.Memberships.Any(x => x.MemberId == createdMembership.MemberId &&
+                                             x.EndDate >= now))
+                    return false;
 
-                var isPlanExistandActive = _unitOfWork.GetRepository<Plan>()
-                                                      .GetAll(x => x.Id == createdMembership.PlanId && x.IsActive == true)
-                                                      .Any();
-
-                if (!isMemberExist || hasActiveMembership) return false;
-                if (!isPlanExistandActive) return false;
+                // O esquema atual usa (MemberId, PlanId) como chave primária.
+                // Não apagar registros antigos para permitir rematrícula: preservar histórico.
+                if (_db.Memberships.Any(x => x.MemberId == createdMembership.MemberId &&
+                                             x.PlanId == createdMembership.PlanId))
+                    return false;
 
                 var membership = _mapper.Map<Membership>(createdMembership);
-                var plan = _unitOfWork.GetRepository<Plan>().GetById(createdMembership.PlanId);
-                var startDate = createdMembership.StartDate ?? BrazilClock.Now;
                 membership.CreatedAt = startDate;
-                membership.EndDate = startDate.AddDays(plan!.DurationDays);
+                membership.EndDate = startDate.AddDays(plan.DurationDays);
+                _db.Memberships.Add(membership);
 
-                _unitOfWork.GetRepository<Membership>().Add(membership);
-
-                return _unitOfWork.SaveChanges() > 0;
-
+                if (_db.SaveChanges() <= 0) return false;
+                transaction.Commit();
+                return true;
             }
             catch
             {
+                // Em falha ou conflito concorrente, a transação é revertida.
                 return false;
             }
         }
-
 
         public bool DeleteMembership(int id)
         {
