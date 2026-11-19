@@ -1,4 +1,6 @@
 using AutoMapper;
+using GymManagementDAL.Data.Contexts;
+using System.Data;
 using Microsoft.Extensions.Logging;
 using GymManagementBLL.Services.AttachmentService;
 using GymManagementBLL.Services.Interfaces;
@@ -22,17 +24,19 @@ namespace GymManagementBLL.Services.Classes
         private readonly IMapper _mapper;
         private readonly IAttachmentService _attachmentService;
         private readonly ILogger<MemberService> _logger;
+        private readonly GymDbContext _db;
 
         #endregion
 
         #region Constructor
 
-        public MemberService(IUnitOfWork unitOfWork, IMapper mapper, IAttachmentService attachmentService, ILogger<MemberService> logger)
+        public MemberService(IUnitOfWork unitOfWork, IMapper mapper, IAttachmentService attachmentService, ILogger<MemberService> logger, GymDbContext db)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _attachmentService = attachmentService;
             _logger = logger;
+            _db = db;
         }
 
         #endregion
@@ -187,44 +191,46 @@ namespace GymManagementBLL.Services.Classes
         public bool RemoveMember(int id)
         {
             if (id <= 0) return false;
-            var repo = _unitOfWork.GetRepository<Member>();
-            var member = repo.GetById(id);
-            if (member is null) return false;
-
-            var sessionIds = _unitOfWork.GetRepository<Booking>()
-                .GetAll(x => x.MemberId == id).Select(x => x.SessionId);
-
-            var hasFutureSessions = _unitOfWork.GetRepository<Session>()
-                .GetAll(S => sessionIds.Contains(S.Id) && S.StartDate > BrazilClock.Now).Any();
-
-            if (hasFutureSessions) return false;
-
-            var memberships = _unitOfWork.GetRepository<Membership>().GetAll(m => m.MemberId == id).ToList();
 
             try
             {
-                if (memberships.Any())
+                using var transaction = _db.Database.BeginTransaction(IsolationLevel.Serializable);
+                var member = _db.Members.Find(id);
+                if (member is null) return false;
+
+                // Nunca apagar dados históricos ou uma conta que ainda pertença a este aluno.
+                // A exclusão é permitida somente para um cadastro sem movimentações/vínculos.
+                var hasRelatedData =
+                    _db.Memberships.Any(x => x.MemberId == id) ||
+                    _db.Bookings.Any(x => x.MemberId == id) ||
+                    _db.Workouts.Any(x => x.MemberId == id) ||
+                    _db.UserClaims.Any(x => x.ClaimType == "gymflow:member_id" &&
+                                            x.ClaimValue == id.ToString());
+                if (hasRelatedData) return false;
+
+                _db.Members.Remove(member);
+                if (_db.SaveChanges() <= 0) return false;
+                transaction.Commit();
+
+                // Arquivos são apagados somente após a confirmação do banco.
+                try
                 {
-                    foreach (var membership in memberships)
-                        _unitOfWork.GetRepository<Membership>().Delete(membership);
+                    if (!string.IsNullOrWhiteSpace(member.Photo) &&
+                        !string.Equals(member.Photo, "default-avatar.png", StringComparison.OrdinalIgnoreCase))
+                        _attachmentService.Delete(member.Photo, "members");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Aluno {MemberId} removido do banco, mas foto não pôde ser apagada.", id);
                 }
 
-                repo.Delete(member);
-                bool isDeleted = _unitOfWork.SaveChanges() > 0;
-
-                if (isDeleted) 
-                    _attachmentService.Delete(member.Photo, "members") ;
-
-                return isDeleted;
-
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Falha ao excluir aluno {MemberId}.", id);
                 return false;
             }
-
-
         }
 
         #endregion
