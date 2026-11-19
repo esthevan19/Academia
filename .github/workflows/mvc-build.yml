@@ -20,6 +20,8 @@ jobs:
         with:
           dotnet-version: 9.0.x
       - name: Restore
-        run: dotnet restore GymManagementPL/GymManagementPL.csproj
+        run: dotnet restore tests/GymFlow.SecurityContracts/GymFlow.SecurityContracts.csproj
       - name: Build
         run: dotnet build GymManagementPL/GymManagementPL.csproj --no-restore --configuration Release
+      - name: Authorization regression tests
+        run: dotnet run --project tests/GymFlow.SecurityContracts/GymFlow.SecurityContracts.csproj --no-restore --configuration Release
