@@ -45,7 +45,7 @@ AssertRole(typeof(CheckInController), null, "Aluno");
 AssertRole(typeof(BookingsApiController), nameof(BookingsApiController.Create), "SuperAdmin", "Admin", "Gerente", "Recepcionista");
 AssertRole(typeof(BookingsApiController), nameof(BookingsApiController.MarkAttendance), "SuperAdmin", "Admin", "Gerente", "Recepcionista", "Instrutor");
 AssertRole(typeof(BookingsApiController), nameof(BookingsApiController.Cancel), "SuperAdmin", "Admin", "Gerente", "Recepcionista");
-AssertRole(typeof(SessionController), null, "SuperAdmin", "Admin", "Gerente", "Recepcionista", "Instrutor", "Aluno");
+AssertRole(typeof(SessionsApiController), nameof(SessionsApiController.Create), "SuperAdmin", "Admin", "Gerente", "Recepcionista");
 
 foreach (var controller in new[] {
     typeof(MembersApiController), typeof(MembershipsApiController),
