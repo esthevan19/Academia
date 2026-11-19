@@ -1,0 +1,18 @@
+name: Read-only hosted API smoke tests
+
+on:
+  push:
+    branches:
+      - main
+      - fix/data-integrity-memberships-20261119
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check production login and protected API routes
+        shell: bash
+        run: bash scripts/smoke-production.sh
