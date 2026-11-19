@@ -1,0 +1,37 @@
+name: SQL persistence integration
+
+on:
+  push:
+    branches:
+      - main
+      - test/sql-persistence-20261119
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  sql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: 'CI_Only_Mssql_Password_2026!'
+        ports:
+          - 1433:1433
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Restore test dependencies
+        run: dotnet restore tests/GymFlow.SqlIntegration/GymFlow.SqlIntegration.csproj
+      - name: Persist and reload real records in ephemeral SQL Server
+        env:
+          GYMFLOW_TEST_SQL: 'Server=127.0.0.1,1433;Database=GymFlowIntegration;User ID=sa;Password=CI_Only_Mssql_Password_2026!;TrustServerCertificate=True;Encrypt=True'
+        run: dotnet run --project tests/GymFlow.SqlIntegration/GymFlow.SqlIntegration.csproj --configuration Release --no-restore
