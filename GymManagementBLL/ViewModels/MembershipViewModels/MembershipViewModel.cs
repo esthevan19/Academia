@@ -8,12 +8,16 @@
 		public string PlanName { get; set; } = null!;
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         public bool IsActive => StartDate <= GymManagementBLL.Services.Classes.BrazilClock.Now &&
                                 EndDate >= GymManagementBLL.Services.Classes.BrazilClock.Now;
 
-        public bool IsScheduled => StartDate > GymManagementBLL.Services.Classes.BrazilClock.Now;
+        public bool IsScheduled => StartDate > GymManagementBLL.Services.Classes.BrazilClock.Now &&
+                                   EndDate >= GymManagementBLL.Services.Classes.BrazilClock.Now;
 
-        public string Status => IsActive ? "Ativa" : IsScheduled ? "Agendada" : "Vencida";
+        public bool IsCanceled => UpdatedAt.HasValue && EndDate < GymManagementBLL.Services.Classes.BrazilClock.Now;
+
+        public string Status => IsCanceled ? "Cancelada" : IsActive ? "Ativa" : IsScheduled ? "Agendada" : "Vencida";
 	}
 }
