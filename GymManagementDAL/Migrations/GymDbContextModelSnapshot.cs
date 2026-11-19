@@ -236,6 +236,12 @@ namespace GymManagementDAL.Migrations
 
             modelBuilder.Entity("GymManagementDAL.Entities.Membership", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
 
@@ -254,7 +260,9 @@ namespace GymManagementDAL.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("MemberId", "PlanId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
 
                     b.HasIndex("PlanId");
 
