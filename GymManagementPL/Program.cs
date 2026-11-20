@@ -14,6 +14,7 @@ using System.Text;
 using System.Globalization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace GymManagementPL
 {
@@ -25,6 +26,24 @@ namespace GymManagementPL
 
             #region Add services to the container.
             
+            // O IIS/MonsterASP pode não disponibilizar perfil de usuário para as chaves
+            // antiforgery/cookies. Configure uma pasta PRIVADA, fora do diretório web,
+            // persistente entre publicações: DataProtection__KeysDirectory.
+            var keyDirectory = builder.Configuration["DataProtection:KeysDirectory"];
+            var dataProtection = builder.Services.AddDataProtection()
+                .SetApplicationName("GymFlow");
+            if (!string.IsNullOrWhiteSpace(keyDirectory))
+            {
+                if (!Path.IsPathFullyQualified(keyDirectory))
+                    throw new InvalidOperationException(
+                        "DataProtection__KeysDirectory precisa apontar para um diretório absoluto e privado.");
+                var keyFolder = new DirectoryInfo(keyDirectory);
+                keyFolder.Create();
+                dataProtection.PersistKeysToFileSystem(keyFolder);
+                if (OperatingSystem.IsWindows())
+                    dataProtection.ProtectKeysWithDpapi(protectToLocalMachine: true);
+            }
+
             builder.Services.AddControllersWithViews();
             // Exibição e validação numérica padronizadas para o Brasil.
             var brazilCulture = CultureInfo.GetCultureInfo("pt-BR");
@@ -139,6 +158,9 @@ namespace GymManagementPL
             #endregion
 
             var app = builder.Build();
+            if (app.Environment.IsProduction() && string.IsNullOrWhiteSpace(keyDirectory))
+                app.Logger.LogWarning("Chaves de sessão sem pasta persistente explícita. Configure DataProtection__KeysDirectory fora da pasta de publicação.");
+
 
             #region DataSeed
 
