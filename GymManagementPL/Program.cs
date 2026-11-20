@@ -205,6 +205,27 @@ namespace GymManagementPL
 
             app.UseAuthorization();
 
+            // Diagnóstico público limitado: nenhum dado do banco, chave ou conta é exposto.
+            // O marcador de revisão ajuda a confirmar se a nova publicação chegou ao servidor.
+            app.MapGet("/api/health", async (GymDbContext db, CancellationToken cancellationToken) =>
+            {
+                bool databaseOk;
+                try
+                {
+                    databaseOk = await db.Database.CanConnectAsync(cancellationToken);
+                }
+                catch
+                {
+                    databaseOk = false;
+                }
+                return Results.Json(new
+                {
+                    application = "GymFlow",
+                    status = databaseOk ? "ok" : "unavailable",
+                    revision = "20261120-review-1"
+                }, statusCode: databaseOk ? StatusCodes.Status200OK : StatusCodes.Status503ServiceUnavailable);
+            }).AllowAnonymous();
+
             app.MapStaticAssets();
             app.MapControllers();
             app.MapControllerRoute(
