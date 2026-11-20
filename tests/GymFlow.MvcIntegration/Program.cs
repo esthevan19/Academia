@@ -59,6 +59,12 @@ try
         BaseAddress = new Uri("https://localhost")
     });
 
+    using var healthResponse = await client.GetAsync("/api/health");
+    var health = await healthResponse.Content.ReadAsStringAsync();
+    if (healthResponse.StatusCode != HttpStatusCode.OK || !health.Contains("20261120-review-1"))
+        throw new InvalidOperationException($"Verificação pública de saúde falhou: HTTP {(int)healthResponse.StatusCode}.");
+    Console.WriteLine("OK: /api/health confirma conexão ao SQL de teste e revisão publicada.");
+
     using var pageResponse = await client.GetAsync("/Member/Create");
     var html = await pageResponse.Content.ReadAsStringAsync();
     if (pageResponse.StatusCode != HttpStatusCode.OK || !html.Contains("Cadastrar aluno", StringComparison.OrdinalIgnoreCase)
@@ -109,6 +115,59 @@ try
         throw new InvalidOperationException("Aluno salvo no banco não aparece na listagem MVC.");
 
     Console.WriteLine("OK: POST cadastro com antiforgery, persistência SQL e listagem MVC.");
+
+    // Testa também telas reais de todos os perfis, sem alterar produção.
+    // Cada caso usa uma identidade simulada somente no test host isolado.
+    var pageChecks = new (string Role, string Path, HttpStatusCode Status)[]
+    {
+        ("SuperAdmin", "/Home/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/Member/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/Plan/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/Membership/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/Membership/Create", HttpStatusCode.OK),
+        ("SuperAdmin", "/Session/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/Session/Create", HttpStatusCode.OK),
+        ("SuperAdmin", "/Trainer/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/Trainer/Create", HttpStatusCode.OK),
+        ("SuperAdmin", "/Booking/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/WorkoutManagement/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/AdminManagement/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/Student/Index", HttpStatusCode.Forbidden),
+        ("Admin", "/Member/Create", HttpStatusCode.OK),
+        ("Admin", "/AdminManagement/Index", HttpStatusCode.OK),
+        ("Gerente", "/Member/Create", HttpStatusCode.OK),
+        ("Gerente", "/Trainer/Index", HttpStatusCode.OK),
+        ("Gerente", "/AdminManagement/Index", HttpStatusCode.Forbidden),
+        ("Recepcionista", "/Member/Create", HttpStatusCode.OK),
+        ("Recepcionista", "/Membership/Create", HttpStatusCode.OK),
+        ("Recepcionista", "/Trainer/Index", HttpStatusCode.Forbidden),
+        ("Recepcionista", "/AdminManagement/Index", HttpStatusCode.Forbidden),
+        ("Recepcionista", "/WorkoutManagement/Index", HttpStatusCode.Forbidden),
+        ("Instrutor", "/Member/Create", HttpStatusCode.Forbidden),
+        ("Instrutor", "/Booking/Index", HttpStatusCode.OK),
+        ("Instrutor", "/WorkoutManagement/Index", HttpStatusCode.OK),
+        ("Instrutor", "/AdminManagement/Index", HttpStatusCode.Forbidden),
+        ("Aluno", "/Member/Create", HttpStatusCode.Forbidden),
+        ("Aluno", "/Membership/Index", HttpStatusCode.Forbidden),
+        ("Aluno", "/AdminManagement/Index", HttpStatusCode.Forbidden),
+        ("Aluno", "/WorkoutManagement/Index", HttpStatusCode.Forbidden),
+        ("Aluno", "/Home/Index", HttpStatusCode.OK),
+        ("Aluno", "/Student/Index", HttpStatusCode.OK),
+        ("Aluno", "/StudentBooking/Index", HttpStatusCode.OK),
+        ("Aluno", "/Plan/Index", HttpStatusCode.OK),
+        ("Aluno", "/Session/Index", HttpStatusCode.OK)
+    };
+    foreach (var check in pageChecks)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, check.Path);
+        request.Headers.Add("X-GymFlow-Ci-Role", check.Role);
+        using var response = await client.SendAsync(request);
+        if (response.StatusCode != check.Status)
+            throw new InvalidOperationException(
+                $"Falha MVC: perfil {check.Role} GET {check.Path} retornou HTTP {(int)response.StatusCode} em vez de {(int)check.Status}.");
+    }
+    Console.WriteLine($"OK: {pageChecks.Length} telas/controles de acesso MVC testados em todos os seis perfis.");
+
 }
 finally
 {
@@ -127,7 +186,7 @@ sealed class CiAuthenticationHandler : AuthenticationHandler<AuthenticationSchem
         {
             new Claim(ClaimTypes.NameIdentifier, "ci-test-superadmin"),
             new Claim(ClaimTypes.Name, "CI Teste"),
-            new Claim(ClaimTypes.Role, "SuperAdmin")
+            new Claim(ClaimTypes.Role, Context.Request.Headers.TryGetValue("X-GymFlow-Ci-Role", out var role) && role.Count == 1 ? role.ToString() : "SuperAdmin")
         };
         var identity = new ClaimsIdentity(claims, Scheme.Name);
         return Task.FromResult(AuthenticateResult.Success(
