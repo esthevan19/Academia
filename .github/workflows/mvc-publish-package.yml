@@ -21,12 +21,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Validate public config has no secrets
+        run: python3 scripts/check-public-config.py
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
       - name: Publish MVC/API
         run: dotnet publish GymManagementPL/GymManagementPL.csproj --configuration Release --output ./publish --self-contained false /p:UseAppHost=false
+      - name: Remove development-only configuration
+        run: rm -f publish/appsettings.Development.json
       - name: Create deploy package
         shell: bash
         run: |
