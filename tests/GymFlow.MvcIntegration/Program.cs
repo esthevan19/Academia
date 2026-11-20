@@ -103,7 +103,7 @@ try
             student.HealthRecord.BloodType != "O+")
             throw new InvalidOperationException("Cadastro MVC não foi persistido com ficha de saúde.");
     }
-    using var listResponse = await client.GetAsync("/Member");
+    using var listResponse = await client.GetAsync("/Member/Index");
     var listHtml = await listResponse.Content.ReadAsStringAsync();
     if (listResponse.StatusCode != HttpStatusCode.OK || !listHtml.Contains(formData["Name"]))
         throw new InvalidOperationException("Aluno salvo no banco não aparece na listagem MVC.");
