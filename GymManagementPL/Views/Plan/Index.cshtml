@@ -27,6 +27,14 @@
             <h2 class="text-primary-color mb-0">Planos da academia</h2>
             <p class="text-muted">Consulte valores, duração e benefícios dos planos</p>
         </div>
+        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente"))
+        {
+            <a asp-controller="Plan" asp-action="Create" class="btn btn-primary rounded-3 px-4 py-2"
+               style="background:#070093;border-color:#070093">
+                <i class="bi bi-plus-circle me-2"></i>Novo plano
+            </a>
+        }
+
     </header>
     @if (Model is not null && Model.Any())
     {
@@ -63,7 +71,7 @@
                                     <a asp-action="Details" asp-route-id="@plan.Id" class="btn btn-outline btn-sm">
                                         <i class="bi bi-eye me-1"></i>Ver Detalhes
                                     </a>
-                                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Recepcionista"))
+                                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente"))
                                     {
                                     <div class="d-flex gap-2">
                                         <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-outline btn-sm flex-fill">
