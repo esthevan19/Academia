@@ -3,6 +3,11 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using GymManagementDAL.Data.Contexts;
+using GymManagementDAL.Entities;
+using GymManagementDAL.Entities.Enums;
+using GymManagementBLL.Services.Classes;
+using GymManagementPL.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -116,6 +121,64 @@ try
 
     Console.WriteLine("OK: POST cadastro com antiforgery, persistência SQL e listagem MVC.");
 
+
+    // Em banco SQL descartável, validar o ciclo real de presença em aula via QR,
+    // sem manipular matrículas ou alunos da MonsterASP.
+    using (var attendanceDb = new GymDbContext(options))
+    {
+        var student = await attendanceDb.Members.SingleAsync(x => x.Email == formData["Email"]);
+        var instructor = new Trainer
+        {
+            Name = "Professor Integração",
+            Email = "professor-" + Guid.NewGuid().ToString("N")[..8] + "@example.com",
+            Phone = "51999999998",
+            DateOfBirth = new DateOnly(1995, 2, 1), Gender = Gender.Male,
+            Specialties = Specialties.Musculacao,
+            Address = new Address { BuildingNumber = 20, City = "Parobe", Street = "Rua Teste" }
+        };
+        var category = new Category { CategoryName = "Funcional Teste" };
+        var plan = new Plan { Name = "Mensal Integração QR", Description = "Plano de testes", DurationDays = 30, Price = 100m, IsActive = true };
+        attendanceDb.Trainers.Add(instructor);
+        attendanceDb.Categories.Add(category);
+        attendanceDb.Plans.Add(plan);
+        await attendanceDb.SaveChangesAsync();
+
+        var brazilTime = BrazilClock.Now;
+        var activeClass = new Session
+        {
+            Description = "Aula de integração QR", Capacity = 10,
+            StartDate = brazilTime.AddMinutes(-5), EndDate = brazilTime.AddMinutes(50),
+            TrainerId = instructor.Id, CategoryId = category.Id
+        };
+        attendanceDb.Sessions.Add(activeClass);
+        attendanceDb.Memberships.Add(new Membership
+        {
+            MemberId = student.Id, PlanId = plan.Id, CreatedAt = brazilTime.AddDays(-2),
+            EndDate = brazilTime.AddDays(25)
+        });
+        await attendanceDb.SaveChangesAsync();
+        attendanceDb.Bookings.Add(new Booking { MemberId = student.Id, SessionId = activeClass.Id });
+        await attendanceDb.SaveChangesAsync();
+
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(
+            new Dictionary<string, string?> { ["Jwt:Key"] = "IntegrationOnlySecretForQrCheckin2026-Long-Key-456" }).Build();
+        var attendance = new ClassAttendanceService(attendanceDb, configuration);
+        var ticket = await attendance.IssueAsync(student.Id, activeClass.Id);
+        if (!ticket.Success || ticket.Code?.Length != 8)
+            throw new Exception("Falha ao gerar código de presença para aluno com reserva.");
+        var rejected = await attendance.ConfirmAsync(activeClass.Id, "0000000X");
+        if (rejected.Success) throw new Exception("Código de QR inválido foi aceito.");
+        var valid = await attendance.ConfirmAsync(activeClass.Id, ticket.Code);
+        if (!valid.Success) throw new Exception("Código de QR válido não registrou presença: " + valid.Message);
+        var repeat = await attendance.ConfirmAsync(activeClass.Id, ticket.Code);
+        if (repeat.Success) throw new Exception("Código de presença foi reutilizado após presença marcada.");
+        attendanceDb.ChangeTracker.Clear();
+        if (!await attendanceDb.Bookings.AsNoTracking().AnyAsync(x =>
+                x.MemberId == student.Id && x.SessionId == activeClass.Id && x.IsAttended))
+            throw new Exception("Presença de QR não foi persistida no SQL Server.");
+    }
+    Console.WriteLine("OK: check-in de aula por QR validado com código temporário, antifraude e gravação SQL.");
+
     // Testa também telas reais de todos os perfis, sem alterar produção.
     // Cada caso usa uma identidade simulada somente no test host isolado.
     var pageChecks = new (string Role, string Path, HttpStatusCode Status)[]
@@ -132,6 +195,7 @@ try
         ("SuperAdmin", "/Booking/Index", HttpStatusCode.OK),
         ("SuperAdmin", "/WorkoutManagement/Index", HttpStatusCode.OK),
         ("SuperAdmin", "/AdminManagement/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/ClassCheckIn/Index", HttpStatusCode.OK),
         ("SuperAdmin", "/Student/Index", HttpStatusCode.Forbidden),
         ("Admin", "/Member/Create", HttpStatusCode.OK),
         ("Admin", "/AdminManagement/Index", HttpStatusCode.OK),
@@ -147,6 +211,7 @@ try
         ("Instrutor", "/Booking/Index", HttpStatusCode.OK),
         ("Instrutor", "/WorkoutManagement/Index", HttpStatusCode.OK),
         ("Instrutor", "/AdminManagement/Index", HttpStatusCode.Forbidden),
+        ("Aluno", "/ClassCheckIn/Index", HttpStatusCode.Forbidden),
         ("Aluno", "/Member/Create", HttpStatusCode.Forbidden),
         ("Aluno", "/Membership/Index", HttpStatusCode.Forbidden),
         ("Aluno", "/AdminManagement/Index", HttpStatusCode.Forbidden),
