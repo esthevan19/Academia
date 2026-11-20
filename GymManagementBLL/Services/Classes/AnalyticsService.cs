@@ -29,6 +29,9 @@ namespace GymManagementBLL.Services.Classes
             {
                 TotalMembers = _unitOfWork.GetRepository<Member>().GetAll().Count(),
                 ActiveMembers = _unitOfWork.GetRepository<Membership>().GetAll(x => x.CreatedAt <= now && x.EndDate >= now).Select(x => x.MemberId).Distinct().Count(),
+                ExpiringInSevenDays = _unitOfWork.GetRepository<Membership>()
+                    .GetAll(x => x.CreatedAt <= now && x.EndDate >= now && x.EndDate <= now.AddDays(7))
+                    .Select(x => x.MemberId).Distinct().Count(),
                 TotalTrainers = _unitOfWork.GetRepository<Trainer>().GetAll().Count(),
                 UpcomingSessions = sessions.Count(x => x.StartDate > now),
                 OngoingSessions = sessions.Count(x => x.StartDate <= now && x.EndDate >= now),
