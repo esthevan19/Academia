@@ -34,6 +34,8 @@ jobs:
           dotnet-version: 9.0.x
       - name: Restore MVC integration tests
         run: dotnet restore tests/GymFlow.MvcIntegration/GymFlow.MvcIntegration.csproj
+      - name: Identify solution root for MVC test host
+        run: touch GymFlow.MvcIntegration.sln
       - name: Render authorized page, POST and verify real SQL persistence
         env:
           GYMFLOW_TEST_SQL: 'Server=127.0.0.1,1433;Database=GymFlowMvcIntegration;User ID=sa;Password=CI_Only_Mssql_Password_2026!;TrustServerCertificate=True;Encrypt=True'
