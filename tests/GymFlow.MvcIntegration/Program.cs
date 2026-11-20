@@ -166,6 +166,10 @@ try
         var ticket = await attendance.IssueAsync(student.Id, activeClass.Id);
         if (!ticket.Success || ticket.Code?.Length != 8)
             throw new Exception("Falha ao gerar código de presença para aluno com reserva.");
+        var png = QRCoder.PngByteQRCodeHelper.GetQRCode(
+            $"GYMFLOW-CLASS:{activeClass.Id}:{ticket.Code}", QRCoder.QRCodeGenerator.ECCLevel.Q, 6);
+        if (png.Length < 100 || png[0] != 137 || png[1] != 80 || png[2] != 78 || png[3] != 71)
+            throw new Exception("A imagem PNG do QR não foi gerada corretamente.");
         var rejected = await attendance.ConfirmAsync(activeClass.Id, "0000000X");
         if (rejected.Success) throw new Exception("Código de QR inválido foi aceito.");
         var valid = await attendance.ConfirmAsync(activeClass.Id, ticket.Code);
