@@ -91,7 +91,7 @@ try
     using var postResponse = await client.PostAsync("/Member/CreateMember", new FormUrlEncodedContent(formData));
     var postHtml = await postResponse.Content.ReadAsStringAsync();
     if (postResponse.StatusCode != HttpStatusCode.Redirect ||
-        postResponse.Headers.Location?.ToString() != "/Member")
+        postResponse.Headers.Location?.ToString() is not ("/Member" or "/Member/Index"))
         throw new InvalidOperationException($"POST /Member/CreateMember falhou: HTTP {(int)postResponse.StatusCode}. Location={postResponse.Headers.Location}. Html={postHtml[..Math.Min(1000, postHtml.Length)]}");
 
     // Testa persistência contra OUTRA instância/consulta EF, sem dados simulados.
