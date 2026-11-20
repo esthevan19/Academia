@@ -25,8 +25,9 @@ O log mostra que AutoMapper 15.1.4 **não recebeu uma chave de licença**. A ver
 2. Confirme `ASPNETCORE_ENVIRONMENT=Production`, `ConnectionStrings__DefaultConnection`, `Jwt__Key`, `Database__ApplyMigrations=false`.
 3. Atualize o branch `main` no seu computador e publique `GymManagementPL` com o perfil WebDeploy existente.
 4. Se a publicação for feita pelo ZIP de artefato GitHub Actions, extraia o pacote **interno** para a pasta da aplicação: não envie o ZIP de artefato bruto ao servidor sem extração.
-5. Se o HTTP 500 persistir, use o **código de referência** exibido na página atualizada e verifique o log de erro correspondente. Envie só a exceção sem credenciais nem dados de alunos.
-6. Faça login SuperAdmin, abra Alunos > Cadastrar aluno, faça um teste autorizado, retorne à listagem e verifique a persistência. Só então teste os demais perfis e o APK.
+5. Abra `https://gymflowfit.runasp.net/api/health`. Na versão nova deve responder HTTP 200 com `status: ok` e `revision: 20261120-review-1`. HTTP 404 significa que a versão nova pode não estar publicada; HTTP 503 indica falha de conexão ao banco (não compartilhe a string SQL).
+6. Se o HTTP 500 persistir, use o **código de referência** exibido na página atualizada e verifique o log de erro correspondente. Envie só a exceção sem credenciais nem dados de alunos.
+7. Faça login SuperAdmin, abra Alunos > Cadastrar aluno, faça um teste autorizado, retorne à listagem e verifique a persistência. Só então teste os demais perfis e o APK.
 
 ## Estado dos testes
 
