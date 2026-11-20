@@ -59,6 +59,12 @@ try
         BaseAddress = new Uri("https://localhost")
     });
 
+    using var healthResponse = await client.GetAsync("/api/health");
+    var health = await healthResponse.Content.ReadAsStringAsync();
+    if (healthResponse.StatusCode != HttpStatusCode.OK || !health.Contains("20261120-review-1"))
+        throw new InvalidOperationException($"Verificação pública de saúde falhou: HTTP {(int)healthResponse.StatusCode}.");
+    Console.WriteLine("OK: /api/health confirma conexão ao SQL de teste e revisão publicada.");
+
     using var pageResponse = await client.GetAsync("/Member/Create");
     var html = await pageResponse.Content.ReadAsStringAsync();
     if (pageResponse.StatusCode != HttpStatusCode.OK || !html.Contains("Cadastrar aluno", StringComparison.OrdinalIgnoreCase)
