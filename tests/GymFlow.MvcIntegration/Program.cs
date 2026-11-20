@@ -122,6 +122,33 @@ try
     Console.WriteLine("OK: POST cadastro com antiforgery, persistência SQL e listagem MVC.");
 
 
+
+    using (var createPlanPage = await client.GetAsync("/Plan/Create"))
+    {
+        var planHtml = await createPlanPage.Content.ReadAsStringAsync();
+        if (createPlanPage.StatusCode != HttpStatusCode.OK || !planHtml.Contains("Cadastrar novo plano"))
+            throw new Exception("Tela de cadastro de plano não abriu.");
+        var planTokenInput = Regex.Match(planHtml, @"<input(?=[^>]*name=""__RequestVerificationToken"")[^>]*>", RegexOptions.IgnoreCase);
+        var planToken = Regex.Match(planTokenInput.Value, @"value=""([^""]+)""", RegexOptions.IgnoreCase);
+        if (!planToken.Success) throw new Exception("Cadastro de plano sem antiforgery.");
+        var newPlanName = "Plano MVC " + Guid.NewGuid().ToString("N")[..7];
+        using var createPlanReply = await client.PostAsync("/Plan/Create", new FormUrlEncodedContent(
+            new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = WebUtility.HtmlDecode(planToken.Groups[1].Value),
+                ["PlanName"] = newPlanName,
+                ["Description"] = "Plano de integração automatizada",
+                ["DurationDays"] = "30",
+                ["Price"] = "129,90"
+            }));
+        if (createPlanReply.StatusCode != HttpStatusCode.Redirect)
+            throw new Exception("Falha no POST de criação de plano: " + (int)createPlanReply.StatusCode);
+        using var plansDb = new GymDbContext(options);
+        if (!await plansDb.Plans.AsNoTracking().AnyAsync(x => x.Name == newPlanName && x.Price == 129.90m))
+            throw new Exception("Plano não persistiu preço em reais corretamente no SQL.");
+    }
+    Console.WriteLine("OK: cadastro MVC de plano com antiforgery, preço pt-BR e persistência SQL.");
+
     // Em banco SQL descartável, validar o ciclo real de presença em aula via QR,
     // sem manipular matrículas ou alunos da MonsterASP.
     using (var attendanceDb = new GymDbContext(options))
@@ -190,6 +217,7 @@ try
         ("SuperAdmin", "/Home/Index", HttpStatusCode.OK),
         ("SuperAdmin", "/Member/Index", HttpStatusCode.OK),
         ("SuperAdmin", "/Plan/Index", HttpStatusCode.OK),
+        ("SuperAdmin", "/Plan/Create", HttpStatusCode.OK),
         ("SuperAdmin", "/Membership/Index", HttpStatusCode.OK),
         ("SuperAdmin", "/Membership/Create", HttpStatusCode.OK),
         ("SuperAdmin", "/Session/Index", HttpStatusCode.OK),
@@ -204,9 +232,11 @@ try
         ("Admin", "/Member/Create", HttpStatusCode.OK),
         ("Admin", "/AdminManagement/Index", HttpStatusCode.OK),
         ("Gerente", "/Member/Create", HttpStatusCode.OK),
+        ("Gerente", "/Plan/Create", HttpStatusCode.OK),
         ("Gerente", "/Trainer/Index", HttpStatusCode.OK),
         ("Gerente", "/AdminManagement/Index", HttpStatusCode.Forbidden),
         ("Recepcionista", "/Member/Create", HttpStatusCode.OK),
+        ("Recepcionista", "/Plan/Create", HttpStatusCode.Forbidden),
         ("Recepcionista", "/Membership/Create", HttpStatusCode.OK),
         ("Recepcionista", "/Trainer/Index", HttpStatusCode.Forbidden),
         ("Recepcionista", "/AdminManagement/Index", HttpStatusCode.Forbidden),
