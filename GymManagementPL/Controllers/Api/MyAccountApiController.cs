@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using GymManagementBLL.Services.Classes;
+using Microsoft.Data.SqlClient;
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.BookingViewModels;
 using GymManagementDAL.Data.Contexts;
@@ -18,12 +19,14 @@ public class MyAccountApiController : ControllerBase
     private readonly IMemberService _memberService;
     private readonly IBookingService _bookingService;
     private readonly GymDbContext _db;
+    private readonly ILogger<MyAccountApiController> _logger;
 
-    public MyAccountApiController(IMemberService memberService, IBookingService bookingService, GymDbContext db)
+    public MyAccountApiController(IMemberService memberService, IBookingService bookingService, GymDbContext db, ILogger<MyAccountApiController> logger)
     {
         _memberService = memberService;
         _bookingService = bookingService;
         _db = db;
+        _logger = logger;
     }
 
     public sealed record StudentBookingRequest(int SessionId);
@@ -93,10 +96,23 @@ public class MyAccountApiController : ControllerBase
             .CountAsync(x => x.MemberId == memberId && x.IsAttended &&
                 x.Session.StartDate >= now.AddDays(-30) && x.Session.StartDate <= now,
                 cancellationToken);
-        var sheets = await _db.Workouts.AsNoTracking()
-            .CountAsync(x => x.MemberId == memberId, cancellationToken);
-        var exercises = await _db.WorkoutExercises.AsNoTracking()
-            .CountAsync(x => x.Workout.MemberId == memberId, cancellationToken);
+        int? sheets = null;
+        int? exercises = null;
+        // Algumas instalações antigas ainda não possuem a migração de treinos.
+        // A evolução continua disponível, sem inventar contagens ou expor erro SQL.
+        try
+        {
+            sheets = await _db.Workouts.AsNoTracking()
+                .CountAsync(x => x.MemberId == memberId, cancellationToken);
+            exercises = await _db.WorkoutExercises.AsNoTracking()
+                .CountAsync(x => x.Workout.MemberId == memberId, cancellationToken);
+        }
+        catch (SqlException ex) when (ex.Number is 207 or 208)
+        {
+            _logger.LogWarning("Tabelas de treino indisponíveis no SQL desta instalação: {ErrorNumber}.", ex.Number);
+            sheets = null;
+            exercises = null;
+        }
 
         int? remainingDays = currentPlan is null ? null :
             Math.Max(0, (int)Math.Ceiling((currentPlan.endDate - now).TotalDays));
@@ -111,7 +127,7 @@ public class MyAccountApiController : ControllerBase
                     currentPlan.planName, currentPlan.endDate, remainingDays
                 },
                 attendance = new { totalClassesAttended = allAttendance, last30Days = attendanceLast30Days },
-                training = new { workoutSheets = sheets, prescribedExercises = exercises },
+                training = new { workoutSheets = sheets, prescribedExercises = exercises, available = sheets.HasValue && exercises.HasValue },
                 nextClass,
                 reminder = currentPlan is null
                     ? "Nenhuma matrícula vigente encontrada. Procure a recepção."
