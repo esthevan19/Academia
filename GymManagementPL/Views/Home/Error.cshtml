@@ -5,5 +5,9 @@
     <h1 class="h3 fw-bold" style="color:#070093">Não foi possível concluir a operação</h1>
     <p>Ocorreu um problema temporário. Nenhuma operação deve ser repetida sem verificar se os dados foram salvos.</p>
     <p>Volte ao painel e confira os registros. Se o problema continuar, entre em contato com a administração da academia.</p>
+    @if (ViewData["IncidentId"] is string incidentId && !string.IsNullOrWhiteSpace(incidentId))
+    {
+        <p class="small text-muted">Referência do erro: <code>@incidentId</code>. Informe este código ao suporte para localizar o registro nos logs.</p>
+    }
     <a class="btn btn-primary" style="background:#070093;border-color:#070093" href="/">Voltar ao início</a>
 </section>
