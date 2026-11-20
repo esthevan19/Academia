@@ -1,0 +1,49 @@
+@model IReadOnlyList<GymManagementPL.Services.ClassAttendanceService.SessionItem>
+@{
+    ViewData["Title"] = "Presença por QR";
+}
+<section class="container py-4" style="max-width:850px">
+    <div class="rounded-4 p-4 mb-4 text-white" style="background:linear-gradient(120deg,#070093,#2823b2)">
+        <span class="small fw-bold">GYMFLOW · AULAS COLETIVAS</span>
+        <h1 class="h2 mt-2 fw-bold">Confirmar presença por QR</h1>
+        <p class="mb-0">O aluno apresenta o QR e o código temporário no aplicativo. Confirme a presença somente durante o horário da aula.</p>
+    </div>
+    @if (TempData["SuccessMessage"] is string success)
+    {
+        <div class="alert alert-success" role="status">@success</div>
+    }
+    @if (TempData["ErrorMessage"] is string error)
+    {
+        <div class="alert alert-danger" role="alert">@error</div>
+    }
+    <div class="card shadow-sm rounded-4 border-0 p-4">
+        <h2 class="h5 fw-bold">Lançar presença na aula</h2>
+        @if (Model.Count == 0)
+        {
+            <p class="text-muted">Nenhuma aula coletiva está em andamento agora.</p>
+        }
+        else
+        {
+            <form asp-controller="ClassCheckIn" asp-action="Confirm" method="post">
+                <label for="sessionId" class="form-label fw-semibold">Aula em andamento</label>
+                <select name="sessionId" id="sessionId" class="form-select mb-3" required>
+                    <option value="">Selecione a aula</option>
+                    @foreach (var session in Model)
+                    {
+                        <option value="@session.Id">@session.Description — @session.StartDate.ToString("HH:mm") até @session.EndDate.ToString("HH:mm")</option>
+                    }
+                </select>
+                <label for="code" class="form-label fw-semibold">Código de 8 dígitos apresentado pelo aluno</label>
+                <input id="code" name="code" class="form-control mb-3" type="text" inputmode="numeric"
+                       pattern="[0-9]{8}" maxlength="8" minlength="8" placeholder="00000000" autocomplete="off" required/>
+                <button class="btn btn-primary px-4" type="submit" style="background:#070093;border-color:#070093">
+                    Confirmar presença
+                </button>
+            </form>
+        }
+    </div>
+    <div class="small text-muted mt-3">
+        Cada código expira em até 2 minutos e só pode ser validado por usuários autorizados.
+        Essa função registra presença em aula, não entrada geral na academia.
+    </div>
+</section>
