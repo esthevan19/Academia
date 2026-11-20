@@ -1,0 +1,40 @@
+name: MVC authenticated member create integration
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - 'GymManagementPL/**'
+      - 'GymManagementBLL/**'
+      - 'GymManagementDAL/**'
+      - 'tests/GymFlow.MvcIntegration/**'
+      - '.github/workflows/mvc-member-integration.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  member-mvc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: 'CI_Only_Mssql_Password_2026!'
+        ports:
+          - 1433:1433
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Restore MVC integration tests
+        run: dotnet restore tests/GymFlow.MvcIntegration/GymFlow.MvcIntegration.csproj
+      - name: Render authorized page, POST and verify real SQL persistence
+        env:
+          GYMFLOW_TEST_SQL: 'Server=127.0.0.1,1433;Database=GymFlowMvcIntegration;User ID=sa;Password=CI_Only_Mssql_Password_2026!;TrustServerCertificate=True;Encrypt=True'
+        run: dotnet run --project tests/GymFlow.MvcIntegration/GymFlow.MvcIntegration.csproj --configuration Release --no-restore
