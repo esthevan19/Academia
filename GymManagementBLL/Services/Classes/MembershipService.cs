@@ -57,11 +57,8 @@ namespace GymManagementBLL.Services.Classes
                                              x.EndDate >= now))
                     return false;
 
-                // O esquema atual usa (MemberId, PlanId) como chave primária.
-                // Não apagar registros antigos para permitir rematrícula: preservar histórico.
-                if (_db.Memberships.Any(x => x.MemberId == createdMembership.MemberId &&
-                                             x.PlanId == createdMembership.PlanId))
-                    return false;
+                // Após migração, permitir renovações do mesmo plano quando não
+                // houver matrícula vigente ou agendada para esse aluno.
 
                 var membership = _mapper.Map<Membership>(createdMembership);
                 membership.CreatedAt = startDate;
