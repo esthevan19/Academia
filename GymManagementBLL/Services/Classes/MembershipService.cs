@@ -53,19 +53,15 @@ namespace GymManagementBLL.Services.Classes
                     !_db.Members.Any(x => x.Id == createdMembership.MemberId))
                     return false;
 
+                var endDate = startDate.AddDays(plan.DurationDays);
                 if (_db.Memberships.Any(x => x.MemberId == createdMembership.MemberId &&
-                                             x.EndDate >= now))
-                    return false;
-
-                // O esquema atual usa (MemberId, PlanId) como chave primária.
-                // Não apagar registros antigos para permitir rematrícula: preservar histórico.
-                if (_db.Memberships.Any(x => x.MemberId == createdMembership.MemberId &&
-                                             x.PlanId == createdMembership.PlanId))
+                                             (x.EndDate >= now ||
+                                              (x.CreatedAt < endDate && startDate < x.EndDate))))
                     return false;
 
                 var membership = _mapper.Map<Membership>(createdMembership);
                 membership.CreatedAt = startDate;
-                membership.EndDate = startDate.AddDays(plan.DurationDays);
+                membership.EndDate = endDate;
                 _db.Memberships.Add(membership);
 
                 if (_db.SaveChanges() <= 0) return false;

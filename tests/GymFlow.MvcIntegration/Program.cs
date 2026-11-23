@@ -185,10 +185,36 @@ try
         attendanceDb.Sessions.Add(activeClass);
         attendanceDb.Memberships.Add(new Membership
         {
-            MemberId = student.Id, PlanId = plan.Id, CreatedAt = brazilTime.AddDays(-2),
-            EndDate = brazilTime.AddDays(25)
+            MemberId = student.Id, PlanId = plan.Id, CreatedAt = brazilTime.AddDays(-61),
+            EndDate = brazilTime.AddDays(-31)
         });
         await attendanceDb.SaveChangesAsync();
+        using var enrollmentPage = await client.GetAsync("/Membership/Create");
+        enrollmentPage.EnsureSuccessStatusCode();
+        var enrollmentHtml = await enrollmentPage.Content.ReadAsStringAsync();
+        var enrollmentInput = Regex.Match(enrollmentHtml, @"<input(?=[^>]*name=""__RequestVerificationToken"")[^>]*>");
+        var enrollmentToken = Regex.Match(enrollmentInput.Value, @"value=""([^""]+)""");
+        if (!enrollmentToken.Success) throw new Exception("Matrícula sem token antiforgery.");
+        var renewal = new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = WebUtility.HtmlDecode(enrollmentToken.Groups[1].Value),
+            ["MemberId"] = student.Id.ToString(),
+            ["PlanId"] = plan.Id.ToString()
+        };
+        using var renewed = await client.PostAsync("/Membership/Create", new FormUrlEncodedContent(renewal));
+        if (renewed.StatusCode != HttpStatusCode.Redirect)
+            throw new Exception($"Renovação MVC do mesmo plano falhou com HTTP {(int)renewed.StatusCode}.");
+        using var repeatedRenewal = await client.PostAsync("/Membership/Create", new FormUrlEncodedContent(renewal));
+        if (repeatedRenewal.StatusCode != HttpStatusCode.OK ||
+            (await repeatedRenewal.Content.ReadAsStringAsync()).Contains("Matrícula criada com sucesso.", StringComparison.Ordinal))
+            throw new Exception("O MVC deve recusar outra renovação enquanto existe matrícula vigente.");
+        var enrollmentHistory = await attendanceDb.Memberships.AsNoTracking()
+            .Where(x => x.MemberId == student.Id && x.PlanId == plan.Id).OrderBy(x => x.CreatedAt).ToListAsync();
+        if (enrollmentHistory.Count != 2 || enrollmentHistory[0].EndDate != brazilTime.AddDays(-31) ||
+            enrollmentHistory[1].EndDate <= BrazilClock.Now)
+            throw new Exception("A renovação não preservou o histórico ou não ativou a matrícula.");
+        Console.WriteLine("OK: o MVC renovou o mesmo plano, preservou o histórico e recusou uma matrícula repetida.");
+
         attendanceDb.Bookings.Add(new Booking { MemberId = student.Id, SessionId = activeClass.Id });
         await attendanceDb.SaveChangesAsync();
 

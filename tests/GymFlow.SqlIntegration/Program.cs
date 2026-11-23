@@ -2,13 +2,20 @@ using GymManagementDAL.Data.Contexts;
 using GymManagementDAL.Entities;
 using GymManagementDAL.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 var connection = Environment.GetEnvironmentVariable("GYMFLOW_TEST_SQL");
 if (string.IsNullOrWhiteSpace(connection) || !connection.Contains("Database=GymFlowIntegration", StringComparison.OrdinalIgnoreCase))
     throw new InvalidOperationException("Informe somente uma conexão SQL de teste com Database=GymFlowIntegration. Nunca utilize produção.");
 
+const string priorMigration = "20261117180000_AddStudentWorkouts";
+const string renewalMigration = "20261119190000_AllowMembershipRenewals";
 var options = new DbContextOptionsBuilder<GymDbContext>()
     .UseSqlServer(connection, sql => sql.EnableRetryOnFailure(3))
+    // Os scripts históricos são a referência para este banco descartável.
+    .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning))
     .Options;
 
 // O banco é criado e apagado exclusivamente no SQL Server efêmero deste workflow.
@@ -20,7 +27,7 @@ using (var db = new GymDbContext(options))
     {
         try
         {
-            db.Database.EnsureCreated();
+            db.GetService<IMigrator>().Migrate(priorMigration);
             created = true;
         }
         catch (Exception ex)
@@ -66,6 +73,35 @@ try
         if (memberId <= 0 || planId <= 0)
             throw new Exception("IDs de aluno/plano não foram persistidos.");
 
+        var oldStart = DateTime.Today.AddDays(-60);
+        var oldEnd = oldStart.AddDays(30);
+        db.Database.ExecuteSqlInterpolated($"""
+            INSERT INTO Memberships (MemberId, PlanId, StartDate, EndDate)
+            VALUES ({memberId}, {planId}, {oldStart}, {oldEnd})
+            """);
+        var sql = db.GetService<IMigrator>().GenerateScript(priorMigration, renewalMigration,
+            MigrationsSqlGenerationOptions.Idempotent);
+        var batches = System.Text.RegularExpressions.Regex.Split(sql, @"(?im)^\s*GO\s*$");
+        db.Database.OpenConnection();
+        try
+        {
+            // Executa o mesmo script publicado no artefato, inclusive uma segunda vez.
+            for (var execution = 0; execution < 2; execution++)
+                foreach (var batch in batches.Where(batch => !string.IsNullOrWhiteSpace(batch)))
+                    db.Database.ExecuteSqlRaw(batch);
+        }
+        finally
+        {
+            db.Database.CloseConnection();
+        }
+        var scriptPath = Environment.GetEnvironmentVariable("GYMFLOW_RENEWAL_SQL");
+        if (!string.IsNullOrWhiteSpace(scriptPath))
+            File.WriteAllText(scriptPath, sql);
+        var oldMembership = db.Memberships.AsNoTracking()
+            .Single(x => x.MemberId == memberId && x.PlanId == planId);
+        if (oldMembership.Id <= 0 || oldMembership.CreatedAt != oldStart || oldMembership.EndDate != oldEnd)
+            throw new Exception("A migração alterou os dados da matrícula antiga.");
+
         db.Memberships.Add(new Membership
         {
             MemberId = memberId,
@@ -90,15 +126,17 @@ try
     using (var verify = new GymDbContext(options))
     {
         var member = verify.Members.AsNoTracking().Include(x => x.HealthRecord).SingleOrDefault(x => x.Id == memberId);
-        var enrollment = verify.Memberships.AsNoTracking().SingleOrDefault(x => x.MemberId == memberId && x.PlanId == planId);
+        var enrollments = verify.Memberships.AsNoTracking().Where(x => x.MemberId == memberId && x.PlanId == planId)
+            .OrderBy(x => x.CreatedAt).ToList();
         var workout = verify.Workouts.AsNoTracking().Include(x => x.Exercises).SingleOrDefault(x => x.MemberId == memberId);
         var plan = verify.Plans.AsNoTracking().SingleOrDefault(x => x.Id == planId);
 
         if (member is null || member.HealthRecord?.BloodType != "O+" ||
-            enrollment is null || plan is null || !plan.IsActive ||
+            enrollments.Count != 2 || enrollments[0].Id == enrollments[1].Id || plan is null || !plan.IsActive ||
             workout is null || workout.Exercises.Count != 1)
             throw new Exception("Falha de gravação ou leitura de aluno, saúde, plano, matrícula ou treino.");
 
+        Console.WriteLine("SQL Server: migração a partir do esquema anterior preservou a matrícula vencida e aceitou a renovação do mesmo plano.");
         Console.WriteLine("SQL Server: aluno, ficha de saúde, plano, matrícula e treino gravados e lidos de outra conexão.");
     }
 }
