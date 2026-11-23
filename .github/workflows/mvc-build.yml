@@ -17,6 +17,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Validate public config has no secrets
         run: python3 scripts/check-public-config.py
+      - name: Validate hosted smoke script syntax
+        run: bash -n scripts/smoke-production.sh
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
