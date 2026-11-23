@@ -79,7 +79,24 @@ try
             INSERT INTO Memberships (MemberId, PlanId, StartDate, EndDate)
             VALUES ({memberId}, {planId}, {oldStart}, {oldEnd})
             """);
-        db.GetService<IMigrator>().Migrate(renewalMigration);
+        var sql = db.GetService<IMigrator>().GenerateScript(priorMigration, renewalMigration,
+            MigrationsSqlGenerationOptions.Idempotent);
+        var batches = System.Text.RegularExpressions.Regex.Split(sql, @"(?im)^\s*GO\s*$");
+        db.Database.OpenConnection();
+        try
+        {
+            // Executa o mesmo script publicado no artefato, inclusive uma segunda vez.
+            for (var execution = 0; execution < 2; execution++)
+                foreach (var batch in batches.Where(batch => !string.IsNullOrWhiteSpace(batch)))
+                    db.Database.ExecuteSqlRaw(batch);
+        }
+        finally
+        {
+            db.Database.CloseConnection();
+        }
+        var scriptPath = Environment.GetEnvironmentVariable("GYMFLOW_RENEWAL_SQL");
+        if (!string.IsNullOrWhiteSpace(scriptPath))
+            File.WriteAllText(scriptPath, sql);
         var oldMembership = db.Memberships.AsNoTracking()
             .Single(x => x.MemberId == memberId && x.PlanId == planId);
         if (oldMembership.Id <= 0 || oldMembership.CreatedAt != oldStart || oldMembership.EndDate != oldEnd)

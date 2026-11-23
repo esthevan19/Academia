@@ -33,5 +33,12 @@ jobs:
         run: dotnet restore tests/GymFlow.SqlIntegration/GymFlow.SqlIntegration.csproj
       - name: Persist and reload real records in ephemeral SQL Server
         env:
+          GYMFLOW_RENEWAL_SQL: ${{ runner.temp }}/20261119190000_AllowMembershipRenewals.sql
           GYMFLOW_TEST_SQL: 'Server=127.0.0.1,1433;Database=GymFlowIntegration;User ID=sa;Password=CI_Only_Mssql_Password_2026!;TrustServerCertificate=True;Encrypt=True'
         run: dotnet run --project tests/GymFlow.SqlIntegration/GymFlow.SqlIntegration.csproj --configuration Release --no-restore
+      - name: Guardar o SQL da renovação validado
+        uses: actions/upload-artifact@v4
+        with:
+          name: GymFlow-Renovacao-SQL
+          path: ${{ runner.temp }}/20261119190000_AllowMembershipRenewals.sql
+          if-no-files-found: error

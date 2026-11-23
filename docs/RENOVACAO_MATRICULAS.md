@@ -15,6 +15,8 @@ permitindo múltiplas contratações do mesmo plano em datas distintas.
 6. Mantenha `Database__ApplyMigrations=false`. Gere e revise o SQL idempotente da migração específica com `dotnet ef migrations script 20261117180000_AddStudentWorkouts 20261119190000_AllowMembershipRenewals --idempotent --project GymManagementDAL --startup-project GymManagementPL` antes de executar a etapa 4. Se a migração anterior estiver pendente no destino, resolva essa diferença em homologação antes de prosseguir.
 7. Teste com **dados de homologação**, nunca criando cobranças ou alunos fictícios no banco real.
 
+O artefato **GymFlow-Renovacao-SQL**, no teste de persistência do GitHub, contém o SQL específico executado duas vezes contra o banco de teste para verificar a execução segura em caso de repetição.
+
 ## Validação sugerida
 - Cadastro, histórico e consulta de matrículas antigas sem perda de dados.
 - Aluno com plano vencido renovando o mesmo plano.
