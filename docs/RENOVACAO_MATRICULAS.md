@@ -6,6 +6,8 @@ Ela impedia que um aluno renovasse o **mesmo plano** mesmo após vencer.
 A nova migração adiciona um identificador `Id` e preserva os registros antigos,
 permitindo múltiplas contratações do mesmo plano em datas distintas.
 
+Use o artefato **GymFlow-MVC-Renovacao-Homologacao** no ambiente de teste. Ele pertence à mesma revisão da alteração de renovação. O pacote **GymFlow-MVC-MonsterASP** da main segue o esquema anterior até a integração da mudança.
+
 ## Ordem obrigatória na MonsterASP
 1. Faça um **backup verificável** do banco SQL `db80215` antes de qualquer migração.
 2. Teste a migração `20261119190000_AllowMembershipRenewals` em uma cópia do banco, incluindo alunos com matrículas reais.

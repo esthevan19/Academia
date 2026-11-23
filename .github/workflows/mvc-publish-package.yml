@@ -3,6 +3,10 @@ name: MVC MonsterASP publish package
 # Gera um pacote de publicação seguro; NÃO substitui o site automaticamente.
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'GymManagementDAL/Migrations/20261119190000_AllowMembershipRenewals.cs'
   push:
     branches:
       - main
@@ -42,7 +46,7 @@ jobs:
       - name: Upload deployable files
         uses: actions/upload-artifact@v4
         with:
-          name: GymFlow-MVC-MonsterASP
+          name: ${{ github.event_name == 'pull_request' && 'GymFlow-MVC-Renovacao-Homologacao' || 'GymFlow-MVC-MonsterASP' }}
           path: GymFlow-MVC-MonsterASP.zip
           if-no-files-found: error
           retention-days: 30
