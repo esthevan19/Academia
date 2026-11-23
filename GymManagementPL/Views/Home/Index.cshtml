@@ -17,6 +17,16 @@
         <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-people"></i></div><span>Total de alunos</span><strong>@Model.TotalMembers</strong></div></div>
         <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-person-check"></i></div><span>Alunos ativos</span><strong>@Model.ActiveMembers</strong></div></div>
         <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-person-badge"></i></div><span>Instrutores</span><strong>@Model.TotalTrainers</strong></div></div>
+        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Gerente") || User.IsInRole("Recepcionista"))
+        {
+            <div class="col-6 col-xl-4">
+                <a asp-controller="Membership" asp-action="Index" class="gf-stat text-decoration-none" aria-label="Ver matrículas próximas do vencimento">
+                    <div class="gf-stat-icon"><i class="bi bi-bell"></i></div>
+                    <span>Matrículas vencendo em 7 dias</span><strong>@Model.ExpiringInSevenDays</strong>
+                    <small style="color:#070093">Ver matrículas →</small>
+                </a>
+            </div>
+        }
         <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-calendar-plus"></i></div><span>Próximas aulas</span><strong>@Model.UpcomingSessions</strong></div></div>
         <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-clock-history"></i></div><span>Aulas em andamento</span><strong>@Model.OngoingSessions</strong></div></div>
         <div class="col-6 col-xl-4"><div class="gf-stat"><div class="gf-stat-icon"><i class="bi bi-check-circle"></i></div><span>Aulas concluídas</span><strong>@Model.CompletedSessions</strong></div></div>

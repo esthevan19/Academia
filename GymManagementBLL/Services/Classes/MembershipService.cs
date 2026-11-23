@@ -53,16 +53,15 @@ namespace GymManagementBLL.Services.Classes
                     !_db.Members.Any(x => x.Id == createdMembership.MemberId))
                     return false;
 
+                var endDate = startDate.AddDays(plan.DurationDays);
                 if (_db.Memberships.Any(x => x.MemberId == createdMembership.MemberId &&
-                                             x.EndDate >= now))
+                                             (x.EndDate >= now ||
+                                              (x.CreatedAt < endDate && startDate < x.EndDate))))
                     return false;
-
-                // Após migração, permitir renovações do mesmo plano quando não
-                // houver matrícula vigente ou agendada para esse aluno.
 
                 var membership = _mapper.Map<Membership>(createdMembership);
                 membership.CreatedAt = startDate;
-                membership.EndDate = startDate.AddDays(plan.DurationDays);
+                membership.EndDate = endDate;
                 _db.Memberships.Add(membership);
 
                 if (_db.SaveChanges() <= 0) return false;
@@ -84,11 +83,12 @@ namespace GymManagementBLL.Services.Classes
                 var now = BrazilClock.Now;
                 var repo = _unitOfWork.MembershipRepository;
                 var membership = repo.GetAll(x => x.MemberId == id &&
-                    x.CreatedAt <= now && x.EndDate >= now)
+                    x.EndDate >= now)
                     .OrderByDescending(x => x.EndDate).FirstOrDefault();
                 if (membership is null) return false;
 
                 membership.EndDate = now.AddTicks(-1);
+                membership.UpdatedAt = DateTime.UtcNow;
                 repo.Update(membership);
                 return _unitOfWork.SaveChanges() > 0;
             }

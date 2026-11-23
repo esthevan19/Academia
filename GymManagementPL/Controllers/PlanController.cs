@@ -42,7 +42,27 @@ namespace GymManagementPL.Controllers
 
         }
 
-        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
+
+        [HttpGet]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
+        public IActionResult Create() => View(new CreatePlanViewModel());
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
+        public IActionResult Create(CreatePlanViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+            if (!_planService.CreatePlan(model))
+            {
+                ModelState.AddModelError(string.Empty, "Não foi possível salvar o plano. Confira os dados.");
+                return View(model);
+            }
+            TempData["SuccessMessage"] = "Plano cadastrado com sucesso.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
         public IActionResult Edit(int id)
         {
             if (id <= 0)
@@ -64,7 +84,7 @@ namespace GymManagementPL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
         public IActionResult Edit(int id, UpdatePlanViewModel updatedPlan)
         {
             if (!ModelState.IsValid)
@@ -86,7 +106,7 @@ namespace GymManagementPL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "SuperAdmin,Admin,Gerente,Recepcionista")]
+        [Authorize(Roles = "SuperAdmin,Admin,Gerente")]
         public IActionResult Activate(int id)
         {
 

@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using GymManagementBLL.Services.Classes;
+using Microsoft.Data.SqlClient;
 using GymManagementBLL.Services.Interfaces;
 using GymManagementBLL.ViewModels.BookingViewModels;
 using GymManagementDAL.Data.Contexts;
@@ -17,12 +19,14 @@ public class MyAccountApiController : ControllerBase
     private readonly IMemberService _memberService;
     private readonly IBookingService _bookingService;
     private readonly GymDbContext _db;
+    private readonly ILogger<MyAccountApiController> _logger;
 
-    public MyAccountApiController(IMemberService memberService, IBookingService bookingService, GymDbContext db)
+    public MyAccountApiController(IMemberService memberService, IBookingService bookingService, GymDbContext db, ILogger<MyAccountApiController> logger)
     {
         _memberService = memberService;
         _bookingService = bookingService;
         _db = db;
+        _logger = logger;
     }
 
     public sealed record StudentBookingRequest(int SessionId);
@@ -53,6 +57,87 @@ public class MyAccountApiController : ControllerBase
         return member is null
             ? NotFound(new { success = false, message = "Cadastro de aluno vinculado não encontrado." })
             : Ok(new { success = true, member });
+    }
+
+
+    // Evolução com dados REAIS: presenças em aulas e fichas de treino.
+    // Não representar fichas como treinos executados nem reservas como presença.
+    [HttpGet("progress")]
+    public async Task<IActionResult> Progress(CancellationToken cancellationToken)
+    {
+        var memberId = GetLinkedMemberId();
+        if (memberId is null)
+            return Conflict(new { success = false, message = "Sua conta ainda não está vinculada a um aluno. Solicite o vínculo ao SuperAdmin." });
+
+        var now = BrazilClock.Now;
+        var member = await _db.Members.AsNoTracking()
+            .Where(x => x.Id == memberId.Value)
+            .Select(x => new { x.Id, x.Name }).FirstOrDefaultAsync(cancellationToken);
+        if (member is null)
+            return NotFound(new { success = false, message = "Cadastro de aluno não encontrado." });
+
+        var currentPlan = await _db.Memberships.AsNoTracking()
+            .Where(x => x.MemberId == memberId && x.CreatedAt <= now && x.EndDate >= now)
+            .OrderByDescending(x => x.EndDate)
+            .Select(x => new { planName = x.Plan.Name, endDate = x.EndDate })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var nextClass = await _db.Bookings.AsNoTracking()
+            .Where(x => x.MemberId == memberId && x.Session.StartDate > now)
+            .OrderBy(x => x.Session.StartDate)
+            .Select(x => new {
+                sessionId = x.SessionId, description = x.Session.Description,
+                startDate = x.Session.StartDate, endDate = x.Session.EndDate
+            }).FirstOrDefaultAsync(cancellationToken);
+
+        var allAttendance = await _db.Bookings.AsNoTracking()
+            .CountAsync(x => x.MemberId == memberId && x.IsAttended, cancellationToken);
+        var attendanceLast30Days = await _db.Bookings.AsNoTracking()
+            .CountAsync(x => x.MemberId == memberId && x.IsAttended &&
+                x.Session.StartDate >= now.AddDays(-30) && x.Session.StartDate <= now,
+                cancellationToken);
+        int? sheets = null;
+        int? exercises = null;
+        // Algumas instalações antigas ainda não possuem a migração de treinos.
+        // A evolução continua disponível, sem inventar contagens ou expor erro SQL.
+        try
+        {
+            sheets = await _db.Workouts.AsNoTracking()
+                .CountAsync(x => x.MemberId == memberId, cancellationToken);
+            exercises = await _db.WorkoutExercises.AsNoTracking()
+                .CountAsync(x => x.Workout.MemberId == memberId, cancellationToken);
+        }
+        catch (SqlException ex) when (ex.Number is 207 or 208)
+        {
+            _logger.LogWarning("Tabelas de treino indisponíveis no SQL desta instalação: {ErrorNumber}.", ex.Number);
+            sheets = null;
+            exercises = null;
+        }
+
+        int? remainingDays = currentPlan is null ? null :
+            Math.Max(0, (int)Math.Ceiling((currentPlan.endDate - now).TotalDays));
+        return Ok(new
+        {
+            success = true,
+            progress = new
+            {
+                member,
+                membership = currentPlan is null ? null : (object)new
+                {
+                    currentPlan.planName, currentPlan.endDate, remainingDays
+                },
+                attendance = new { totalClassesAttended = allAttendance, last30Days = attendanceLast30Days },
+                training = new { workoutSheets = sheets, prescribedExercises = exercises, available = sheets.HasValue && exercises.HasValue },
+                nextClass,
+                reminder = currentPlan is null
+                    ? "Nenhuma matrícula vigente encontrada. Procure a recepção."
+                    : remainingDays <= 7
+                        ? "Seu plano vence em " + remainingDays + " dia(s). Consulte a recepção para renovar."
+                        : nextClass is not null
+                            ? "Você possui uma aula agendada. Confira o horário na agenda."
+                            : "Consulte seus treinos e reserve uma aula coletiva."
+            }
+        });
     }
 
     [HttpGet("bookings")]
