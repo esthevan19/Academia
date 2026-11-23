@@ -20,6 +20,7 @@ check() {
 }
 
 check '/Account/Login' 200
+check '/api/health' 200
 check '/api/members' 401
 check '/api/memberships' 401
 check '/api/plans' 401
@@ -27,6 +28,11 @@ check '/api/sessions' 401
 check '/api/workouts' 401
 check '/api/me' 401
 check '/api/admins' 401
+check '/api/trainers' 401
+check '/api/dashboard/overview' 401
+check '/api/bookings/sessions/1/members' 401
+check '/api/class-checkin/active-sessions' 401
+check '/api/class-checkin/mine/1' 401
 
 if ((failures > 0)); then
   echo "Smoke test encontrou ${failures} falha(s). Cheque versão publicada, autenticação e hospedagem." >&2
