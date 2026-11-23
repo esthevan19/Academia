@@ -53,7 +53,7 @@ public class MembersApiController : ControllerBase
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
         return _memberService.CreateMember(model)
             ? Ok(new { success = true, message = "Aluno cadastrado com sucesso." })
-            : Conflict(new { success = false, message = "E-mail ou telefone já cadastrado." });
+            : Conflict(new { success = false, message = "Não foi possível cadastrar o aluno. Confira os dados, incluindo e-mail e telefone." });
     }
 
     [HttpPut("{id:int}")]

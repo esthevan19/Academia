@@ -1,4 +1,8 @@
 using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
@@ -45,6 +49,7 @@ try
             builder.UseEnvironment("Production");
             builder.UseSetting("ConnectionStrings:DefaultConnection", connection);
             builder.UseSetting("Database:ApplyMigrations", "false");
+            builder.UseSetting("Jwt:Key", "IntegrationOnlyJwtForStudentBookings-TestHost-2026");
             builder.ConfigureTestServices(services =>
             {
                 // Autenticação falsa APENAS no processo de teste; nunca no site publicado.
@@ -207,6 +212,72 @@ try
         if (!await attendanceDb.Bookings.AsNoTracking().AnyAsync(x =>
                 x.MemberId == student.Id && x.SessionId == activeClass.Id && x.IsAttended))
             throw new Exception("Presença de QR não foi persistida no SQL Server.");
+        using var createPage = await client.GetAsync("/Session/Create");
+        createPage.EnsureSuccessStatusCode();
+        var classForm = await createPage.Content.ReadAsStringAsync();
+        var classInput = Regex.Match(classForm, @"<input(?=[^>]*name=""__RequestVerificationToken"")[^>]*>");
+        var classToken = Regex.Match(classInput.Value, @"value=""([^""]+)""");
+        if (!classToken.Success) throw new Exception("O formulário de aula não emitiu o token antiforgery.");
+
+        const string description = "Funcional integrado no site e aplicativo";
+        var future = brazilTime.AddDays(1);
+        using var classResponse = await client.PostAsync("/Session/Create", new FormUrlEncodedContent(
+            new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = WebUtility.HtmlDecode(classToken.Groups[1].Value),
+                ["Description"] = description,
+                ["TrainerId"] = instructor.Id.ToString(),
+                ["CategoryId"] = category.Id.ToString(),
+                ["Capacity"] = "1",
+                ["StartDate"] = future.ToString("yyyy-MM-ddTHH:mm"),
+                ["EndDate"] = future.AddHours(1).ToString("yyyy-MM-ddTHH:mm")
+            }));
+        if (classResponse.StatusCode != HttpStatusCode.Redirect)
+            throw new Exception($"Cadastro MVC da aula falhou com HTTP {(int)classResponse.StatusCode}.");
+        var newClass = await attendanceDb.Sessions.AsNoTracking().SingleAsync(x => x.Description == description);
+
+        var testEmail = $"app-{suffix}@example.com";
+        var password = "Gf1!" + Guid.NewGuid().ToString("N");
+        using (var scope = factory.Services.CreateScope())
+        {
+            var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var account = new ApplicationUser { UserName = testEmail, Email = testEmail, FirstName = "Aluno", LastName = "Teste" };
+            if (!(await users.CreateAsync(account, password)).Succeeded ||
+                !(await users.AddToRoleAsync(account, "Aluno")).Succeeded ||
+                !(await users.AddClaimAsync(account, new Claim("gymflow:member_id", student.Id.ToString()))).Succeeded)
+                throw new Exception("Falha ao preparar a conta de aluno do teste.");
+        }
+
+        using var mobile = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("https://localhost"),
+            AllowAutoRedirect = false
+        });
+        using var login = await mobile.PostAsJsonAsync("/api/auth/login", new { email = testEmail, password });
+        login.EnsureSuccessStatusCode();
+        using var sessionJson = JsonDocument.Parse(await login.Content.ReadAsStringAsync());
+        mobile.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer", sessionJson.RootElement.GetProperty("token").GetString());
+
+        using var classes = await mobile.GetFromJsonAsync<JsonDocument>("/api/sessions")
+            ?? throw new Exception("A API não devolveu as aulas.");
+        if (!classes.RootElement.GetProperty("sessions").EnumerateArray()
+                .Any(x => x.GetProperty("id").GetInt32() == newClass.Id &&
+                          x.GetProperty("status").GetString() == "Upcoming"))
+            throw new Exception("A aula criada no site não apareceu como agendada no app do aluno.");
+
+        using var reserve = await mobile.PostAsJsonAsync("/api/me/bookings", new { sessionId = newClass.Id });
+        reserve.EnsureSuccessStatusCode();
+        if (!await attendanceDb.Bookings.AsNoTracking().AnyAsync(b => b.SessionId == newClass.Id && b.MemberId == student.Id))
+            throw new Exception("A reserva pelo app não chegou ao banco.");
+        using var duplicate = await mobile.PostAsJsonAsync("/api/me/bookings", new { sessionId = newClass.Id });
+        if (duplicate.StatusCode != HttpStatusCode.Conflict)
+            throw new Exception("A API deve recusar a segunda reserva do mesmo aluno.");
+        using var cancel = await mobile.DeleteAsync($"/api/me/bookings/{newClass.Id}");
+        cancel.EnsureSuccessStatusCode();
+        if (await attendanceDb.Bookings.AsNoTracking().AnyAsync(b => b.SessionId == newClass.Id && b.MemberId == student.Id))
+            throw new Exception("A reserva cancelada pelo app continuou no banco.");
+        Console.WriteLine("OK: SuperAdmin cadastra aula no MVC, aluno entra com JWT, consulta, reserva e cancela pela API.");
     }
     Console.WriteLine("OK: check-in de aula por QR validado com código temporário, antifraude e gravação SQL.");
 
